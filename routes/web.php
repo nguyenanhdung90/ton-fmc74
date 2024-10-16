@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TonController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/rpc', [TonController::class, 'rpc']);
+Route::get('/parse', [TonController::class, 'parse']);
