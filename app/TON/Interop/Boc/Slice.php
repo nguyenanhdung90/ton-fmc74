@@ -23,18 +23,23 @@ class Slice
 
     private int $usedBits;
 
+    private int $length;
+
     /**
      * @param int $length Length in bits
      * @param Cell[] $refs
      */
     public function __construct(
-        private Uint8Array $array,
-        private int $length,
-        private array $refs,
-        ?int $usedBits = null,
+        Uint8Array $array,
+        int $length,
+        array $refs,
+        $usedBits = null
     )
     {
         $this->usedBits = $usedBits ?? Cell::SIZE;
+        $this->length = $length;
+        $this->array = $array;
+        $this->refs = $refs;
     }
 
     public function getFreeBits(): int

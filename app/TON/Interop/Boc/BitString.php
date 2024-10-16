@@ -149,10 +149,9 @@ class BitString implements \Stringable
     /**
      * Writes bit and increase BitString internal cursor.
      *
-     * @param BitLike|int|bool $b
      * @throws BitStringException
      */
-    public function writeBit(int | bool $b): self
+    public function writeBit($b): self
     {
         if ($this->cursor === $this->length) {
             throw new BitStringException("BitString overflow");
@@ -189,7 +188,7 @@ class BitString implements \Stringable
      *
      * @throws BitStringException
      */
-    public function writeUint(int | BigInteger $number, int $bitLength): self
+    public function writeUint($number, int $bitLength): self
     {
         if (!$number instanceof BigInteger) {
             $number = BigInteger::of($number);
@@ -217,7 +216,7 @@ class BitString implements \Stringable
      *
      * @throws BitStringException
      */
-    public function writeInt(int | BigInteger $number, int $bitLength): self
+    public function writeInt($number, int $bitLength): self
     {
         if (!$number instanceof BigInteger) {
             $number = BigInteger::of($number);
@@ -302,7 +301,7 @@ class BitString implements \Stringable
      * @param int|BigInteger $amount in nanotoncoins.
      * @throws BitStringException
      */
-    public function writeCoins(int | BigInteger $amount): self
+    public function writeCoins($amount): self
     {
         if (!$amount instanceof BigInteger) {
             $amount = BigInteger::of($amount);
@@ -530,7 +529,7 @@ class BitString implements \Stringable
                 $this->cellProxyInvalidator = (function () {
                     /** @noinspection PhpDynamicFieldDeclarationInspection */
                     $this->_hash = null; // @phpstan-ignore-line
-                })(...);
+                });
             }
 
             $this->cellProxyInvalidator->call($this->_cell);

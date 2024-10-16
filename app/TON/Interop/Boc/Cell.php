@@ -55,7 +55,7 @@ class Cell
      * @return Cell[]
      * @throws CellException
      */
-    public static function fromBoc(string|Uint8Array $serializedBoc): array
+    public static function fromBoc($serializedBoc): array
     {
         return self::deserializeBoc($serializedBoc);
     }
@@ -65,7 +65,7 @@ class Cell
      *
      * @throws CellException
      */
-    public static function oneFromBoc(string|Uint8Array $serializedBoc, bool $isBase64 = false): Cell
+    public static function oneFromBoc($serializedBoc, bool $isBase64 = false): Cell
     {
         $cells = self::deserializeBoc($serializedBoc, $isBase64);
         $cellsCount = count($cells);
@@ -84,7 +84,7 @@ class Cell
         (function (Cell $self) {
             /** @noinspection PhpDynamicFieldDeclarationInspection */
             $this->_cell = $self; // @phpstan-ignore-line
-        })(...)->call($this->bits, $this);
+        })->call($this->bits, $this);
     }
 
     /**
@@ -453,7 +453,7 @@ class Cell
      * @return Cell[]
      * @throws CellException
      */
-    private static function deserializeBoc(string|Uint8Array $serializedBoc, bool $isBase64 = false): array
+    private static function deserializeBoc($serializedBoc, bool $isBase64 = false): array
     {
         if (!$serializedBoc instanceof Uint8Array) {
             try {
@@ -525,7 +525,7 @@ class Cell
      * @throws CellException
      * @noinspection PhpConditionAlreadyCheckedInspection
      */
-    #[ArrayShape([
+/*    #[ArrayShape([
         "has_idx" => "int",
         "hash_crc32" => "int",
         "has_cache_bits" => "int",
@@ -539,7 +539,7 @@ class Cell
         "root_list" => "int[]",
         "index" => "int[]|false",
         "cells_data" => "Olifanton\\TypedArrays\\Uint8Array",
-    ])]
+    ])]*/
     private static function parseBocHeader(Uint8Array $serializedBoc): array
     {
         if ($serializedBoc->length < 5) {
@@ -656,10 +656,10 @@ class Cell
     /**
      * @throws CellException|BitStringException|SliceException
      */
-    #[ArrayShape([
+/*    #[ArrayShape([
         "cell" => "Olifanton\\Boc\\Cell",
         "residue" => "Olifanton\\TypedArrays\\Uint8Array",
-    ])]
+    ])]*/
     private static function deserializeCellData(Uint8Array $cellData, int $referenceIndexSize): array
     {
         if ($cellData->length < 2) {
@@ -722,10 +722,10 @@ class Cell
     /**
      * @throws CellException
      */
-    #[ArrayShape([
+/*    #[ArrayShape([
         "topologicalOrderArray" => "array[]", // [0 => <string> cellHash, 1 => <Cell>]
         "indexHashmap" => "array<string, int>"
-    ])]
+    ])]*/
     private static function treeWalk(Cell    $cell,
                                      array   $topologicalOrderArray,
                                      array   $indexHashmap,

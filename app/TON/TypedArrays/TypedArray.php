@@ -125,7 +125,7 @@ abstract class TypedArray extends ArrayBufferView implements \ArrayAccess
         throw new \DomainException("unset() cannot be used on " . static::class);
     }
 
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset)
     {
         if (!is_int($offset)) {
             throw new \InvalidArgumentException("Only integer offsets accepted");

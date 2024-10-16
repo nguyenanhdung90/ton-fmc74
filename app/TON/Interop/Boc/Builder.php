@@ -41,7 +41,7 @@ class Builder
      *
      * @throws BitStringException
      */
-    public function writeBit(int | bool $b): self
+    public function writeBit($b): self
     {
         $this->cell->bits->writeBit($b);
 
@@ -66,7 +66,7 @@ class Builder
      *
      * @throws BitStringException
      */
-    public function writeUint(int | BigInteger $number, int $bitLength): self
+    public function writeUint($number, int $bitLength): self
     {
         $this->cell->bits->writeUint($number, $bitLength);
 
@@ -76,7 +76,7 @@ class Builder
     /**
      * @throws BitStringException
      */
-    public function writeMaybeUint(int | BigInteger | null $number, int $bitLength): self
+    public function writeMaybeUint($number, int $bitLength): self
     {
         if (!is_null($number)) {
             $this->cell->bits->writeBit(1);
@@ -93,7 +93,7 @@ class Builder
      *
      * @throws BitStringException
      */
-    public function writeInt(int | BigInteger $number, int $bitLength): self
+    public function writeInt($number, int $bitLength): self
     {
         $this->cell->bits->writeInt($number, $bitLength);
 
@@ -103,7 +103,7 @@ class Builder
     /**
      * @throws BitStringException
      */
-    public function writeMaybeInt(int | BigInteger | null $number, int $bitLength): self
+    public function writeMaybeInt($number, int $bitLength): self
     {
         if (!is_null($number)) {
             $this->writeBit(1);
@@ -175,7 +175,7 @@ class Builder
      * @param int|BigInteger $amount in nanotoncoins.
      * @throws BitStringException
      */
-    public function writeCoins(int | BigInteger $amount): self
+    public function writeCoins($amount): self
     {
         $this->cell->bits->writeCoins($amount);
 
@@ -185,7 +185,7 @@ class Builder
     /**
      * @throws BitStringException
      */
-    public function writeMaybeCoins(int | BigInteger | null $amount): self
+    public function writeMaybeCoins($amount): self
     {
         if (!is_null($amount)) {
             $this->cell->bits->writeBit(1);
