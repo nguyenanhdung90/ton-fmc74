@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\TON\HttpClients\TonCenterV2Client;
-use App\TON\HttpClients\TonCenterV2ClientInterface;
+use App\TON\HttpClients\TonCenterClient;
+use App\TON\HttpClients\TonCenterClientInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $appServices = [
-            TonCenterV2ClientInterface::class => TonCenterV2Client::class,
+            TonCenterClientInterface::class => TonCenterClient::class,
         ];
         foreach ($appServices as $key => $value) {
             $this->app->bind($key, $value);

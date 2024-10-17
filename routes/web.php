@@ -19,3 +19,4 @@ Route::get('/', function () {
 });
 Route::get('/rpc', [TonController::class, 'rpc']);
 Route::get('/parse', [TonController::class, 'parse']);
+Route::get('/test', [TonController::class, 'test']);
