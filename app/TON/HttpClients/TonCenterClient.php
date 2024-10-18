@@ -2,6 +2,7 @@
 
 namespace App\TON\HttpClients;
 
+use App\TON\TonHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
@@ -45,11 +46,12 @@ class TonCenterClient implements TonCenterClientInterface
         ];
     }
 
-    public function jsonRPC(array $params): array
+    public function jsonRPC(array $query): array
     {
         try {
             $uri = $this->baseUri . 'api/v2/jsonRPC';
-            Arr::set($options, 'body', json_encode($params));
+            $rpcQuery = array_merge($query, ['id' => TonHelper::random(6), "jsonrpc" => "2.0"]);
+            Arr::set($options, 'body', json_encode($rpcQuery));
             $response = $this->client->request('POST', $uri, $options);
             $content = $response->getBody()->getContents();
             return json_decode($content, true);
@@ -59,26 +61,32 @@ class TonCenterClient implements TonCenterClientInterface
         }
     }
 
-    public function getJettonWallets(array $params) {
+    public function getJettonWallets(array $params): array
+    {
         try {
             $uri = $this->baseUri . 'api/v3/jetton/wallets?' . http_build_query($params);
             $response = $this->client->request('GET', $uri);
+            if ($response->getStatusCode() !== 200) {
+                return ['ok' => false];
+            }
             $content = $response->getBody()->getContents();
-            return json_decode($content, true);
+            return ['ok' => true, 'data' => json_decode($content, true)];
         } catch (GuzzleException $e) {
             Log::error('Caught exception get Jetton Wallets: ' . $e->getMessage());
             return ['ok' => false, 'error' => $e->getMessage()];
         }
     }
 
-    public function getJettonMasters(array $params)
+    public function getJettonMasters(array $params): array
     {
         try {
             $uri = $this->baseUri . 'api/v3/jetton/masters?' . http_build_query($params);
-            Log::info($uri);
             $response = $this->client->request('GET', $uri);
+            if ($response->getStatusCode() !== 200) {
+                return ['ok' => false];
+            }
             $content = $response->getBody()->getContents();
-            return json_decode($content, true);
+            return ['ok' => true, 'data' => json_decode($content, true)];
         } catch (GuzzleException $e) {
             Log::error('Caught exception getJettonMasters: ' . $e->getMessage());
             return ['ok' => false, 'error' => $e->getMessage()];

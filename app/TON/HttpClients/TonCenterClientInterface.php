@@ -4,7 +4,7 @@ namespace App\TON\HttpClients;
 
 interface TonCenterClientInterface
 {
-    public function jsonRPC(array $params);
+    public function jsonRPC(array $query);
 
     public function getJettonWallets(array $params);
 

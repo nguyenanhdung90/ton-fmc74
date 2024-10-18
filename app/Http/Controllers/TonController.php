@@ -26,10 +26,12 @@ class TonController extends Controller
         ];
         $data = $tonCenterV2Client->jsonRPC($params);
         $result = Arr::get($data, 'result');
-        $sources = [];
-        foreach ($result as $item) {
-            $sources[] = Arr::get($item, 'in_msg.source');
-        }
+        //return var_dump(Arr::pluck($result, 'in_msg.source'));
+//        $sources = [];
+//        foreach ($result as $item) {
+//            $sources[] = Arr::get($item, 'in_msg.source');
+//        }
+        $sources = Arr::pluck($result, 'in_msg.source');
         $uniqueSources = array_unique(array_filter($sources));
         $walletSources = [];
         foreach ($uniqueSources as $address) {
@@ -85,7 +87,7 @@ class TonController extends Controller
     }
 
     public function test() {
-        $address = new Address('EQBo8k3byv2sq9A4uG0d89mxL2LlETwD0wE-7DlynP6KNMDi');
-        return $address->toString(true, true, false, true);
+        $address = new Address('UQBo8k3byv2sq9A4uG0d89mxL2LlETwD0wE-7DlynP6KNJ0n');
+        return $address->toString(false);
     }
 }
