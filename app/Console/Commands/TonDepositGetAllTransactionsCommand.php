@@ -40,7 +40,7 @@ class TonDepositGetAllTransactionsCommand extends Command
         $this->tonCenterV2Client = $tonCenterV2Client;
     }
 
-    public function handle()
+    public function handle(): int
     {
         echo "Start get all transaction deposit ... \n";
         $limit = min($this->option('limit'), 100);
@@ -95,7 +95,7 @@ class TonDepositGetAllTransactionsCommand extends Command
             $jetMasters = $this->getBatchJetMasters($batchJetWallets);
             if (is_null($jetMasters)) {
                 printf("Error when get jetton master by query: %s \n", json_encode($transactionQuery['params']));
-                sleep(5);
+                sleep(1);
                 continue;
             }
             $this->setJetMasterToMapper($mapperJetWallets, $jetMasters);
@@ -109,7 +109,7 @@ class TonDepositGetAllTransactionsCommand extends Command
             $lt = Arr::get($lastTx, 'transaction_id.lt');
             $hash = Arr::get($lastTx, 'transaction_id.hash');
         }
-        return;
+        return 1;
     }
 
     private function getBatches(array $sources, int $length): array
