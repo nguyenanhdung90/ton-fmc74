@@ -14,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -23,14 +24,17 @@ class InsertDepositTonTransaction implements ShouldQueue
 
     private array $data;
 
+    private Collection $mapperSource;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(array $data)
+    public function __construct(array $data, Collection $mapperSource)
     {
         $this->data = $data;
+        $this->mapperSource = $mapperSource;
     }
 
     /**
@@ -41,6 +45,12 @@ class InsertDepositTonTransaction implements ShouldQueue
     public function handle()
     {
         try {
+            $source = Arr::get($this->data, 'in_msg.source');
+            if (!empty($source) && $this->mapperSource->has($source)) {
+                Arr::set($this->data, 'in_msg.source_details', $this->mapperSource->get($source));
+            } else {
+                Arr::set($this->data, 'in_msg.source_details', null);
+            }
             if (count(Arr::get($this->data, 'out_msgs'))) {
                 // This is not received transaction
                 return;

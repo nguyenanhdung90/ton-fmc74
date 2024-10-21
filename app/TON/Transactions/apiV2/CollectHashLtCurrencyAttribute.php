@@ -3,7 +3,6 @@
 namespace App\TON\Transactions\apiV2;
 
 use App\TON\Transactions\CollectAttribute;
-use App\TON\Transactions\TransactionHelper;
 use Illuminate\Support\Arr;
 
 class CollectHashLtCurrencyAttribute extends CollectAttribute
