@@ -4,12 +4,9 @@ namespace App\TON;
 
 class TonHelper
 {
-    /**
-     * @throws \Exception
-     */
-    public static function random(int $length): string
+    public static function generateRandomString($length = 10)
     {
-        $bytes = random_bytes($length);
-        return bin2hex($bytes);
+        return substr(str_shuffle(str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            ceil($length / strlen($x)))), 1, $length);
     }
 }

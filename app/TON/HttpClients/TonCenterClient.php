@@ -6,6 +6,7 @@ use App\TON\TonHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class TonCenterClient implements TonCenterClientInterface
@@ -50,7 +51,7 @@ class TonCenterClient implements TonCenterClientInterface
     {
         try {
             $uri = $this->baseUri . 'api/v2/jsonRPC';
-            $rpcQuery = array_merge($query, ['id' => TonHelper::random(6), "jsonrpc" => "2.0"]);
+            $rpcQuery = array_merge($query, ['id' => TonHelper::generateRandomString(6), "jsonrpc" => "2.0"]);
             Arr::set($options, 'body', json_encode($rpcQuery));
             $response = $this->client->request('POST', $uri, $options);
             $content = $response->getBody()->getContents();
@@ -61,35 +62,54 @@ class TonCenterClient implements TonCenterClientInterface
         }
     }
 
-    public function getJettonWallets(array $params): array
+    public function getTransactionJsonRPC(array $params): Collection
+    {
+        $query = [
+            "method" => "getTransactions",
+            "params" => array_merge($params, ["archival" => true])
+        ];
+        $data = $this->jsonRPC($query);
+        if (!$data['ok']) {
+            printf("Error from TonCenter: %s \n", json_encode($query));
+        }
+        return $data['ok'] ? collect($data['result']) : collect([]);
+    }
+
+    public function getJetWallets(array $params): ?Collection
     {
         try {
             $uri = $this->baseUri . 'api/v3/jetton/wallets?' . http_build_query($params);
             $response = $this->client->request('GET', $uri);
             if ($response->getStatusCode() !== 200) {
-                return ['ok' => false];
+                return null;
             }
             $content = $response->getBody()->getContents();
-            return ['ok' => true, 'data' => json_decode($content, true)];
+            $result = json_decode($content, true);
+            $jetWallets = Arr::get($result, 'jetton_wallets', []);
+            return collect($jetWallets);
         } catch (GuzzleException $e) {
             Log::error('Caught exception get Jetton Wallets: ' . $e->getMessage());
-            return ['ok' => false, 'error' => $e->getMessage()];
+            printf("Caught exception get Jetton Wallets: %s \n", $e->getMessage());
+            return null;
         }
     }
 
-    public function getJettonMasters(array $params): array
+    public function getJetMasters(array $params): ?Collection
     {
         try {
             $uri = $this->baseUri . 'api/v3/jetton/masters?' . http_build_query($params);
             $response = $this->client->request('GET', $uri);
             if ($response->getStatusCode() !== 200) {
-                return ['ok' => false];
+                return null;
             }
             $content = $response->getBody()->getContents();
-            return ['ok' => true, 'data' => json_decode($content, true)];
+            $result = json_decode($content, true);
+            $jetMasters = Arr::get($result, 'jetton_masters', []);
+            return collect($jetMasters);
         } catch (GuzzleException $e) {
             Log::error('Caught exception getJettonMasters: ' . $e->getMessage());
-            return ['ok' => false, 'error' => $e->getMessage()];
+            printf("Caught exception getJettonMasters: %s \n", $e->getMessage());
+            return null;
         }
     }
 }

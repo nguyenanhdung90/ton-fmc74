@@ -2,11 +2,15 @@
 
 namespace App\TON\HttpClients;
 
+use Illuminate\Support\Collection;
+
 interface TonCenterClientInterface
 {
     public function jsonRPC(array $query);
 
-    public function getJettonWallets(array $params);
+    public function getTransactionJsonRPC(array $params): Collection;
 
-    public function getJettonMasters(array $params);
+    public function getJetWallets(array $params): ?Collection;
+
+    public function getJetMasters(array $params): ?Collection;
 }

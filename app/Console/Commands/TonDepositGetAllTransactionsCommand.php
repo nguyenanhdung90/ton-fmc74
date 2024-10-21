@@ -7,12 +7,16 @@ use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Address;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class TonDepositGetAllTransactionsCommand extends Command
 {
     const BATCH_NUMBER_JETTON_WALLET = 2;
 
     const BATCH_NUMBER_JETTON_MASTER = 1;
+
+    const MAX_LIMIT_TRANSACTION = 100;
     /**
      * php artisan ton:get_all_deposit
      *
@@ -42,185 +46,151 @@ class TonDepositGetAllTransactionsCommand extends Command
 
     public function handle(): int
     {
-        echo "Start get all transaction deposit ... \n";
-        $limit = min($this->option('limit'), 100);
-        $transactionQuery = [
-            "method" => "getTransactions",
-            "params" => [
-                "limit" => $limit,
-                "address" => config('services.ton.root_ton_wallet'),
-                "archival" => true
-            ],
+        printf("Start get all transaction deposit ... \n");
+        $limit = min($this->option('limit'), self::MAX_LIMIT_TRANSACTION);
+        $params = [
+            "limit" => $limit,
+            "address" => config('services.ton.root_ton_wallet'),
         ];
-
         $lt = $hash = null;
         while (true) {
             if ($lt) {
-                Arr::set($transactionQuery, 'params.lt', $lt);
-                Arr::set($transactionQuery, 'params.hash', $hash);
+                Arr::set($params, 'lt', $lt);
+                Arr::set($params, 'hash', $hash);
             }
-
-            printf("Query: %s \n" , json_encode($transactionQuery['params']));
+            printf("New query: %s \n", json_encode($params));
             sleep(1);
-            $data = $this->tonCenterV2Client->jsonRPC($transactionQuery);
-            $ok = Arr::get($data, 'ok');
-            if (!$ok) {
-                printf("Error from TonCenter: %s \n", json_encode($data));
-                break;
-            }
-            $transactions = Arr::get($data, 'result');
-            $numberTx = count($transactions);
-            if (is_null($lt) && !$numberTx) {
+            $transactions = $this->tonCenterV2Client->getTransactionJsonRPC($params);
+            $numberTx = $transactions->count();
+            if (!$lt && !$numberTx) {
                 printf("End, there are no transactions for the first loop \n");
                 break;
             }
-            if (!is_null($lt) && $numberTx == 1) {
+            if ($lt && $numberTx == 1) {
                 printf("End, there are no transactions for the next loop \n");
                 break;
             }
 
-            // get mapper jettton master
-            $sources = array_unique(array_filter(Arr::pluck($transactions, 'in_msg.source')));
-            $batchSources = $this->getBatches($sources, self::BATCH_NUMBER_JETTON_WALLET);
-            $jetWallets = $this->getBatchJetWallets($batchSources);
-            if (is_null($jetWallets)) {
-                printf("Error when get jetton wallet by query: %s \n", json_encode($transactionQuery['params']));
+            // get mapper jetton master
+            $sources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
+                return !empty($value);
+            });
+
+            $sourceChunks = $sources->chunk(self::BATCH_NUMBER_JETTON_WALLET);
+            $mapperSource = $this->parseMapperJetWallets($sources);
+
+            $jetWalletCollection = $this->getJetWallets($sourceChunks);
+            if (!$jetWalletCollection) {
+                printf("Error when get jetton wallet by query: %s \n", json_encode($params));
                 continue;
             }
-            $mapperJetWallets = $this->parseMapperJetWallets($sources);
-            $this->setJetWalletToMapper($mapperJetWallets, $jetWallets);
+            $this->setJetWalletToMapper($jetWalletCollection, $mapperSource);
 
-            $hexJetWallets = array_unique(Arr::pluck($jetWallets, 'jetton'));
-            $batchJetWallets = $this->getBatches($hexJetWallets, self::BATCH_NUMBER_JETTON_MASTER);
-            $jetMasters = $this->getBatchJetMasters($batchJetWallets);
-            if (is_null($jetMasters)) {
-                printf("Error when get jetton master by query: %s \n", json_encode($transactionQuery['params']));
+            $jetWallets = $jetWalletCollection->pluck('jetton')->unique();
+            $jetWalletChunks = $jetWallets->chunk(self::BATCH_NUMBER_JETTON_MASTER);
+            $jetMasterCollections = $this->getJetMasters($jetWalletChunks);
+            if (is_null($jetMasterCollections)) {
+                printf("Error when get jetton master by query: %s \n", json_encode($params));
                 sleep(1);
                 continue;
             }
-            $this->setJetMasterToMapper($mapperJetWallets, $jetMasters);
+            $this->setJetMasterToMapper($jetMasterCollections, $mapperSource);
             // end get mapper jettton master
 
             printf("Processing %s transactions. \n", $numberTx);
-            $this->processTx($transactions, $mapperJetWallets);
+            $this->processTx($transactions, $mapperSource);
 
             // reset condition of query
-            $lastTx = end($transactions);
+            $lastTx = $transactions->last();
             $lt = Arr::get($lastTx, 'transaction_id.lt');
             $hash = Arr::get($lastTx, 'transaction_id.hash');
         }
         return 1;
     }
 
-    private function getBatches(array $sources, int $length): array
+    private function getJetWallets(Collection $sourceChunks): ?Collection
     {
-        $groupSources = [];
-        $numberSources = count($sources);
-        $numberGroup = ceil($numberSources / $length);
-        for ($x = 0; $x < $numberGroup; $x++) {
-            $groupSources[] = array_slice($sources, $x * self::BATCH_NUMBER_JETTON_WALLET, self::BATCH_NUMBER_JETTON_WALLET);
-        }
-        return $groupSources;
-    }
-
-    private function getBatchJetWallets(array $batchSources)
-    {
-
-        $jetWallets = [];
-        foreach ($batchSources as $sources) {
-            sleep(2);
+        $mergedJetWallet = collect([]);
+        foreach ($sourceChunks as $sourceChunk) {
             $params = [
-                "limit" => count($sources),
-                "address" => implode(',', $sources),
+                "limit" => $sourceChunk->count(),
+                "address" => $sourceChunk->implode(','),
             ];
             sleep(1);
-            $results = $this->tonCenterV2Client->getJettonWallets($params);
-            //echo json_encode($results);
-            if (!$results['ok']) {
-                //echo json_encode($results);
-                return;
+            $jetWallet = $this->tonCenterV2Client->getJetWallets($params);
+            if (!$jetWallet) {
+                return null;
             }
-            if (!empty($results['data']['jetton_wallets'])) {
-                $jetWallets = array_merge($jetWallets, $results['data']['jetton_wallets']);
-            }
+            $mergedJetWallet = $mergedJetWallet->merge($jetWallet);
         }
-        return $jetWallets;
+        return $mergedJetWallet;
     }
 
-    private function getBatchJetMasters(array $batchJetWallets)
+    private function getJetMasters(Collection $jetWalletChunks): ?Collection
     {
-
-        $jetMasters = [];
-        foreach ($batchJetWallets as $jetWallets) {
+        $mergedJetMaster = collect([]);
+        foreach ($jetWalletChunks as $jetWalletChunk) {
             $params = [
-                "limit" => count($jetWallets),
-                "address" => implode(',', $jetWallets)
+                "limit" => $jetWalletChunk->count(),
+                "address" => $jetWalletChunk->implode(',')
             ];
             sleep(1);
-            $results = $this->tonCenterV2Client->getJettonMasters($params);
-            if (!$results['ok']) {
-                return;
+            $jetMaster = $this->tonCenterV2Client->getJetMasters($params);
+            if (!$jetMaster) {
+                return null;
             }
-            if (!empty($results['data']['jetton_masters'])) {
-                $jetMasters = array_merge($jetMasters, $results['data']['jetton_masters']);
-            }
+            $mergedJetMaster = $mergedJetMaster->merge($jetMaster);
         }
-        return $jetMasters;
+        return $mergedJetMaster;
     }
 
-    private function parseMapperJetWallets(array $sources): array
+    private function parseMapperJetWallets(Collection $sources): Collection
     {
-        $mappers = [];
-        foreach ($sources as $source) {
-            $address = new Address($source);
-            $mappers[$source] = [
-                'hex' => strtolower($address->toString(false)),
+        $sources->transform(function ($item, $key) {
+            $address = new Address($item);
+            return [
+                'source' => $item,
+                'hex' => strtoupper($address->toString(false)),
                 'jetton_wallet' => null,
                 'jetton_master' => []
             ];
-        }
-        return $mappers;
+        });
+        return $sources->keyBy('source');
     }
 
-    private function setJetWalletToMapper(&$mappers, array $jetWallets)
+    private function setJetWalletToMapper(Collection $jetWalletCollection, &$mappers)
     {
-        $keyIndexJetWallets = [];
-        foreach ($jetWallets as $item) {
-            $indexHex = strtolower($item['address']);
-            $keyIndexJetWallets[$indexHex]['jetton'] = Arr::get($item, 'jetton');
-        }
-        foreach ($mappers as $key => $item) {
-            $indexHex = $item['hex'];
-            if (isset($keyIndexJetWallets[$indexHex])) {
-                $mappers[$key]['jetton_wallet'] = strtolower(Arr::get($keyIndexJetWallets[$indexHex], 'jetton'));
+        $keyIndexJetWallets = $jetWalletCollection->keyBy('address');
+        $mappers->transform(function ($item, $key) use ($keyIndexJetWallets) {
+            $hex = $item['hex'];
+            if ($keyIndexJetWallets->has($hex)) {
+                $item['jetton_wallet'] = $keyIndexJetWallets->get($hex)['jetton'];
             }
-        }
+            return $item;
+        });
     }
 
-    private function setJetMasterToMapper(&$mappers, array $jetMasters)
+    private function setJetMasterToMapper(Collection $jetMasterCollection, &$mappers)
     {
-        $keyIndexJetMasters = [];
-        foreach ($jetMasters as $item) {
-            $indexHex = strtolower($item['address']);
-            $keyIndexJetMasters[$indexHex]['jetton_content'] = Arr::get($item, 'jetton_content');
-        }
-        foreach ($mappers as $key => $item) {
+        $keyIndexJetMasters = $jetMasterCollection->keyBy('address');
+        $mappers->transform(function ($item, $key) use ($keyIndexJetMasters) {
             if (empty($item['jetton_wallet'])) {
-                continue;
+                return $item;
             }
             $indexHex = $item['jetton_wallet'];
-            if (isset($keyIndexJetMasters[$indexHex])) {
-                $mappers[$key]['jetton_master'] = Arr::get($keyIndexJetMasters[$indexHex], 'jetton_content');
+            if ($keyIndexJetMasters->has($indexHex)) {
+                $item['jetton_master'] = $keyIndexJetMasters->get($indexHex)['jetton_content'];
             }
-        }
+            return $item;
+        });
     }
 
-    private function processTx(array $transactions, array $mapperJetWallets)
+    private function processTx(Collection $transactions, Collection $mapperSource)
     {
         foreach ($transactions as $transaction) {
             $source = Arr::get($transaction, 'in_msg.source');
-            if (!empty($source) && isset($mapperJetWallets[$source])) {
-                Arr::set($transaction, 'in_msg.source_details', $mapperJetWallets[$source]);
+            if (!empty($source) && $mapperSource->has($source)) {
+                Arr::set($transaction, 'in_msg.source_details', $mapperSource->get($source));
             }
             InsertDepositTonTransaction::dispatch($transaction);
         }

@@ -36,6 +36,7 @@ class InsertDepositTonTransaction implements ShouldQueue
     public function handle()
     {
         Log::info($this->data);
+        return 1;
         if (count(Arr::get($this->data, 'out_msgs'))) {
             // This is not received transaction
             return;
