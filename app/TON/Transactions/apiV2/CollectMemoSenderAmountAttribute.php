@@ -21,9 +21,9 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
     public function collect(array $data): array
     {
         $parentTrans = parent::collect($data);
-        $bodyCode = Arr::get($data, 'in_msg.msg_data.body');
-        if ($bodyCode) {
-            $body = $this->parseJetBody($bodyCode);
+        $symbol = Arr::get($data, 'in_msg.source_details.jetton_master.symbol');
+        if ($symbol) {
+            $body = $this->parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
             $amount = (int)Arr::get($body, 'amount', 0);
             $fromAddressWallet = Arr::get($body, 'from_address_wallet');
             $memo = Arr::get($body, 'comment');
@@ -54,11 +54,11 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         $slice = $cell->beginParse();
         $remainBit = count($slice->getRemainingBits());
         if ($remainBit < 32) {
-            throw new InvalidJettonException("Invalid Jetton.", InvalidJettonException::INVALID_JETTON);
+            throw new InvalidJettonException("Invalid Jetton: " . $body, InvalidJettonException::INVALID_JETTON);
         }
         $opcode = Bytes::bytesToHexString($slice->loadBits(32));
         if ($opcode != config('services.ton.jetton_opcode')) {
-            throw new InvalidJettonException("Invalid Jetton notify",
+            throw new InvalidJettonException("Invalid Jetton opcode: " . $body,
                 InvalidJettonException::INVALID_JETTON_OPCODE);
         }
         $slice->skipBits(64);
