@@ -9,7 +9,6 @@ use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 
 class TonPeriodicDepositTransactionsCommand extends Command
 {
