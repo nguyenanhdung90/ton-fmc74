@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateTonWalletsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -17,7 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('memo', 50);
             $table->string('currency', 20);
-            $table->unsignedDecimal('amount', 20, 9)->default(0);
+            $table->unsignedBigInteger('amount')->default(0);
+            $table->unsignedInteger('decimals')->default(0);
             $table->unique('memo', 'currency');
             $table->timestamps();
         });

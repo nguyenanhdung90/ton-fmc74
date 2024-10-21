@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Tons\Transactions;
+namespace App\TON\Transactions;
 
 class TransactionHelper
 {
     const TON_DECIMALS = 9;
-
-    const USDT_DECIMALS = 9;
 
     public static function toHash(string $data): string
     {

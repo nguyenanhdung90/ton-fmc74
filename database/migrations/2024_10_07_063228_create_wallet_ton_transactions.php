@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateWalletTonTransactions extends Migration
 {
     /**
      * Run the migrations.
@@ -20,9 +20,10 @@ return new class extends Migration
             $table->enum('type', ['DEPOSIT', 'WITHDRAW']);
             $table->string('to_memo', 50)->nullable();
             $table->string('hash', '44')->index();
-            $table->unsignedDecimal('amount', 20, 9)->default(0);
+            $table->unsignedBigInteger('amount')->default(0);
+            $table->unsignedInteger('decimals')->default(0);
             $table->string('currency', 20);
-            $table->unsignedDecimal('total_fees', 20, 9)->default(0)->comment('currency = TON');
+            $table->unsignedBigInteger('total_fees')->default(0);
             $table->unsignedBigInteger('lt');
             $table->timestamps();
         });

@@ -71,7 +71,7 @@ class TonDepositGetAllTransactionsCommand extends Command
                 break;
             }
 
-            // get mapper jetton master
+            // get mapper jetton
             $sources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
                 return !empty($value);
             });
@@ -95,7 +95,7 @@ class TonDepositGetAllTransactionsCommand extends Command
                 continue;
             }
             $this->setJetMasterToMapper($jetMasterCollections, $mapperSource);
-            // end get mapper jettton master
+            // end get mapper jetton
 
             printf("Processing %s transactions. \n", $numberTx);
             $this->processTx($transactions, $mapperSource);
@@ -191,6 +191,8 @@ class TonDepositGetAllTransactionsCommand extends Command
             $source = Arr::get($transaction, 'in_msg.source');
             if (!empty($source) && $mapperSource->has($source)) {
                 Arr::set($transaction, 'in_msg.source_details', $mapperSource->get($source));
+            } else {
+                Arr::set($transaction, 'in_msg.source_details', null);
             }
             InsertDepositTonTransaction::dispatch($transaction);
         }

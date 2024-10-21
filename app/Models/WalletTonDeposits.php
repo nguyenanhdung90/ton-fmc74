@@ -12,6 +12,6 @@ class WalletTonDeposits extends Model
     protected $table = 'wallet_ton_memos';
 
     protected $fillable = [
-        'memo', 'currency', 'amount', 'transaction_id'
+        'memo', 'currency', 'amount', 'decimals', 'transaction_id'
     ];
 }
