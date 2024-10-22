@@ -4,18 +4,13 @@ namespace App\Console\Commands;
 
 use App\Jobs\InsertDepositTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Interop\Address;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class TonDepositGetAllTransactionsCommand extends Command
 {
-
-
     /**
      * php artisan ton:get_all_deposit
      *
@@ -87,7 +82,7 @@ class TonDepositGetAllTransactionsCommand extends Command
                 $lt = Arr::get($lastTx, 'transaction_id.lt');
                 $hash = Arr::get($lastTx, 'transaction_id.hash');
             } catch (\Exception $e) {
-                printf($e->getMessage());
+                printf($e->getMessage() . "\n");
                 continue;
             }
         }

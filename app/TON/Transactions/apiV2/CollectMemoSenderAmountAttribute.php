@@ -24,7 +24,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         $symbol = Arr::get($data, 'in_msg.source_details.jetton_master.symbol');
         if ($symbol) {
             $body = $this->parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
-            $amount = (int)Arr::get($body, 'amount', 0);
+            $amount = Arr::get($body, 'amount', 0);
             $fromAddressWallet = Arr::get($body, 'from_address_wallet');
             $memo = Arr::get($body, 'comment');
         } else {
@@ -32,7 +32,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             $source = Arr::get($data, 'in_msg.source');
             $address = new Address($source);
             $fromAddressWallet = $address->asWallet(!config('services.tom.is_main'));
-            $memo = Arr::get($data, 'in_msg.message_content.decoded.comment');
+            $memo = Arr::get($data, 'in_msg.message');
         }
 
         Arr::set($trans, 'to_memo', $memo);
@@ -54,23 +54,34 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         $slice = $cell->beginParse();
         $remainBit = count($slice->getRemainingBits());
         if ($remainBit < 32) {
-            throw new InvalidJettonException("Invalid Jetton: " . $body, InvalidJettonException::INVALID_JETTON);
+            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body,
+                InvalidJettonException::INVALID_JETTON);
         }
         $opcode = Bytes::bytesToHexString($slice->loadBits(32));
         if ($opcode != config('services.ton.jetton_opcode')) {
             throw new InvalidJettonException("Invalid Jetton opcode: " . $body,
                 InvalidJettonException::INVALID_JETTON_OPCODE);
         }
+
         $slice->skipBits(64);
         $amount = $slice->loadCoins();
         $sender = $slice->loadAddress()->toString(true, true, null, true);
+
         $comment = null;
         if ($cellForward = $slice->loadMaybeRef()) {
             $forwardPayload = $cellForward->beginParse();
             $comment = $forwardPayload->loadString();
+        } else {
+            $remainBitJet = count($slice->getRemainingBits());
+            if ($remainBitJet >= 32) {
+                $forwardOp = Bytes::bytesToHexString($slice->loadBits(32));
+                if ($forwardOp == 0) {
+                    $comment = $slice->loadString(32);
+                }
+            }
         }
         return [
-            'amount' => (string)$amount,
+            'amount' => (int)$amount,
             'from_address_wallet' => $sender,
             'comment' => $comment,
         ];
