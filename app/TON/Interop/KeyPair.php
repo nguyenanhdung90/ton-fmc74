@@ -10,10 +10,16 @@ use App\TON\TypedArrays\Uint8Array;
  */
 final class KeyPair
 {
+    public Uint8Array $publicKey;
+    public Uint8Array $secretKey;
+
     public function __construct(
-        public Uint8Array $publicKey,
-        public Uint8Array $secretKey,
-    ) {}
+        Uint8Array $publicKey,
+        Uint8Array $secretKey
+    ) {
+        $this->publicKey = $publicKey;
+        $this->secretKey = $secretKey;
+    }
 
     public static function fromSecretKey(Uint8Array $secretKey): self
     {

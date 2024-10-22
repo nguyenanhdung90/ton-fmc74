@@ -25,6 +25,23 @@ class ToncenterHttpV2Client implements ToncenterV2Client
         $this->options = $options;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function runGetMethod($address, string $method, array $stack = [])
+    {
+        $response = $this
+            ->query([
+                "method" => "runGetMethod",
+                "params" => [
+                    "address" => (string)$address,
+                    "method" => $method,
+                    "stack" => $stack,
+                ],
+            ]);
+
+        return $response->result;
+    }
 
     /**
      * @inheritDoc

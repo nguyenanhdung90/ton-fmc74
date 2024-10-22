@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\TON\Mnemonic\TonMnemonic;
 use App\TON\Withdraws\WithdrawMemoToMemoInterface;
 use Http\Client\Common\HttpMethodsClient;
 use Http\Discovery\Psr17FactoryDiscovery;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
 use App\TON\Transports\Toncenter\ToncenterTransport;
+use App\TON\Contracts\Wallets\V4\WalletV4R2;
+use App\TON\Contracts\Wallets\V4\WalletV4Options;
 
 class TonController extends Controller
 {
@@ -27,6 +30,9 @@ class TonController extends Controller
         return 'Success';
     }
 
+    /**
+     * @throws \App\TON\Mnemonic\Exceptions\TonMnemonicException
+     */
     public function parseJetBody(Request $request): array
     {
         $httpClient = new HttpMethodsClient(
@@ -42,7 +48,12 @@ class TonController extends Controller
             )
         );
         $tonTransport = new ToncenterTransport($tonCenter);
+        $phrases = config('services.ton.ton_mnemonic');
+        $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
+        $options = new WalletV4Options($kp->publicKey);
+        $wallet = new WalletV4R2($options);
 
+        $seqno = (int)$wallet->seqno($tonTransport);
 
         $ko = 123;
     }

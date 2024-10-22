@@ -14,6 +14,7 @@ abstract class WalletV4 extends AbstractWallet implements Wallet
 
     public function __construct(WalletV4Options $options)
     {
+        $this->options = $options;
         parent::__construct($this->options);
     }
 

@@ -4,14 +4,28 @@ namespace App\TON\Transports\Toncenter\Models;
 
 class JsonRpcResponse
 {
+    public bool $ok;
+    public $result;
+    public ?string $error;
+    public ?int $code;
+    public string $jsonrpc;
+    public ?string $id;
+
     public function __construct(
-        bool   $ok,
-        mixed  $result,
+        bool $ok,
+        $result,
         ?string $error,
-        ?int    $code,
+        ?int $code,
         string $jsonrpc,
-        ?string $id,
-    ) {}
+        ?string $id
+    ) {
+        $this->ok = $ok;
+        $this->result = $result;
+        $this->error = $error;
+        $this->code = $code;
+        $this->jsonrpc = $jsonrpc;
+        $this->id = $id;
+    }
 
     public function asTonResponse(): TonResponse
     {

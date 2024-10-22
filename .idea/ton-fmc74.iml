@@ -105,7 +105,6 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/swiftmailer/swiftmailer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/promise" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/httplug" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/guzzle7-adapter" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/clue/stream-filter" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/options-resolver" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/php-http/client-common" />

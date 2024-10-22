@@ -1,24 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace Olifanton\Ton\Transports\Toncenter;
+namespace App\TON\Transports\Toncenter;
 
-use Olifanton\Interop\Boc\Builder;
-use Olifanton\Interop\Boc\Exceptions\CellException;
-use Olifanton\Interop\Boc\Exceptions\SliceException;
-use Olifanton\Interop\Bytes;
-use Olifanton\Ton\Marshalling\Tvm\Cell;
-use Olifanton\Ton\Marshalling\Tvm\Number;
-use Olifanton\Ton\Marshalling\Tvm\Slice;
-use Olifanton\Ton\Marshalling\Tvm\TvmStackEntry;
+use App\TON\Interop\Boc\Builder;
+use App\TON\Interop\Boc\Exceptions\CellException;
+use App\TON\Interop\Boc\Exceptions\SliceException;
+use App\TON\Interop\Bytes;
+use App\TON\Marshalling\Tvm\Cell;
+use App\TON\Marshalling\Tvm\Number;
+use App\TON\Marshalling\Tvm\Slice;
+use App\TON\Marshalling\Tvm\TvmStackEntry;
 
 final class ToncenterStackSerializer
 {
-    /**
-     * @param array[]|TvmStackEntry[] $stack
-     * @return array[]
-     * @throws CellException
-     * @throws SliceException
-     */
+
     public static function serialize(array $stack): array
     {
         $result = [];
@@ -40,7 +35,7 @@ final class ToncenterStackSerializer
                     continue;
                 }
 
-                throw new \RuntimeException("Not implemented serializer for " . $entry::class);
+                throw new \RuntimeException("Not implemented serializer for ");
             } else if (is_array($entry) && array_is_list($entry)) {
                 $result[] = $entry;
             } else {
@@ -60,7 +55,7 @@ final class ToncenterStackSerializer
      */
     private static function serializeCell(Cell $entry): array
     {
-        return ["cell", Bytes::bytesToBase64($entry->getData()->toBoc(has_idx: false))];
+        return ["cell", Bytes::bytesToBase64($entry->getData()->toBoc( false))];
     }
 
     /**
@@ -70,7 +65,7 @@ final class ToncenterStackSerializer
     private static function serializeSlice(Slice $entry): array
     {
         return ["tvm.Slice", Bytes::bytesToBase64(
-            (new Builder())->writeSlice($entry->getData())->cell()->toBoc(has_idx: false),
+            (new Builder())->writeSlice($entry->getData())->cell()->toBoc(false),
         )];
     }
 

@@ -10,10 +10,15 @@ use App\TON\Contracts\Messages\Exceptions\MessageException;
 
 class StateInit
 {
+    public ?Cell $code = null;
+    public ?Cell $data = null;
     public function __construct(
         ?Cell $code = null,
         ?Cell $data = null
-    ) {}
+    ) {
+        $this->code = $code;
+        $this->data = $data;
+    }
 
     /**
      * @throws MessageException

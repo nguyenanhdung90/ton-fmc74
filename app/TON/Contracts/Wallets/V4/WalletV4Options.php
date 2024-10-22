@@ -16,6 +16,7 @@ class WalletV4Options extends WalletOptions
         ?Address $address = null
     )
     {
+        $this->walletId = $walletId;
         parent::__construct($publicKey, $workchain, $address);
     }
 }

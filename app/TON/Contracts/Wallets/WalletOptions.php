@@ -8,12 +8,19 @@ use App\TON\TypedArrays\Uint8Array;
 
 class WalletOptions extends ContractOptions
 {
+    public Uint8Array $publicKey;
+    public int $workchain;
+    public ?Address $address;
+
     public function __construct(
         Uint8Array $publicKey,
         int $workchain = 0,
         ?Address $address = null
     )
     {
+        $this->publicKey = $publicKey;
+        $this->workchain = $workchain;
+        $this->address = $address;
         parent::__construct($workchain, $address);
     }
 }
