@@ -6,5 +6,5 @@ use Illuminate\Support\Collection;
 
 interface MapperJetMasterByAddressInterface
 {
-    public function process(Collection $address): Collection;
+    public function request(Collection $address): Collection;
 }

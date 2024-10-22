@@ -78,6 +78,7 @@ class InsertDepositTonTransaction implements ShouldQueue
                     "memo" => Arr::get($trans, 'to_memo'),
                     "currency" => Arr::get($trans, 'currency'),
                     "amount" => Arr::get($trans, 'amount'),
+                    "decimals" => Arr::get($trans, 'decimals'),
                     "transaction_id" => $tranId,
                     "created_at" => Carbon::now(),
                     "updated_at" => Carbon::now(),

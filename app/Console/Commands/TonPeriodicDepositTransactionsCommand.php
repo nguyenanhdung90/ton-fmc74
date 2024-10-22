@@ -30,6 +30,8 @@ class TonPeriodicDepositTransactionsCommand extends Command
 
     protected MapperJetMasterByAddressInterface $mapperJetMasterByAddress;
 
+    protected array $params;
+
     /**
      * Create a new command instance.
      *
@@ -42,6 +44,7 @@ class TonPeriodicDepositTransactionsCommand extends Command
         parent::__construct();
         $this->tonCenterV2Client = $tonCenterV2Client;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
+        $this->params = ["limit" => null, "address" => config('services.ton.root_ton_wallet'), "to_lt" => null];
     }
 
     /**
@@ -51,19 +54,16 @@ class TonPeriodicDepositTransactionsCommand extends Command
      */
     public function handle(): int
     {
-        $limit = min($this->option('limit'), TransactionHelper::MAX_LIMIT_TRANSACTION);
         $lastTransaction = WalletTonTransaction::whereNotNull('from_address_wallet')->orderBy('id', 'desc')->first();
         $toLt = $lastTransaction ? $lastTransaction->lt : 0;
-        $params = ["limit" => $limit, "address" => config('services.ton.root_ton_wallet')];
-
+        $limit = min($this->option('limit'), TransactionHelper::MAX_LIMIT_TRANSACTION);
+        Arr::set($this->params, 'to_lt', $toLt);
+        Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
-                if ($toLt) {
-                    Arr::set($params, 'to_lt', $toLt);
-                }
-                printf("Period transaction deposit query: %s \n", json_encode($params));
-                sleep(5);//5
-                $transactions = $this->tonCenterV2Client->getTransactionJsonRPC($params);
+                printf("Period transaction deposit query: %s \n", json_encode($this->params));
+                sleep(5);
+                $transactions = $this->tonCenterV2Client->getTransactionJsonRPC($this->params);
                 $numberTx = $transactions->count();
                 if (!$numberTx) {
                     printf("There are no transactions and continue after 5s ... \n");
@@ -73,16 +73,16 @@ class TonPeriodicDepositTransactionsCommand extends Command
                 $sources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
                     return !empty($value);
                 });
-                $mapperSource = $this->mapperJetMasterByAddress->process($sources);
+                $mapperSource = $this->mapperJetMasterByAddress->request($sources);
 
                 printf("Processing %s transactions. \n", $numberTx);
                 foreach ($transactions as $transaction) {
                     InsertDepositTonTransaction::dispatch($transaction, $mapperSource);
                 }
 
-                // reset condition of query
+                // set condition of query
                 $lastTx = $transactions->first();
-                $toLt = Arr::get($lastTx, 'transaction_id.lt');
+                Arr::set($this->params, 'to_lt', Arr::get($lastTx, 'transaction_id.lt'));
             } catch (\Exception $e) {
                 printf($e->getMessage());
                 continue;

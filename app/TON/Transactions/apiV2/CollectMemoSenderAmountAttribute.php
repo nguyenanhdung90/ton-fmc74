@@ -64,7 +64,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         }
 
         $slice->skipBits(64);
-        $amount = $slice->loadCoins();
+        $amount = (string)$slice->loadCoins();
         $sender = $slice->loadAddress()->toString(true, true, null, true);
 
         $comment = null;

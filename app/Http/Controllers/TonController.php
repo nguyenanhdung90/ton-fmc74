@@ -47,7 +47,7 @@ $body = "te6cckEBAgEARAABYnNi0JxUbeTvVNl+jjAbWAgA0eSbt5X7WVegcXDaO+ezYl7FyiJ4B6Y
                 InvalidJettonException::INVALID_JETTON_OPCODE);
         }
         $slice->skipBits(64);
-        $amount = $slice->loadCoins();
+        $amount = (string)$slice->loadCoins();
         $sender = $slice->loadAddress()->toString(true, true, null, true);
         $comment = null;
         $cellForward = $slice->loadMaybeRef();
@@ -64,7 +64,7 @@ $body = "te6cckEBAgEARAABYnNi0JxUbeTvVNl+jjAbWAgA0eSbt5X7WVegcXDaO+ezYl7FyiJ4B6Y
             }
         }
         return [
-            'amount' => (string)$amount,
+            'amount' => (int)$amount,
             'from_address_wallet' => $sender,
             'comment' => $comment,
         ];

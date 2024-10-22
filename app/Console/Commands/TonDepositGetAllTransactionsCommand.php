@@ -29,6 +29,8 @@ class TonDepositGetAllTransactionsCommand extends Command
 
     protected MapperJetMasterByAddressInterface $mapperJetMasterByAddress;
 
+    protected array $params;
+
     /**
      * Create a new command instance.
      *
@@ -41,23 +43,25 @@ class TonDepositGetAllTransactionsCommand extends Command
         parent::__construct();
         $this->tonCenterV2Client = $tonCenterV2Client;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
+        $this->params = [
+            "limit" => null,
+            "address" => config('services.ton.root_ton_wallet'),
+            "lt" => null,
+            "hash" => null
+        ];
     }
 
     public function handle(): int
     {
         $limit = min($this->option('limit'), TransactionHelper::MAX_LIMIT_TRANSACTION);
-        $params = ["limit" => $limit, "address" => config('services.ton.root_ton_wallet')];
-        $lt = $hash = null;
+        Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
-                if ($lt) {
-                    Arr::set($params, 'lt', $lt);
-                    Arr::set($params, 'hash', $hash);
-                }
-                printf("New query: %s \n", json_encode($params));
+                printf("New query: %s \n", json_encode(array_filter($this->params)));
                 sleep(1);
-                $transactions = $this->tonCenterV2Client->getTransactionJsonRPC($params);
+                $transactions = $this->tonCenterV2Client->getTransactionJsonRPC($this->params);
                 $numberTx = $transactions->count();
+                $lt = Arr::get($this->params, 'lt');
                 if (!$lt && !$numberTx) {
                     printf("End, there are no transactions for the first loop \n");
                     break;
@@ -70,17 +74,17 @@ class TonDepositGetAllTransactionsCommand extends Command
                 $sources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
                     return !empty($value);
                 });
-                $mapperSource = $this->mapperJetMasterByAddress->process($sources);
+                $mapperSource = $this->mapperJetMasterByAddress->request($sources);
 
                 printf("Processing %s transactions. \n", $numberTx);
                 foreach ($transactions as $transaction) {
                     InsertDepositTonTransaction::dispatch($transaction, $mapperSource);
                 }
 
-                // reset condition of query
+                // set condition of query
                 $lastTx = $transactions->last();
-                $lt = Arr::get($lastTx, 'transaction_id.lt');
-                $hash = Arr::get($lastTx, 'transaction_id.hash');
+                Arr::set($this->params, 'lt', Arr::get($lastTx, 'transaction_id.lt'));
+                Arr::set($this->params, 'hash', Arr::get($lastTx, 'transaction_id.hash'));
             } catch (\Exception $e) {
                 printf($e->getMessage() . "\n");
                 continue;

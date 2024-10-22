@@ -66,7 +66,7 @@ class TonCenterClient implements TonCenterClientInterface
     {
         $query = [
             "method" => "getTransactions",
-            "params" => array_merge($params, ["archival" => true])
+            "params" => array_merge(array_filter($params), ["archival" => true])
         ];
         $data = $this->jsonRPC($query);
         if (!$data['ok']) {
@@ -78,7 +78,7 @@ class TonCenterClient implements TonCenterClientInterface
     public function getJetWallets(array $params): ?Collection
     {
         try {
-            $uri = $this->baseUri . 'api/v3/jetton/wallets?' . http_build_query($params);
+            $uri = $this->baseUri . 'api/v3/jetton/wallets?' . http_build_query(array_filter($params));
             $response = $this->client->request('GET', $uri);
             if ($response->getStatusCode() !== 200) {
                 return null;
@@ -97,7 +97,7 @@ class TonCenterClient implements TonCenterClientInterface
     public function getJetMasters(array $params): ?Collection
     {
         try {
-            $uri = $this->baseUri . 'api/v3/jetton/masters?' . http_build_query($params);
+            $uri = $this->baseUri . 'api/v3/jetton/masters?' . http_build_query(array_filter($params));
             $response = $this->client->request('GET', $uri);
             if ($response->getStatusCode() !== 200) {
                 return null;

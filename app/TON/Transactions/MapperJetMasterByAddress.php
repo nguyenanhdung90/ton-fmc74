@@ -21,7 +21,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
      * @throws ErrorJettonWalletException
      * @throws ErrorJettonMasterException
      */
-    public function process(Collection $address): Collection
+    public function request(Collection $address): Collection
     {
         $sourceChunks = $address->chunk(TransactionHelper::BATCH_NUMBER_JETTON_WALLET);
         $mapperSource = $this->parseMapperJetWallets($address);
