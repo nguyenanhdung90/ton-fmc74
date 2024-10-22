@@ -12,12 +12,6 @@ class TransactionHelper
 
     const MAX_LIMIT_TRANSACTION = 100;
 
-    public static function toHash(string $data): string
-    {
-        $ll = base64_decode($data);
-        return bin2hex($ll);
-    }
-
     /**
      * @throws \Exception
      */
