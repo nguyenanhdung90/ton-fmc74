@@ -22,16 +22,13 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
             throw new InvalidWithdrawMemoToMemoException('None exist source memo',
                 InvalidWithdrawMemoToMemoException::NONE_EXIST_SOURCE_MEMO);
         }
-
-        if ($amount <= 0) {
+        $decimals = $sourceWalletTonMemo->decimals;
+        $amountUnit = $amount * pow(10, $decimals);
+        if ($amountUnit <= 0) {
             throw new InvalidWithdrawMemoToMemoException('Amount is not less than zero',
                 InvalidWithdrawMemoToMemoException::INVALID_AMOUNT);
         }
-        if ($amount > $sourceWalletTonMemo->amount) {
-            throw new InvalidWithdrawMemoToMemoException('Amount is not enough',
-                InvalidWithdrawMemoToMemoException::AMOUNT_SOURCE_MEMO_NOT_ENOUGH);
-        }
-        $updateSourceAmount = $sourceWalletTonMemo->amount - $amount;
+        $updateSourceAmount = $sourceWalletTonMemo->amount - $amountUnit;
         $destinationWalletTonMemo = WalletTonMemo::where('memo', $toMemo)
             ->where('currency', $currency)->lockForUpdate()
             ->first();
@@ -39,10 +36,13 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
             throw new InvalidWithdrawMemoToMemoException('None exist destination memo',
                 InvalidWithdrawMemoToMemoException::NONE_EXIST_DESTINATION_MEMO);
         }
-        $updateDestinationAmount = $destinationWalletTonMemo->amount + $amount;
-        $decimals = $sourceWalletTonMemo->decimals;
+        if ($amountUnit > $sourceWalletTonMemo->amount) {
+            throw new InvalidWithdrawMemoToMemoException('Amount is not enough',
+                InvalidWithdrawMemoToMemoException::AMOUNT_SOURCE_MEMO_NOT_ENOUGH);
+        }
+        $updateDestinationAmount = $destinationWalletTonMemo->amount + $amountUnit;
         DB::transaction(function () use (
-            $fromMemo, $toMemo, $amount, $currency, $updateSourceAmount,
+            $fromMemo, $toMemo, $amountUnit, $currency, $updateSourceAmount,
             $updateDestinationAmount, $decimals
         ) {
             DB::table('wallet_ton_memos')->where('memo', $fromMemo)->where('currency', $currency)
@@ -54,7 +54,7 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
                 'from_memo' => $fromMemo,
                 'type' => config('services.ton.deposit'),
                 'to_memo' => $toMemo,
-                'amount' => $amount,
+                'amount' => $amountUnit,
                 'decimals' => $decimals,
                 'hash' => TransactionHelper::uniqueTransactionHash(),
                 'currency' => $currency,
@@ -67,7 +67,7 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
             DB::table('wallet_ton_deposits')->insert([
                 "memo" => $toMemo,
                 "currency" => $currency,
-                "amount" => $amount,
+                "amount" => $amountUnit,
                 'decimals' => $decimals,
                 "transaction_id" => $tranId,
                 "created_at" => Carbon::now(),

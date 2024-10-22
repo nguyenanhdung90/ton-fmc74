@@ -20,7 +20,7 @@ class TonController extends Controller
 
     public function withdrawOnlyMemo(Request $request): string
     {
-        $this->withdrawMemoToMemo->transfer('https://t.me/testgiver_ton_bot', 'plus', 0, 'TON');
+        $this->withdrawMemoToMemo->transfer('10', 'Usdt', 1, 'USDT');
         return 'Success';
     }
 

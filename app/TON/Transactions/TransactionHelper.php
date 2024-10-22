@@ -23,7 +23,7 @@ class TransactionHelper
      */
     public static function uniqueTransactionHash(): string
     {
-        $bytes = random_bytes(32);
+        $bytes = random_bytes(22);
         return bin2hex($bytes);
     }
 }
