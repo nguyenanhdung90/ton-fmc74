@@ -2,12 +2,11 @@
 
 namespace App\TON\Transports\Toncenter;
 
+use App\TON\Interop\Address;
 use App\TON\Transports\Toncenter\Exceptions\ClientException;
 use App\TON\Transports\Toncenter\Exceptions\TimeoutException;
 use App\TON\Transports\Toncenter\Exceptions\ValidationException;
-use App\TON\Transports\Toncenter\Models\JsonRpcResponse;
 use App\TON\Transports\Toncenter\Models\TonResponse;
-use App\TON\Interop\Address;
 
 /**
  * Toncenter API client
@@ -53,18 +52,4 @@ interface ToncenterV2Client
      */
     public function sendQuery(array $body): TonResponse;
 
-
-
-    /**
-     * All methods in the API are available through JSON-RPC protocol.
-     *
-     * @param array{method: string, params: array} $params
-     * @return JsonRpcResponse
-     * @link https://toncenter.com/api/v2/#/json%20rpc/jsonrpc_handler_jsonRPC_post
-     *
-     * @throws ValidationException
-     * @throws TimeoutException
-     * @throws ClientException
-     */
-    public function jsonRPC(array $params): JsonRpcResponse;
 }

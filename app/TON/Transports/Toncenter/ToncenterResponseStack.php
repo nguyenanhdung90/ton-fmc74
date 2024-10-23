@@ -40,10 +40,6 @@ class ToncenterResponseStack  extends \SplQueue implements ResponseStack
         foreach ($rawStack as $idx => [$typeName, $value]) {
             switch ($typeName) {
                 case self::TYPE_NUM:
-//                    $data = BigInteger::fromBase(
-//                        str_replace("0x", "", $value),
-//                        16,
-//                    );
                     $this->push([
                         $typeName,
                         BigInteger::fromBase(

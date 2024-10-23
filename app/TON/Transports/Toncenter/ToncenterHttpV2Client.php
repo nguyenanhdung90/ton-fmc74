@@ -84,16 +84,6 @@ class ToncenterHttpV2Client implements ToncenterV2Client
             ->asTonResponse();
     }
 
-
-
-    /**
-     * @inheritDoc
-     */
-    public function jsonRPC(array $params): JsonRpcResponse
-    {
-        return $this->query($params);
-    }
-
     /**
      * @throws ClientException
      */

@@ -33,8 +33,7 @@ class TonCenterClient implements TonCenterClientInterface
 
     public function __construct()
     {
-        $this->baseUri = config('services.ton.is_main') ? config('services.ton.base_uri_ton_center_main') :
-            config('services.ton.base_uri_ton_center_test');
+        $this->baseUri = config('services.ton.is_main') ? self::MAIN_BASE_URI : self::TEST_BASE_URI;
         $this->apiKey = config('services.ton.is_main') ? config('services.ton.api_key_main') :
             config('services.ton.api_key_test');
         $this->client = new Client();
