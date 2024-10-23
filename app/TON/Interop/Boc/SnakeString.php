@@ -8,9 +8,13 @@ class SnakeString
 {
     private const PREFIX = "\00\00\00\00";
 
+    private string $data;
+
     private function __construct(
-        private string $data,
-    ) {}
+        string $data
+    ) {
+        $this->data = $data;
+    }
 
     /**
      * @throws Exceptions\CellException

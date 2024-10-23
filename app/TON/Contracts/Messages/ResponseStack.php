@@ -23,12 +23,12 @@ interface ResponseStack extends \Countable
 
     public function current();
 
-    public function next(): void;
+//    public function next(): void;
 
     public function __serialize(): array;
 
     /**
      * @throws ResponseStackParsingException
      */
-    public function __unserialize(array $data): void;
+    public function __unserialize( $data): void;
 }

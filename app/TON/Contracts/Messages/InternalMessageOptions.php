@@ -7,6 +7,17 @@ use App\TON\Interop\Address;
 
 class InternalMessageOptions
 {
+    public bool $bounce;
+    public Address $dest;
+    public BigInteger $value;
+    public ?Address $src;
+    public ?BigInteger $ihrFee;
+    public ?BigInteger $fwdFee;
+    public ?bool $ihrDisabled;
+    public ?bool $bounced;
+    public ?string $createdLt;
+    public ?string $createdAt;
+
     public function __construct(
         bool $bounce,
         Address $dest,
@@ -18,5 +29,16 @@ class InternalMessageOptions
         ?bool $bounced = null,
         ?string $createdLt = null,
         ?string $createdAt = null
-    ) {}
+    ) {
+        $this->bounce = $bounce;
+        $this->dest = $dest;
+        $this->value = $value;
+        $this->src = $src;
+        $this->ihrFee = $ihrFee;
+        $this->fwdFee = $fwdFee;
+        $this->ihrDisabled = $ihrDisabled;
+        $this->bounced = $bounced;
+        $this->createdLt = $createdLt;
+        $this->createdAt = $createdAt;
+    }
 }

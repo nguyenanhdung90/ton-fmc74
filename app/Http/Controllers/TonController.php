@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\TON\Contracts\Wallets\Transfer;
+use App\TON\Contracts\Wallets\TransferOptions;
+use App\TON\Interop\Address;
+use App\TON\Interop\Units;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\Withdraws\WithdrawMemoToMemoInterface;
 use Http\Client\Common\HttpMethodsClient;
@@ -30,10 +34,7 @@ class TonController extends Controller
         return 'Success';
     }
 
-    /**
-     * @throws \App\TON\Mnemonic\Exceptions\TonMnemonicException
-     */
-    public function parseJetBody(Request $request): array
+    public function parseJetBody(Request $request)
     {
         $httpClient = new HttpMethodsClient(
             Psr18ClientDiscovery::find(),
@@ -52,9 +53,20 @@ class TonController extends Controller
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
         $options = new WalletV4Options($kp->publicKey);
         $wallet = new WalletV4R2($options);
-
         $seqno = (int)$wallet->seqno($tonTransport);
-
-        $ko = 123;
+        $transfer = new TransferOptions($seqno);
+        $extMsg = $wallet->createTransferMessage(
+            [
+                new Transfer(
+                    new Address('0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k'),
+                    Units::toNano("0.011"),
+                    "sa v a",
+                    \App\TON\SendMode::PAY_GAS_SEPARATELY,
+                )
+            ],
+            $transfer
+        );
+        $tonTransport->sendMessage($extMsg, $kp->secretKey);
+        return 1231312;
     }
 }

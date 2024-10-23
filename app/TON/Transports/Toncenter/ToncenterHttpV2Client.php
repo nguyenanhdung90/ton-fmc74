@@ -10,8 +10,10 @@ use App\TON\Transports\Toncenter\Exceptions\TimeoutException;
 use App\TON\Transports\Toncenter\Exceptions\ValidationException;
 use App\TON\Transports\Toncenter\Models\JsonRpcResponse;
 use App\TON\Transports\Toncenter\Models\TonResponse;
+use App\TON\Transports\Toncenter\Responses\UnrecognizedSmcRunResult;
 use App\TON\TypedArrays\Uint8Array;
 use Http\Client\Common\HttpMethodsClientInterface;
+use Illuminate\Support\Arr;
 use Psr\Http\Client\ClientExceptionInterface;
 
 class ToncenterHttpV2Client implements ToncenterV2Client
@@ -25,10 +27,7 @@ class ToncenterHttpV2Client implements ToncenterV2Client
         $this->options = $options;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function runGetMethod($address, string $method, array $stack = [])
+    public function runGetMethod($address, string $method, array $stack = []): object
     {
         $response = $this
             ->query([
@@ -39,8 +38,7 @@ class ToncenterHttpV2Client implements ToncenterV2Client
                     "stack" => $stack,
                 ],
             ]);
-
-        return $response->result;
+        return $this->hydrateResponseModel(UnrecognizedSmcRunResult::class, $response->result);
     }
 
     /**
@@ -252,5 +250,25 @@ class ToncenterHttpV2Client implements ToncenterV2Client
         } catch (\Throwable $t) {}
 
         return [null, null];
+    }
+
+    private function hydrateResponseModel(string $responseClazz, $data): object
+    {
+        try {
+            $reflection = new \ReflectionClass($responseClazz);
+            $reflectionProperties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED);
+            $maps = $reflection->getConstant('MAP_JSON');
+            $instance = new $responseClazz();
+            $proxySetter = function (string $propertyName, $propertyValue) use ($instance) {
+                $instance->{$propertyName} = $propertyValue;
+            };
+            foreach ($reflectionProperties as $reflectionProperty) {
+                $propertyName = $reflectionProperty->name;
+                $val = Arr::get($data, $maps[$propertyName]);
+                $proxySetter->call($instance, $propertyName, $val);
+            }
+            return $instance;
+        } catch (\ReflectionException $e) {
+        }
     }
 }

@@ -8,7 +8,7 @@ use App\TON\Interop\Boc\Exceptions\CellException;
 use App\TON\Contracts\Messages\Exceptions\ResponseStackParsingException;
 use App\TON\Contracts\Messages\ResponseStack;
 
-class ToncenterResponseStack extends \SplQueue implements ResponseStack
+class ToncenterResponseStack  extends \SplQueue implements ResponseStack
 {
     private const TYPE_NUM = "num";
 
@@ -40,6 +40,10 @@ class ToncenterResponseStack extends \SplQueue implements ResponseStack
         foreach ($rawStack as $idx => [$typeName, $value]) {
             switch ($typeName) {
                 case self::TYPE_NUM:
+//                    $data = BigInteger::fromBase(
+//                        str_replace("0x", "", $value),
+//                        16,
+//                    );
                     $this->push([
                         $typeName,
                         BigInteger::fromBase(
@@ -134,19 +138,29 @@ class ToncenterResponseStack extends \SplQueue implements ResponseStack
         $typeName = $entry["@type"];
 
         try {
-            return match ($typeName) {
-                "tvm.list", "tvm.tuple" => array_map(static fn(array $e) => self::parseObject($e), $entry["elements"]),
-                "tvm.cell" => Cell::oneFromBoc($entry["bytes"], true),
-                "tvm.slice" => Cell::oneFromBoc($entry["bytes"], true)->beginParse(),
-                "tvm.stackEntryCell" => self::parseObject($entry["cell"]),
-                "tvm.stackEntryTuple" => self::parseObject($entry["tuple"]),
-                "tvm.stackEntryNumber" => self::parseObject($entry["number"]),
-                "tvm.stackEntrySlice" => self::parseObject($entry["slice"]),
-                "tvm.numberDecimal" => BigInteger::fromBase($entry["number"], 10),
-                default => throw new ResponseStackParsingException(
-                    "Unknown type: " . $typeName,
-                ),
-            };
+            switch ($typeName) {
+                case "tvm.list":
+                case "tvm.tuple":
+                    return array_map(static fn(array $e) => self::parseObject($e), $entry["elements"]);
+                case "tvm.cell":
+                    return Cell::oneFromBoc($entry["bytes"], true);
+                case "tvm.slice":
+                    return Cell::oneFromBoc($entry["bytes"], true)->beginParse();
+                case "tvm.stackEntryCell":
+                    return self::parseObject($entry["cell"]);
+                case "tvm.stackEntryTuple":
+                    return self::parseObject($entry["tuple"]);
+                case "tvm.stackEntryNumber":
+                    return self::parseObject($entry["number"]);
+                case "tvm.stackEntrySlice":
+                    return self::parseObject($entry["slice"]);
+                case "tvm.numberDecimal":
+                    return BigInteger::fromBase($entry["number"], 10);
+                default:
+                    throw new ResponseStackParsingException(
+                        "Unknown type: " . $typeName,
+                    );
+            }
         // @codeCoverageIgnoreStart
         } catch (CellException $e) {
             throw new ResponseStackParsingException(
@@ -162,7 +176,7 @@ class ToncenterResponseStack extends \SplQueue implements ResponseStack
         // @codeCoverageIgnoreEnd
     }
 
-    private function currentInternal(string $type): mixed
+    private function currentInternal(string $type)
     {
         $current = parent::current();
 
@@ -187,7 +201,7 @@ class ToncenterResponseStack extends \SplQueue implements ResponseStack
     /**
      * @throws ResponseStackParsingException
      */
-    public function __unserialize(array $data): void
+    public function __unserialize($data): void
     {
         $rawStack = $data["raw"];
         $this->rawStack = $rawStack;

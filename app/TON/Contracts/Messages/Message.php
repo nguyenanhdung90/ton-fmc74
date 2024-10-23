@@ -14,11 +14,19 @@ abstract class Message
 {
     protected bool $tailSigned = false;
 
+    private Cell $header;
+    private ?Cell $body;
+    private ?Cell $state;
+
     public function __construct(
         Cell $header,
         ?Cell $body = null,
         ?Cell $state = null
-    ) {}
+    ) {
+        $this->header = $header;
+        $this->body = $body;
+        $this->state = $state;
+    }
 
     public function tailSigned(bool $isTailSigned): self
     {

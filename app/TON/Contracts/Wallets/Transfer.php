@@ -4,19 +4,31 @@ namespace App\TON\Contracts\Wallets;
 
 use Brick\Math\BigInteger;
 use App\TON\Interop\Address;
-use App\TON\Interop\Boc\Cell;
-use App\TON\Ton\Contracts\Messages\StateInit;
-use App\TON\Ton\SendMode;
+use App\TON\Contracts\Messages\StateInit;
+use App\TON\SendMode;
 
 class Transfer
 {
+    public Address $dest;
+    public BigInteger $amount;
+    public $payload;
+    public $sendMode;
+    public $stateInit;
+    public $bounce;
+
     public function __construct(
         Address $dest,
         BigInteger $amount,
         $payload = "",
         $sendMode = SendMode::NONE,
         ?StateInit $stateInit = null,
-        bool $bounce = false,
+        bool $bounce = false
     ) {
+        $this->dest = $dest;
+        $this->amount = $amount;
+        $this->payload = $payload;
+        $this->sendMode = $sendMode;
+        $this->stateInit = $stateInit;
+        $this->bounce = $bounce;
     }
 }

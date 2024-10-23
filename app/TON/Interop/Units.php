@@ -17,7 +17,7 @@ class Units
     /**
      * Returns $amount in nano.
      */
-    public static final function toNano(BigNumber|string|int|float $amount, int $decimals = self::DEFAULT): BigInteger
+    public static final function toNano($amount, int $decimals = self::DEFAULT): BigInteger
     {
         return self::toWei(
             BigDecimal::of($amount), str_pad("1", $decimals + 1, "0"),
@@ -27,7 +27,7 @@ class Units
     /**
      * Returns wei value from $amount in nano.
      */
-    public static final function fromNano(BigNumber|string|int $amount, int $decimals = self::DEFAULT): BigNumber
+    public static final function fromNano($amount, int $decimals = self::DEFAULT): BigNumber
     {
         return self::fromWei(
             BigNumber::of($amount)->toScale($decimals), str_pad("1", $decimals + 1, "0"),

@@ -14,19 +14,7 @@ use App\TON\Interop\Address;
  */
 interface ToncenterV2Client
 {
-    /**
-     * Run get method on smart contract.
-     *
-     * @param Address $address Smart contract address
-     * @param string $method Method name
-     * @param string[][] $stack Stack array
-     * @throws \App\TON\Transports\Toncenter\Exceptions\ValidationException
-     * @throws \App\TON\Transports\Toncenter\Exceptions\TimeoutException
-     * @throws \App\TON\Transports\Toncenter\Exceptions\ClientException
-     * @link https://toncenter.com/api/v2/#/run%20method/run_get_method_runGetMethod_post
-     *
-     */
-    public function runGetMethod(Address $address, string $method, array $stack = []);
+    public function runGetMethod(Address $address, string $method, array $stack = []): object;
 
     /**
      * Send serialized boc file: fully packed and serialized external message to blockchain.

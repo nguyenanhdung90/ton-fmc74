@@ -68,7 +68,6 @@ class ToncenterTransport implements Transport
                     $response->exitCode,
                 );
             }
-
             return ToncenterResponseStack::parse($response->stack);
         } catch (TncEx\ClientException | TncEx\TimeoutException | TncEx\ValidationException $e) {
             throw new TransportException(
