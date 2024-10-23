@@ -123,6 +123,7 @@ class ToncenterTransport implements Transport
     public function sendMessage(ExternalMessage $message, Uint8Array $secretKey): void
     {
         try {
+            $de = 12/0;
             $this->send($message->sign($secretKey)->toBoc(false));
         } catch (CellException | MessageException $e) {
             throw new TransportException(

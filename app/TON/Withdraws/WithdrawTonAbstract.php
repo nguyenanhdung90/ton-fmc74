@@ -13,10 +13,8 @@ use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
 
-
 abstract class WithdrawTonAbstract extends WithdrawAbstract
 {
-
     /**
      * @throws WalletException
      * @throws TonMnemonicException
