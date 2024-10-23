@@ -20,5 +20,6 @@ Route::get('/', function () {
 
 Route::get('/withdrawOnlyMemo', [TonController::class, 'withdrawOnlyMemo']);
 Route::get('/withdrawUSDT', [TonController::class, 'withdrawUSDT']);
+Route::get('/withdrawTON', [TonController::class, 'withdrawTON']);
 Route::get('/parseJetBody', [TonController::class, 'parseJetBody']);
 
