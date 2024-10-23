@@ -9,14 +9,28 @@ use App\TON\Interop\Bytes;
 
 class JettonData
 {
+    public BigInteger $totalSupply;
+    public bool $isMutable;
+    public ?Address $adminAddress;
+    public ?string $jettonContentUrl;
+    public ?Cell $jettonContentCell;
+    public ?Cell $jettonWalletCode;
+
     public function __construct(
         BigInteger $totalSupply,
         bool $isMutable,
         ?Address $adminAddress,
         ?string $jettonContentUrl,
         ?Cell $jettonContentCell,
-        ?Cell $jettonWalletCode,
-    ) {}
+        ?Cell $jettonWalletCode
+    ) {
+        $this->totalSupply = $totalSupply;
+        $this->isMutable = $isMutable;
+        $this->adminAddress = $adminAddress;
+        $this->jettonContentUrl = $jettonContentUrl;
+        $this->jettonContentCell = $jettonContentCell;
+        $this->jettonWalletCode = $jettonWalletCode;
+    }
 
     /**
      * @throws \App\TON\Interop\Boc\Exceptions\CellException

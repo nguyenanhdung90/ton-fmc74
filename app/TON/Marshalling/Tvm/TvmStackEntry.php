@@ -6,11 +6,11 @@ abstract class TvmStackEntry
 {
     protected string $type;
 
-    protected mixed $data;
+    protected $data;
 
     public function __construct(
         string $type,
-        mixed $data,
+        $data
     )
     {
         $this->type = $type;
@@ -22,7 +22,7 @@ abstract class TvmStackEntry
         return $this->type;
     }
 
-    public function getData(): mixed
+    public function getData()
     {
         return $this->data;
     }

@@ -29,4 +29,9 @@ class SendMode
     const PAY_GAS_SEPARATELY = 1;
     const IGNORE_ERRORS = 2;
     const NONE = 0;
+
+    public static function combine(array $modes)
+    {
+        return array_sum($modes);
+    }
 }
