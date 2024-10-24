@@ -5,62 +5,31 @@ namespace App\TON\Interop\Boc;
 use Brick\Math\BigInteger;
 use App\TON\Interop\Address;
 
-/**
- * @template K of int|BigInteger|string|Cell
- * @template V of int|BigInteger|bool|string|Cell
- * @phpstan-type BitLike 0|1|bool
- * @phpstan-type KSerializerCallback callable(K, int): BitLike[]
- * @phpstan-type KDeserializerCallback callable(BitLike[], int): K
- * @phpstan-type VSerializerCallback callable(V): Cell
- * @phpstan-type VDeserializerCallback callable(Cell): V
- */
 class DictSerializers
 {
-    /**
-     * @var KSerializerCallback
-     */
     private $keySerializer;
 
     private bool $isDefKeySerializer = false;
 
-    /**
-     * @var KDeserializerCallback
-     */
     private $keyDeserializer;
 
     private bool $isDefKeyDeserializer = false;
 
-    /**
-     * @var VSerializerCallback
-     */
     private $valueSerializer;
 
     private bool $isDefValueSerializer = false;
 
-    /**
-     * @var VDeserializerCallback
-     */
     private $valueDeserializer;
 
     private bool $isDefValueDeserializer = false;
 
     private bool $isCombined = false;
 
-    /**
-     * @param null|KSerializerCallback $keySerializer
-     * @phpstan-param null|KSerializerCallback $keySerializer
-     * @param null|KDeserializerCallback $keyDeserializer
-     * @phpstan-param  null|KDeserializerCallback $keyDeserializer
-     * @param null|VSerializerCallback $valueSerializer
-     * @phpstan-param null|VSerializerCallback $valueSerializer
-     * @param null|VDeserializerCallback $valueDeserializer
-     * @phpstan-param null|VDeserializerCallback $valueDeserializer
-     */
     public final function __construct(
         ?callable $keySerializer = null,
         ?callable $keyDeserializer = null,
         ?callable $valueSerializer = null,
-        ?callable $valueDeserializer = null,
+        ?callable $valueDeserializer = null
     ) {
         $this->keySerializer = $keySerializer ?? static fn ($key) => $key;
         $this->isDefKeySerializer = !$keySerializer;
@@ -114,21 +83,17 @@ class DictSerializers
         return $this;
     }
 
-    /**
-     * @param null|VSerializerCallback $valueSerializer
-     * @param null|VDeserializerCallback $valueDeserializer
-     */
     public final static function uintKey(
         bool $isBigInt = true,
         ?callable $valueSerializer = null,
-        ?callable $valueDeserializer = null,
+        ?callable $valueDeserializer = null
     ): self
     {
         return new self(
-            static fn (int|BigInteger $k, int $keySize): array => BitString::empty()
+            static fn ($k, int $keySize): array => BitString::empty()
                 ->writeUint($k, $keySize)
                 ->toBitsA(),
-            static function (array $k, int $keySize) use ($isBigInt): BigInteger|int {
+            static function (array $k, int $keySize) use ($isBigInt) {
                 $key = (new Builder())
                     ->writeBitArray($k)
                     ->cell()
@@ -142,21 +107,17 @@ class DictSerializers
         );
     }
 
-    /**
-     * @param null|VSerializerCallback $valueSerializer
-     * @param null|VDeserializerCallback $valueDeserializer
-     */
     public final static function intKey(
         bool $isBigInt = true,
         ?callable $valueSerializer = null,
-        ?callable $valueDeserializer = null,
+        ?callable $valueDeserializer = null
     ): self
     {
         return new self(
-            static fn (int|BigInteger $k, int $keySize): array => BitString::empty()
+            static fn ($k, int $keySize): array => BitString::empty()
                 ->writeInt($k, $keySize)
                 ->toBitsA(),
-            static function (array $k, int $keySize) use ($isBigInt): BigInteger|int {
+            static function (array $k, int $keySize) use ($isBigInt) {
                 $key = (new Builder())
                     ->writeBitArray($k)
                     ->cell()
@@ -170,19 +131,20 @@ class DictSerializers
         );
     }
 
-    /**
-     * @param null|VSerializerCallback $valueSerializer
-     * @param null|VDeserializerCallback $valueDeserializer
-     */
     public final static function addressKey(
         ?callable $valueSerializer = null,
-        ?callable $valueDeserializer = null,
+        ?callable $valueDeserializer = null
     ): self
     {
         return new self(
-            static fn (?Address $k, int $keySize): array => $keySize !== 267 ? throw new \InvalidArgumentException() : BitString::empty()
-                ->writeAddress($k)
-                ->toBitsA(),
+            static function (?Address $k, int $keySize): array {
+                if ($keySize !== 267) {
+                    throw new \InvalidArgumentException();
+                }
+                return BitString::empty()
+                    ->writeAddress($k)
+                    ->toBitsA();
+            },
             static function (array $k, int $keySize): Address {
                 return (new Builder())
                     ->writeBitArray($k)
@@ -195,13 +157,9 @@ class DictSerializers
         );
     }
 
-    /**
-     * @param null|VSerializerCallback $valueSerializer
-     * @param null|VDeserializerCallback $valueDeserializer
-     */
     public final static function sha256stringKey(
         ?callable $valueSerializer = null,
-        ?callable $valueDeserializer = null,
+        ?callable $valueDeserializer = null
     ): self
     {
         return new self(
@@ -214,22 +172,18 @@ class DictSerializers
         );
     }
 
-    /**
-     * @param VSerializerCallback|null $keySerializer
-     * @param VDeserializerCallback|null $keyDeserializer
-     */
     public final static function intValue(
         int $intSize,
         bool $isBigInt = true,
         ?callable $keySerializer = null,
-        ?callable $keyDeserializer = null,
+        ?callable $keyDeserializer = null
     ): self
     {
         return new self(
             $keySerializer,
             $keyDeserializer,
-            static fn(int|BigInteger $v): Cell => (new Builder())->writeInt($v, $intSize)->cell(),
-            static function (Cell $v) use($isBigInt, $intSize): int|BigInteger {
+            static fn($v): Cell => (new Builder())->writeInt($v, $intSize)->cell(),
+            static function (Cell $v) use($isBigInt, $intSize) {
                 $value = $v
                     ->beginParse()
                     ->loadInt($intSize);
@@ -239,22 +193,18 @@ class DictSerializers
         );
     }
 
-    /**
-     * @param VSerializerCallback|null $keySerializer
-     * @param VDeserializerCallback|null $keyDeserializer
-     */
     public final static function uintValue(
         int $uintSize,
         bool $isBigInt = true,
         ?callable $keySerializer = null,
-        ?callable $keyDeserializer = null,
+        ?callable $keyDeserializer = null
     ): self
     {
         return new self(
             $keySerializer,
             $keyDeserializer,
-            static fn (int|BigInteger $v): Cell => (new Builder())->writeUint($v, $uintSize)->cell(),
-            static function (Cell $v) use($isBigInt, $uintSize): int|BigInteger {
+            static fn ($v): Cell => (new Builder())->writeUint($v, $uintSize)->cell(),
+            static function (Cell $v) use($isBigInt, $uintSize) {
                 $value = $v
                     ->beginParse()
                     ->loadUint($uintSize);
@@ -266,7 +216,7 @@ class DictSerializers
 
     public final static function snakeStringValue(
         ?callable $keySerializer = null,
-        ?callable $keyDeserializer = null,
+        ?callable $keyDeserializer = null
     ): self
     {
         return new self(
@@ -282,76 +232,44 @@ class DictSerializers
         return self::snakeStringValue()->combine(self::sha256stringKey());
     }
 
-    /**
-     * @return KSerializerCallback
-     * @phpstan-return  KSerializerCallback
-     */
     public final function getKeySerializer(): callable
     {
         return $this->keySerializer;
     }
 
-    /**
-     * @return KDeserializerCallback
-     * @phpstan-return KDeserializerCallback
-     */
     public final function getKeyDeserializer(): callable
     {
         return $this->keyDeserializer;
     }
 
-    /**
-     * @return VSerializerCallback
-     * @phpstan-return VSerializerCallback
-     */
     public final function getValueSerializer(): callable
     {
         return $this->valueSerializer;
     }
 
-    /**
-     * @return VDeserializerCallback
-     * @phpstan-return VDeserializerCallback
-     */
     public final function getValueDeserializer(): callable
     {
         return $this->valueDeserializer;
     }
 
-    /**
-     * @param KSerializerCallback $keySerializer
-     * @phpstan-param KSerializerCallback $keySerializer
-     */
     public final function setKeySerializer(callable $keySerializer): void
     {
         $this->keySerializer = $keySerializer;
         $this->isDefKeySerializer = false;
     }
 
-    /**
-     * @param KDeserializerCallback $keyDeserializer
-     * @phpstan-param KDeserializerCallback $keyDeserializer
-     */
     public final function setKeyDeserializer(callable $keyDeserializer): void
     {
         $this->keyDeserializer = $keyDeserializer;
         $this->isDefKeySerializer = false;
     }
 
-    /**
-     * @param VSerializerCallback $valueSerializer
-     * @phpstan-param  VSerializerCallback $valueSerializer
-     */
     public final function setValueSerializer(callable $valueSerializer): void
     {
         $this->valueSerializer = $valueSerializer;
         $this->isDefValueSerializer = false;
     }
 
-    /**
-     * @param VDeserializerCallback $valueDeserializer
-     * @phpstan-param  VDeserializerCallback $valueDeserializer
-     */
     public final function setValueDeserializer(callable $valueDeserializer): void
     {
         $this->valueDeserializer = $valueDeserializer;

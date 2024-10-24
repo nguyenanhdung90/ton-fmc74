@@ -4,14 +4,28 @@ namespace App\TON\Contracts\Jetton;
 
 class JettonMetadata implements \JsonSerializable
 {
+    public string $name;
+    public string $description;
+    public string $symbol;
+    public ?string $imageData;
+    public int $decimals;
+    public ?string $image;
+
     public function __construct(
         string $name,
         string $description,
         string $symbol,
         ?string $imageData,
         int $decimals = 9,
-        ?string $image = null,
-    ) {}
+        ?string $image = null
+    ) {
+        $this->name = $name;
+        $this->description = $description;
+        $this->symbol = $symbol;
+        $this->imageData = $imageData;
+        $this->decimals = $decimals;
+        $this->image = $image;
+    }
 
     public function jsonSerialize(): array
     {

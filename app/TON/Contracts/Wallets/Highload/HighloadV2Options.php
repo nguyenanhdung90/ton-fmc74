@@ -8,13 +8,15 @@ use App\TON\TypedArrays\Uint8Array;
 
 class HighloadV2Options extends WalletOptions
 {
+    public int $subwalletId;
+
     public function __construct(
         Uint8Array $publicKey,
         int $subwalletId = 0,
         int $workchain = 0,
         ?Address $address = null
-    )
-    {
+    ) {
+        $this->publicKey = $publicKey;
         parent::__construct($publicKey, $workchain, $address);
     }
 }

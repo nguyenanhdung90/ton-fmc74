@@ -2,8 +2,6 @@
 
 namespace App\TON\TypedArrays;
 
-// https://www.khronos.org/registry/typedarray/specs/latest/#7
-
 /**
  * @property-read int length
  */

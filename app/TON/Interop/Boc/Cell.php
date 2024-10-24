@@ -2,7 +2,6 @@
 
 namespace App\TON\Interop\Boc;
 
-use JetBrains\PhpStorm\ArrayShape;
 use App\TON\Interop\Boc\Exceptions\BitStringException;
 use App\TON\Interop\Boc\Exceptions\CellException;
 use App\TON\Interop\Boc\Exceptions\SliceException;
@@ -167,7 +166,7 @@ class Cell
 
         try {
             $tuBits = $this->bits->getTopUppedArray();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new CellException(
                 "Getting data with descriptors error: " . $e->getMessage(),
@@ -175,7 +174,7 @@ class Cell
                 $e
             );
         }
-        // @codeCoverageIgnoreEnd
+
 
         return Bytes::concatBytes(Bytes::concatBytes($d1, $d2), $tuBits);
     }
@@ -251,11 +250,11 @@ class Cell
             $this->_hash = Crypto::sha256($this->getRepr());
 
             return $this->_hash;
-        // @codeCoverageIgnoreStart
+
         } catch (CryptoException $e) {
             throw new CellException("SHA256 digest error: " . $e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -525,7 +524,7 @@ class Cell
      * @throws CellException
      * @noinspection PhpConditionAlreadyCheckedInspection
      */
-/*    #[ArrayShape([
+/*    #[
         "has_idx" => "int",
         "hash_crc32" => "int",
         "has_cache_bits" => "int",
@@ -539,7 +538,7 @@ class Cell
         "root_list" => "int[]",
         "index" => "int[]|false",
         "cells_data" => "Olifanton\\TypedArrays\\Uint8Array",
-    ])]*/
+    ]*/
     private static function parseBocHeader(Uint8Array $serializedBoc): array
     {
         if ($serializedBoc->length < 5) {
@@ -656,10 +655,6 @@ class Cell
     /**
      * @throws CellException|BitStringException|SliceException
      */
-/*    #[ArrayShape([
-        "cell" => "Olifanton\\Boc\\Cell",
-        "residue" => "Olifanton\\TypedArrays\\Uint8Array",
-    ])]*/
     private static function deserializeCellData(Uint8Array $cellData, int $referenceIndexSize): array
     {
         if ($cellData->length < 2) {
@@ -722,10 +717,10 @@ class Cell
     /**
      * @throws CellException
      */
-/*    #[ArrayShape([
+/*    #[
         "topologicalOrderArray" => "array[]", // [0 => <string> cellHash, 1 => <Cell>]
         "indexHashmap" => "array<string, int>"
-    ])]*/
+    ]*/
     private static function treeWalk(Cell    $cell,
                                      array   $topologicalOrderArray,
                                      array   $indexHashmap,

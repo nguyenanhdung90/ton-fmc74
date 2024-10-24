@@ -2,8 +2,6 @@
 
 namespace App\TON\TypedArrays;
 
-// https://www.khronos.org/registry/typedarray/specs/latest/#8
-
 class DataView extends ArrayBufferView
 {
     private static function isMachineLittleEndian(): bool

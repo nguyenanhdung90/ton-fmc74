@@ -25,11 +25,11 @@ class DefaultProvider implements DigestProvider, KeyPairProvider, SignatureProvi
 
         try {
             $digest = hash('sha256', Bytes::arrayToBytes($bytes), true);
-        // @codeCoverageIgnoreStart
+
         } catch (\Throwable $e) {
             throw new CryptoException("Hash error: " . $e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
 
         return Bytes::bytesToArray($digest);
     }
@@ -45,11 +45,11 @@ class DefaultProvider implements DigestProvider, KeyPairProvider, SignatureProvi
             $keyPair = sodium_crypto_sign_seed_keypair(Bytes::arrayToBytes($seed));
 
             return $this->keyPairFromSodium($keyPair);
-        // @codeCoverageIgnoreStart
+
         } catch (\SodiumException $e) {
             throw new CryptoException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -61,11 +61,11 @@ class DefaultProvider implements DigestProvider, KeyPairProvider, SignatureProvi
 
         try {
             return $this->keyPairFromSodium(sodium_crypto_sign_keypair());
-        // @codeCoverageIgnoreStart
+
         } catch (\SodiumException $e) {
             throw new CryptoException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -80,11 +80,11 @@ class DefaultProvider implements DigestProvider, KeyPairProvider, SignatureProvi
             $secretKey = sodium_crypto_sign_secretkey($keyPair);
 
             return Bytes::bytesToArray(substr($secretKey, 0, 32));
-        // @codeCoverageIgnoreStart
+
         } catch (\SodiumException $e) {
             throw new CryptoException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -101,11 +101,11 @@ class DefaultProvider implements DigestProvider, KeyPairProvider, SignatureProvi
                     Bytes::arrayToBytes($secretKey),
                 ),
             );
-        // @codeCoverageIgnoreStart
+
         } catch (\SodiumException $e) {
             throw new CryptoException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -125,15 +125,15 @@ class DefaultProvider implements DigestProvider, KeyPairProvider, SignatureProvi
     private function checkExt(string $ext): void
     {
         if (in_array($ext, $this->ext)) {
-            // @codeCoverageIgnoreStart
+
             return;
-            // @codeCoverageIgnoreEnd
+
         }
 
         if (!extension_loaded($ext)) {
-            // @codeCoverageIgnoreStart
+
             throw new CryptoException("Missing `" . $ext . "` extension");
-            // @codeCoverageIgnoreEnd
+
         }
 
         $this->ext[] = $ext;

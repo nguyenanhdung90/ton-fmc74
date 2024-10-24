@@ -8,10 +8,12 @@ final class LevelMask
 {
     private int $hashIndex;
     private int $hashCount;
+    private int $mask;
 
     public function __construct(
-        private int $mask,
+        int $mask
     ) {
+        $this->mask = $mask;
         $this->hashIndex = self::countSetBits($this->mask);
         $this->hashCount = $this->hashIndex + 1;
     }

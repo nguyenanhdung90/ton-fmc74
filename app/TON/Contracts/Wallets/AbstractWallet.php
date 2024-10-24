@@ -118,7 +118,7 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
                             : $sendMode,
                     );
                 $signingMessage->refs[] = $internalMessage->cell();
-            // @codeCoverageIgnoreStart
+
             } catch (BitStringException|MessageException|ContractException $e) {
                 throw new WalletException(
                     $e->getMessage(),
@@ -126,7 +126,7 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
                     $e,
                 );
             }
-            // @codeCoverageIgnoreEnd
+
         }
 
         try {
@@ -140,7 +140,7 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
                     $seqno === 0 ? $this->getStateInit()->cell() : null,
                 )
             );
-        // @codeCoverageIgnoreStart
+
         } catch (MessageException|ContractException $e) {
             throw new WalletException(
                 $e->getMessage(),
@@ -148,18 +148,18 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
                 $e,
             );
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     public function createSigningMessage(int $seqno): Cell
     {
         try {
             return (new Builder())->writeUint($seqno, 32)->cell();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new WalletException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     public function getPublicKey(): Uint8Array
@@ -171,7 +171,7 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
     {
         try {
             return Bytes::bytesToHexString(self::deserializeCode(static::getHexCodeString())->hash());
-        // @codeCoverageIgnoreStart
+
         } catch (\Throwable $e) {
             throw new WalletException(
                 "Wallet code hash calculation error: " . $e->getMessage(),
@@ -179,7 +179,7 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
                 $e,
             );
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     protected function createCode(): Cell
@@ -199,11 +199,11 @@ abstract class AbstractWallet extends AbstractContract implements Wallet
                 ->writeBytes($this->getPublicKey());
 
             return $cell;
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new WalletException("Wallet data creation error: " . $e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**

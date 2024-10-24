@@ -11,9 +11,9 @@ class JettonMinterOptions extends ContractOptions
     public ?Address $adminAddress;
     public ?string $jettonContentUrl;
     public Cell $jettonWalletCode;
-    public ?Cell $code = null;
-    public ?Address $address = null;
-    public int $workchain = 0;
+    public ?Cell $code;
+    public ?Address $address;
+    public int $workchain;
 
     public function __construct(
         ?Address $adminAddress,

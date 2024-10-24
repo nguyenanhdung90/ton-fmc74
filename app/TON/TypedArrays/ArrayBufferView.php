@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\TON\TypedArrays;
 
-// https://www.khronos.org/registry/typedarray/specs/latest/#6
-
 /**
  * @property-read ArrayBuffer buffer
  * @property-read int byteOffset

@@ -8,12 +8,18 @@ use App\TON\Contracts\ContractOptions;
 
 class JettonWalletOptions extends ContractOptions
 {
+    public ?Cell $code;
+    public int $workchain;
+    public ?Address $address;
+
     public function __construct(
         ?Cell $code = null,
         int $workchain = 0,
         ?Address $address = null
-    )
-    {
+    ) {
+        $this->code = $code;
+        $this->workchain = $workchain;
+        $this->address = $address;
         parent::__construct($workchain, $address);
     }
 }

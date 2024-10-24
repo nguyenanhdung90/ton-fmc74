@@ -2,8 +2,6 @@
 
 namespace App\TON\TypedArrays;
 
-// https://www.khronos.org/registry/typedarray/specs/latest/#7
-
 class Uint16Array extends TypedArray
 {
     const BYTES_PER_ELEMENT = 2;

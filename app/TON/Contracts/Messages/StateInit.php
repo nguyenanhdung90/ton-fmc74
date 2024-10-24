@@ -12,6 +12,7 @@ class StateInit
 {
     public ?Cell $code = null;
     public ?Cell $data = null;
+
     public function __construct(
         ?Cell $code = null,
         ?Cell $data = null
@@ -98,7 +99,7 @@ class StateInit
                 ->writeBit(!!$this->code)
                 ->writeBit(!!$this->data)
                 ->writeBit(0);
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new MessageException(
                 "StateInit serialization error: " . $e->getMessage(),
@@ -106,7 +107,7 @@ class StateInit
                 $e,
             );
         }
-        // @codeCoverageIgnoreEnd
+
 
         if ($this->code) {
             $cell->refs[] = $this->code;

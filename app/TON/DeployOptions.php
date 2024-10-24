@@ -8,9 +8,17 @@ use App\TON\TypedArrays\Uint8Array;
 
 class DeployOptions
 {
+    public Wallet $deployerWallet;
+    public Uint8Array $deployerSecretKey;
+    public BigInteger $storageAmount;
+
     public function __construct(
-         Wallet     $deployerWallet,
-         Uint8Array $deployerSecretKey,
-         BigInteger $storageAmount
-    ) {}
+        Wallet $deployerWallet,
+        Uint8Array $deployerSecretKey,
+        BigInteger $storageAmount
+    ) {
+        $this->deployerSecretKey = $deployerWallet;
+        $this->deployerSecretKey = $deployerSecretKey;
+        $this->storageAmount = $storageAmount;
+    }
 }

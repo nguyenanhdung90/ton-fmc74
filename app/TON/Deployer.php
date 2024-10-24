@@ -200,7 +200,7 @@ class Deployer implements LoggerAwareInterface
         $initCode = $stateInit->code;
         $initData = $stateInit->data;
 
-        // @codeCoverageIgnoreStart
+
         if (is_null($initCode)) {
             throw new DeployerException("Empty init code");
         }
@@ -208,6 +208,6 @@ class Deployer implements LoggerAwareInterface
         if (is_null($initData)) {
             throw new DeployerException("Empty init data");
         }
-        // @codeCoverageIgnoreEnd
+
     }
 }

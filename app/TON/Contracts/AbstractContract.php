@@ -53,11 +53,11 @@ abstract class AbstractContract implements Contract, Deployable
             try {
                 $stateCell = $this->getStateInit()->cell();
                 $this->address = new Address($this->getWc() . ":" . Bytes::bytesToHexString($stateCell->hash()));
-            // @codeCoverageIgnoreStart
+
             } catch (MessageException | CellException $e) {
                 throw new WalletException("Address calculation error: " . $e->getMessage(), $e->getCode(), $e);
             }
-            // @codeCoverageIgnoreEnd
+
         }
 
         return $this->address;
@@ -96,10 +96,10 @@ abstract class AbstractContract implements Contract, Deployable
     {
         try {
             return Cell::oneFromBoc($serializedBoc, $isBase64);
-        // @codeCoverageIgnoreStart
+
         } catch (CellException $e) {
             throw new WalletException("Smartcontract code creation error: " . $e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 }

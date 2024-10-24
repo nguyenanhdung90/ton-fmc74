@@ -7,9 +7,17 @@ use App\TON\Interop\Address;
 
 class BurnOptions
 {
+    public BigInteger $jettonAmount;
+    public ?Address $responseAddress;
+    public int $queryId;
+
     public function __construct(
         BigInteger $jettonAmount,
         ?Address $responseAddress,
-        int $queryId = 0,
-    ) {}
+        int $queryId = 0
+    ) {
+        $this->jettonAmount = $jettonAmount;
+        $this->responseAddress = $responseAddress;
+        $this->queryId = $queryId;
+    }
 }

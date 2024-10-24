@@ -33,11 +33,11 @@ class ExternalOutMessage extends Message
                 ->writeAddress($dest)
                 ->writeUint($createdLt, 64)
                 ->writeUint($createdAt, 32);
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new MessageException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
 
         parent::__construct($header, $body, $state);
     }

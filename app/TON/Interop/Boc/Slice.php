@@ -120,11 +120,9 @@ class Slice
             for ($i = 0; $i < $bitLength; $i++) {
                 $result->writeBit($this->loadBit());
             }
-        // @codeCoverageIgnoreStart
         } catch (BitStringException $e) {
             throw new SliceException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
 
         return $result->getImmutableArray();
     }
@@ -141,11 +139,11 @@ class Slice
             for ($i = 0; $i < $bitLength; $i++) {
                 $result->writeBit($this->get($this->readCursor + $i));
             }
-            // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new SliceException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
 
         return $result->getImmutableArray();
     }
@@ -256,15 +254,15 @@ class Slice
         }
 
         if ($b->toInt() !== 2) {
-            // @codeCoverageIgnoreStart
+
             throw new SliceException("Unsupported address type");
-            // @codeCoverageIgnoreEnd
+
         }
 
         if ($this->loadBit()) {
-            // @codeCoverageIgnoreStart
+
             throw new SliceException("Unsupported address type");
-            // @codeCoverageIgnoreEnd
+
         }
 
         $wc = $this->loadInt(8)->toInt();
@@ -280,15 +278,15 @@ class Slice
     public function loadRef(): Cell
     {
         if ($this->refCursor >= 4) {
-            // @codeCoverageIgnoreStart
+
             throw new SliceException("Refs overflow");
-            // @codeCoverageIgnoreEnd
+
         }
 
         if (!isset($this->refs[$this->refCursor])) {
-            // @codeCoverageIgnoreStart
+
             throw new SliceException("Not found ref");
-            // @codeCoverageIgnoreEnd
+
         }
 
         $result = $this->refs[$this->refCursor];
@@ -406,9 +404,9 @@ class Slice
     private function checkRange(int $n): void
     {
         if (!$this->inRange($n)) {
-            // @codeCoverageIgnoreStart
+
             throw new SliceException("BitString overflow");
-            // @codeCoverageIgnoreEnd
+
         }
     }
 

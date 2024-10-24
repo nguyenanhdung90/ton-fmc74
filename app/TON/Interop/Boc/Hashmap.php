@@ -24,15 +24,17 @@ class Hashmap implements IteratorAggregate
 
     protected DictSerializers $serializers;
 
+    protected int $keySize;
+
     public function __construct(
-        protected int $keySize,
-        ?DictSerializers       $serializers = null,
+        int $keySize,
+        ?DictSerializers $serializers = null
     )
     {
+        $this->keySize = $keySize;
         if ($this->keySize < 1) {
             throw new \InvalidArgumentException();
         }
-
         $this->hashmap = new \ArrayObject();
         $this->serializers = $serializers ?? new DictSerializers();
     }
@@ -333,7 +335,7 @@ class Hashmap implements IteratorAggregate
         $m = count($first);
         $sameBitsIndex = ArrayHelper::arraySearch(
             $first,
-            static fn(int|bool $bit, int $i) => isset($last[$i]) && (int)$bit !== (int)$last[$i],
+            static fn($bit, int $i) => isset($last[$i]) && (int)$bit !== (int)$last[$i],
         );
         $sameBitsLength = $sameBitsIndex === null ? count($first) : $sameBitsIndex;
 
@@ -398,11 +400,11 @@ class Hashmap implements IteratorAggregate
                 ->writeBit(0)
                 ->writeBitArray($bits)
                 ->toBitsA();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -421,11 +423,11 @@ class Hashmap implements IteratorAggregate
                 )
                 ->writeBitArray($bits)
                 ->toBitsA();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -445,11 +447,11 @@ class Hashmap implements IteratorAggregate
                     (int)ceil(log($m + 1, 2)),
                 )
                 ->toBitsA();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -485,7 +487,7 @@ class Hashmap implements IteratorAggregate
                 },
                 [],
             );
-        // @codeCoverageIgnoreStart
+
         } catch (CellException|SliceException $e) {
             throw new HashmapException(
                 $e->getMessage(),
@@ -493,7 +495,7 @@ class Hashmap implements IteratorAggregate
                 $e,
             );
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -512,11 +514,11 @@ class Hashmap implements IteratorAggregate
             }
 
             return self::deserializeLabelSame($edge, $m);
-        // @codeCoverageIgnoreStart
+
         } catch (SliceException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -541,11 +543,11 @@ class Hashmap implements IteratorAggregate
             }
 
             return $result;
-        // @codeCoverageIgnoreStart
+
         } catch (SliceException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -562,11 +564,11 @@ class Hashmap implements IteratorAggregate
             return array_chunk((new BitString(BitHelper::alignBits($length)))
                 ->writeBytes($edge->loadBits($length))
                 ->toBitsA(), $length)[0];
-        // @codeCoverageIgnoreStart
+
         } catch (SliceException|BitStringException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -580,11 +582,11 @@ class Hashmap implements IteratorAggregate
             $length = $edge->loadUint((int)ceil(log($m + 1, 2)))->toInt();
 
             return array_fill(0, $length, $repeated);
-        // @codeCoverageIgnoreStart
+
         } catch (SliceException $e) {
             throw new HashmapException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     protected final function validateKeySize(array $key): void

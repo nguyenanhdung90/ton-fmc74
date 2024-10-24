@@ -89,7 +89,7 @@ abstract class Message
             }
 
             return $message;
-        // @codeCoverageIgnoreStart
+
         } catch (CellException | BitStringException $e) {
             throw new MessageException(
                 "Message parsing error: " . $e->getMessage(),
@@ -97,7 +97,7 @@ abstract class Message
                 $e,
             );
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -123,7 +123,7 @@ abstract class Message
             }
 
             return $message;
-        // @codeCoverageIgnoreStart
+
         } catch (CellException | CryptoException | BitStringException $e) {
             throw new MessageException(
                 "Message signing error: " . $e->getMessage(),
@@ -131,7 +131,7 @@ abstract class Message
                 $e,
             );
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     private static function hasTargetFreeBits(Cell $target, Cell $other): bool

@@ -72,11 +72,11 @@ class JettonWallet extends AbstractContract
                 }
 
             return $body->cell();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new ContractException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -91,11 +91,11 @@ class JettonWallet extends AbstractContract
                 ->writeCoins($options->jettonAmount)
                 ->writeAddress($options->responseAddress)
                 ->cell();
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException $e) {
             throw new ContractException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -128,10 +128,10 @@ class JettonWallet extends AbstractContract
                 $minterAddress,
                 $walletCode
             );
-        // @codeCoverageIgnoreStart
+
         } catch (SliceException|CellException $e) {
             throw new ContractException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 }

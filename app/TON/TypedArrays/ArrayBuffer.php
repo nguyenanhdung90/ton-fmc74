@@ -2,9 +2,6 @@
 
 namespace App\TON\TypedArrays;
 
-// https://www.khronos.org/registry/typedarray/specs/latest/#5
-// Note that Transferable is NOT implemented here, because it isn't useful for
-// PHP
 
 /**
  * @property-read int byteLength

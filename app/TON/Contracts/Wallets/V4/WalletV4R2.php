@@ -55,11 +55,11 @@ class WalletV4R2 extends WalletV4
                     $signingMessage,
                 )
             );
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException|MessageException $e) {
             throw new WalletException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 
     /**
@@ -144,10 +144,10 @@ class WalletV4R2 extends WalletV4
                      $signingMessage,
                 )
             );
-        // @codeCoverageIgnoreStart
+
         } catch (BitStringException|ContractException $e) {
             throw new WalletException($e->getMessage(), $e->getCode(), $e);
         }
-        // @codeCoverageIgnoreEnd
+
     }
 }
