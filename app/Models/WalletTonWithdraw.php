@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WalletTonDeposit extends Model
+class WalletTonWithdraw extends Model
 {
     protected $table = 'wallet_ton_withdraws';
 

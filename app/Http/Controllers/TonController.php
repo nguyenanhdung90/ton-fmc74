@@ -34,7 +34,7 @@ class TonController extends Controller
     public function withdrawTON(Request $request): string
     {
         $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-        $this->withdrawTon->process($destinationAddress, "0.01", 'comment');
+        $this->withdrawTon->process($destinationAddress, "0.11", 'comment');
         return 'success';
     }
 

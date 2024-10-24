@@ -12,6 +12,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
+use Illuminate\Support\Facades\Log;
 
 abstract class WithdrawTonAbstract extends WithdrawAbstract
 {
@@ -38,7 +39,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             ],
             new TransferOptions((int)$wallet->seqno($transport))
         );
-        $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
+        $tonResponse = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
     }
 }
 
