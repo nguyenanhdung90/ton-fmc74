@@ -17,6 +17,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
+use Illuminate\Support\Facades\Log;
 
 abstract class WithdrawUSDTAbstract extends WithdrawAbstract
 {
@@ -69,6 +70,6 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
             )],
             $transfer
         );
-        $transport->sendMessage($extMessage, $kp->secretKey);
+        $tonResponse = $transport->sendMessageReturnHash($extMessage, $kp->secretKey);
     }
 }
