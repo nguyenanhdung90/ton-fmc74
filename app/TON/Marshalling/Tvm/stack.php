@@ -2,8 +2,6 @@
 
 namespace App\TON\Marshalling\Tvm;
 
-use Brick\Math\BigInteger;
-
 if (!function_exists("slice")) {
     function slice(\App\TON\Interop\Boc\Slice $data): Slice
     {

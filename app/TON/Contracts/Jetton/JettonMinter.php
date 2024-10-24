@@ -15,7 +15,6 @@ use App\TON\Contracts\Exceptions\ContractException;
 use App\TON\Exceptions\TransportException;
 use App\TON\Helpers\OffchainHelper;
 use App\TON\Transport;
-use function App\TON\Marshalling\Tvm\slice;
 
 class JettonMinter extends AbstractContract
 {
