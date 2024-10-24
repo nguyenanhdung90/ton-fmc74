@@ -38,7 +38,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             ],
             new TransferOptions((int)$wallet->seqno($transport))
         );
-        $transport->sendMessage($extMsg, $kp->secretKey);
+        $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
     }
 }
 

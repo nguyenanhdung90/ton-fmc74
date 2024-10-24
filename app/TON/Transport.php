@@ -2,6 +2,7 @@
 
 namespace App\TON;
 
+use App\TON\Transports\Toncenter\Models\TonResponse;
 use Brick\Math\BigNumber;
 use App\TON\Interop\Address;
 use App\TON\Interop\Boc\Cell;
@@ -27,7 +28,17 @@ interface Transport
     /**
      * @throws TransportException
      */
+    public function sendReturnHash($boc): TonResponse;
+
+    /**
+     * @throws TransportException
+     */
     public function sendMessage(ExternalMessage $message, Uint8Array $secretKey): void;
+
+    /**
+     * @throws TransportException
+     */
+    public function sendMessageReturnHash(ExternalMessage $message, Uint8Array $secretKey): TonResponse;
 
     /**
      * @throws TransportException

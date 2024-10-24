@@ -2,6 +2,7 @@
 
 namespace App\TON\Transports\Toncenter;
 
+use App\TON\Transports\Toncenter\Models\TonResponse;
 use Brick\Math\BigNumber;
 use App\TON\Interop\Address;
 use App\TON\Interop\Boc\Cell;
@@ -118,12 +119,54 @@ class ToncenterTransport implements Transport
     }
 
     /**
+     * @throws TransportException
+     */
+    public function sendReturnHash($boc): TonResponse
+    {
+        try {
+            return $this
+                ->client
+                ->sendBocReturnHash(
+                    $boc,
+                );
+        } catch (TncEx\ClientException | TncEx\TimeoutException | TncEx\ValidationException $e) {
+            throw new TransportException(
+                sprintf(
+                    "Sending error: %s",
+                    $e->getMessage(),
+                ),
+                0,
+                $e,
+            );
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function sendMessage(ExternalMessage $message, Uint8Array $secretKey): void
     {
         try {
             $this->send($message->sign($secretKey)->toBoc(false));
+        } catch (CellException | MessageException $e) {
+            throw new TransportException(
+                sprintf(
+                    "Message sending error: %s",
+                    $e->getMessage(),
+                ),
+                0,
+                $e,
+            );
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function sendMessageReturnHash(ExternalMessage $message, Uint8Array $secretKey): TonResponse
+    {
+        try {
+            return $this->sendReturnHash($message->sign($secretKey)->toBoc(false));
         } catch (CellException | MessageException $e) {
             throw new TransportException(
                 sprintf(

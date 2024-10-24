@@ -74,9 +74,10 @@ class InsertDepositTonTransaction implements ShouldQueue
             DB::transaction(function () use ($trans) {
                 DB::table('wallet_ton_transactions')->insert($trans);
                 $tranId = DB::getPdo()->lastInsertId();
+                $currency = Arr::get($trans, 'currency');
                 DB::table('wallet_ton_deposits')->insert([
                     "memo" => Arr::get($trans, 'to_memo'),
-                    "currency" => Arr::get($trans, 'currency'),
+                    "currency" => $currency,
                     "amount" => Arr::get($trans, 'amount'),
                     "decimals" => Arr::get($trans, 'decimals'),
                     "transaction_id" => $tranId,
@@ -86,12 +87,26 @@ class InsertDepositTonTransaction implements ShouldQueue
                 if (!empty($trans['to_memo'])) {
                     $walletMemo = DB::table('wallet_ton_memos')
                         ->where('memo', Arr::get($trans, 'to_memo'))
-                        ->where('currency', Arr::get($trans, 'currency'))
+                        ->where('currency', $currency)
                         ->lockForUpdate()
                         ->get(['id', 'memo', 'currency', 'amount'])
                         ->first();
                     if ($walletMemo) {
-                        $updateAmount = $walletMemo->amount + $trans['amount'];
+                        if ($currency === config('services.ton.ton')) {
+                            $updateAmount = $walletMemo->amount + ($trans['amount'] - $trans['total_fees']);
+                        } else {
+                            $updateAmount = $walletMemo->amount + $trans['amount'];
+                            // fee jetton
+                            $walletTonMemo = DB::table('wallet_ton_memos')
+                                ->where('memo', Arr::get($trans, 'to_memo'))
+                                ->where('currency', config('services.ton.ton'))
+                                ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
+                            if ($walletTonMemo && ($walletTonMemo->amount - $trans['total_fees']) > 0) {
+                                $updateFeeTonAmount = $walletTonMemo->amount - $trans['total_fees'];
+                                DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
+                                    ->update(['amount' => $updateFeeTonAmount]);
+                            }
+                        }
                         DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
                             ->update(['amount' => $updateAmount]);
                     }
