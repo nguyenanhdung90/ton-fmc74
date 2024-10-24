@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTonWalletsTable extends Migration
+class CreateWalletTonWithdrawsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,16 @@ class CreateTonWalletsTable extends Migration
      */
     public function up()
     {
-        Schema::create('wallet_ton_memos', function (Blueprint $table) {
+        Schema::create('wallet_ton_withdraws', function (Blueprint $table) {
             $table->id();
-            $table->string('memo', 50);
+            $table->string('to_address_wallet', 66)->nullable();
             $table->string('currency', 20);
             $table->unsignedBigInteger('amount')->default(0);
             $table->unsignedInteger('decimals')->default(0);
-            $table->unique(['memo', 'currency'], 'memo_currency');
+            $table->unsignedBigInteger('transaction_id');
+            $table->foreign('transaction_id')
+                ->references('id')
+                ->on('wallet_ton_transactions');
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ class CreateTonWalletsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ton_wallets');
+        Schema::dropIfExists('wallet_ton_withdraws');
     }
-};
+}

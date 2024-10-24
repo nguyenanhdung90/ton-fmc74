@@ -19,6 +19,7 @@ class CreateWalletTonTransactions extends Migration
             $table->string('from_memo', 50)->nullable();
             $table->enum('type', ['DEPOSIT', 'WITHDRAW']);
             $table->string('to_memo', 50)->nullable();
+            $table->string('to_address_wallet', 66)->nullable();
             $table->string('hash', '44')->index();
             $table->unsignedBigInteger('amount')->default(0);
             $table->unsignedInteger('decimals')->default(0);
