@@ -13,6 +13,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
+use App\TON\Transactions\TransactionHelper;
 use Illuminate\Support\Facades\Log;
 
 abstract class WithdrawTonAbstract extends WithdrawAbstract
@@ -22,7 +23,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
      * @throws TonMnemonicException
      * @throws TransportException
      */
-    public function process(string $fromMemo, string $toAddress, string $transferAmount, string $comment = "")
+    public function process(string $fromMemo, string $toAddress, string $transferAmount, string $toMemo = "")
     {
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();
@@ -34,7 +35,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
                 new Transfer(
                     new Address($toAddress),
                     Units::toNano($transferAmount),
-                    $comment,
+                    $toMemo,
                     SendMode::PAY_GAS_SEPARATELY
                 )
             ],
@@ -42,7 +43,9 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
         );
         $tonResponse = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
 
-        InsertWithdrawTonTransaction::dispatch($tonResponse, $fromMemo, $toAddress, (float)$transferAmount, $comment);
+        InsertWithdrawTonTransaction::dispatch($tonResponse, $fromMemo, $toAddress, (float)$transferAmount,
+            TransactionHelper::TON,
+            $toMemo);
     }
 }
 

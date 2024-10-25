@@ -51,33 +51,36 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                 $withDrawTransactions = DB::table('wallet_ton_transactions')->where('type', config('services.ton.withdraw'))
                     ->whereNull('lt')->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
                 printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
-                foreach ($withDrawTransactions as $tx) {
+                foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(2);
-                    $transactions = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $tx->hash]);
-                    if (!$transactions) {
+                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->hash]);
+                    if (!$txByMessages) {
                         continue;
                     }
-                    $transaction = $transactions->first();
-                    if (!$transaction) {
+                    $txByMessage = $txByMessages->first();
+                    if (!$txByMessage) {
                         continue;
                     }
-                    $feeWithDraw = (int)Arr::get($transaction, 'total_fees', 0) +
-                        (int)Arr::get($transaction, 'out_msgs.0.fwd_fee', 0);
-                    $lt = Arr::get($transaction, 'lt');
-                    $hash = Arr::get($transaction, 'hash');
+
+                    $lt = Arr::get($txByMessage, 'lt');
+                    $hash = Arr::get($txByMessage, 'hash');
                     if (!$lt || !$hash) {
                         return;
                     }
-                    DB::transaction(function () use ($tx, $feeWithDraw, $lt, $hash) {
-                        DB::table('wallet_ton_transactions')->where('id', $tx->id)
+
+                    $feeWithDraw = (int)Arr::get($txByMessage, 'total_fees', 0) +
+                        (int)Arr::get($txByMessage, 'out_msgs.0.fwd_fee', 0);
+
+                    DB::transaction(function () use ($withdrawTx, $feeWithDraw, $lt, $hash) {
+                        DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
                             ->update(['lt' => $lt, 'hash' => $hash, 'total_fees' => $feeWithDraw,
                                 'updated_at' => Carbon::now()]);
-                        if (!empty($tx->from_memo)) {
-                            $walletMemo = DB::table('wallet_ton_memos')->where('memo', $tx->from_memo)
-                                ->where('currency', config('services.ton.ton'))
+                        if (!empty($withdrawTx->from_memo)) {
+                            $walletMemo = DB::table('wallet_ton_memos')->where('memo', $withdrawTx->from_memo)
+                                ->where('currency', TransactionHelper::TON)
                                 ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
                             if ($walletMemo) {
-                                $updateAmount = $walletMemo->amount - ($tx->amount + $feeWithDraw);
+                                $updateAmount = $walletMemo->amount - ($withdrawTx->amount + $feeWithDraw);
                                 if ($updateAmount >= 0) {
                                     DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
                                         ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);

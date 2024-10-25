@@ -3,6 +3,7 @@
 namespace App\TON\Transactions\apiV2;
 
 use App\TON\Transactions\CollectAttributeInterface;
+use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 
 class CollectTransactionAttribute implements CollectAttributeInterface
@@ -18,7 +19,7 @@ class CollectTransactionAttribute implements CollectAttributeInterface
             'to_address_wallet' => config('services.ton.root_ton_wallet'),
             'amount' => null,
             'decimals' => null,
-            'type' => config('services.ton.deposit'),
+            'type' => TransactionHelper::DEPOSIT,
             'currency' => null,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

@@ -24,7 +24,8 @@ class InsertWithdrawTonTransaction implements ShouldQueue
     private string $fromMemo;
     private string $toAddress;
     private float $transferAmount;
-    private string $comment;
+    private float $currency;
+    private string $toMemo;
 
     /**
      * Create a new job instance.
@@ -36,13 +37,15 @@ class InsertWithdrawTonTransaction implements ShouldQueue
         string $fromMemo,
         string $toAddress,
         float $transferAmount,
-        string $comment
+        string $currency,
+        string $toMemo
     ) {
         $this->tonResponse = $tonResponse;
         $this->fromMemo = $fromMemo;
         $this->toAddress = $toAddress;
         $this->transferAmount = $transferAmount;
-        $this->comment = $comment;
+        $this->currency = $currency;
+        $this->toMemo = $toMemo;
     }
 
     /**
@@ -67,11 +70,11 @@ class InsertWithdrawTonTransaction implements ShouldQueue
                 'from_address_wallet' => config('services.ton.root_ton_wallet'),
                 'from_memo' => $this->fromMemo,
                 'type' => config('services.ton.withdraw'),
-                'to_memo' => $this->comment,
+                'to_memo' => $this->toMemo,
                 'to_address_wallet' => $this->toAddress,
                 'hash' => $msgHash,
                 'amount' => (string)Units::toNano($this->transferAmount),
-                'currency' => config('services.ton.ton'),
+                'currency' => $this->currency,
                 'decimals' => TransactionHelper::TON_DECIMALS,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

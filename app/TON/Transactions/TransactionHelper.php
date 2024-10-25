@@ -12,6 +12,16 @@ class TransactionHelper
 
     const MAX_LIMIT_TRANSACTION = 100;
 
+    const TON = 'TON';
+
+    const USDT = 'USDT';
+
+    const DEPOSIT = 'DEPOSIT';
+
+    const WITHDRAW = 'WITHDRAW';
+
+    const JET_OPCODE = '7362d09c';
+
     /**
      * @throws \Exception
      */

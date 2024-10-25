@@ -7,6 +7,7 @@ use App\TON\Transactions\apiV2\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\apiV2\CollectMemoSenderAmountAttribute;
 use App\TON\Transactions\apiV2\CollectTotalFeesAttribute;
 use App\TON\Transactions\apiV2\CollectTransactionAttribute;
+use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -81,14 +82,14 @@ class InsertDepositTonTransaction implements ShouldQueue
                         ->get(['id', 'memo', 'currency', 'amount'])
                         ->first();
                     if ($walletMemo) {
-                        if ($currency === config('services.ton.ton')) {
+                        if ($currency === TransactionHelper::TON) {
                             $updateAmount = $walletMemo->amount + ($trans['amount'] - $trans['total_fees']);
                         } else {
                             $updateAmount = $walletMemo->amount + $trans['amount'];
                             // fee jetton
                             $walletTonMemo = DB::table('wallet_ton_memos')
                                 ->where('memo', Arr::get($trans, 'to_memo'))
-                                ->where('currency', config('services.ton.ton'))
+                                ->where('currency', TransactionHelper::TON)
                                 ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
                             if ($walletTonMemo && ($walletTonMemo->amount - $trans['total_fees']) > 0) {
                                 $updateFeeTonAmount = $walletTonMemo->amount - $trans['total_fees'];

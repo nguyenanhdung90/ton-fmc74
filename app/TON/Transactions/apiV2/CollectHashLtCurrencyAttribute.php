@@ -3,6 +3,7 @@
 namespace App\TON\Transactions\apiV2;
 
 use App\TON\Transactions\CollectAttribute;
+use App\TON\Transactions\TransactionHelper;
 use Illuminate\Support\Arr;
 
 class CollectHashLtCurrencyAttribute extends CollectAttribute
@@ -14,7 +15,7 @@ class CollectHashLtCurrencyAttribute extends CollectAttribute
         $trans = array(
             'hash' => Arr::get($data, 'transaction_id.hash'),
             'lt' => Arr::get($data, 'transaction_id.lt'),
-            'currency' => $symbol ?: config('services.ton.ton'),
+            'currency' => $symbol ?: TransactionHelper::TON,
         );
         return array_merge($parentTrans, $trans);
     }

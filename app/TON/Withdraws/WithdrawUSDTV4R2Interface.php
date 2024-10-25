@@ -4,5 +4,5 @@ namespace App\TON\Withdraws;
 
 interface WithdrawUSDTV4R2Interface
 {
-    public function process(string $destAddress, string $usdtAmount, string $comment = "");
+    public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "");
 }

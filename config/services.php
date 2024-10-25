@@ -37,9 +37,5 @@ return [
         'root_usdt_test' => env('ROOT_USDT_TEST'),
         'root_usdt_main' => env('ROOT_USDT_MAIN'),
         'ton_mnemonic' => env('TON_MNEMONIC'),
-        'ton' => 'TON',
-        'deposit' => 'DEPOSIT',
-        'withdraw' => 'WITHDRAW',
-        'jetton_opcode' => '7362d09c',
     ]
 ];

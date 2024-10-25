@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\InsertWithdrawTonTransaction;
-use App\TON\Interop\Units;
-use App\TON\Transports\Toncenter\Models\TonResponse;
 use App\TON\Withdraws\WithdrawMemoToMemoInterface;
 use App\TON\Withdraws\WithdrawTonV4R2Interface;
 use App\TON\Withdraws\WithdrawUSDTV4R2Interface;
@@ -47,9 +44,13 @@ class TonController extends Controller
 
     public function withdrawUSDTExample(Request $request): string
     {
-        $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-        $this->withdrawUSDT->process($destinationAddress, "0.3", 'plus usdt');
-        return 'success';
+        try {
+            $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
+            $this->withdrawUSDT->process('memo', $destinationAddress, "0.00193", 'plus usdt');
+            return 'success';
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
 
     public function parseJetBody(): int

@@ -52,7 +52,7 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
             DB::table('wallet_ton_transactions')->insert([
                 'from_address_wallet' => null,
                 'from_memo' => $fromMemo,
-                'type' => config('services.ton.deposit'),
+                'type' => TransactionHelper::WITHDRAW,
                 'to_memo' => $toMemo,
                 'amount' => $amountUnit,
                 'decimals' => $decimals,

@@ -2,6 +2,7 @@
 
 namespace App\TON\Withdraws;
 
+use App\Jobs\InsertWithdrawTonTransaction;
 use App\TON\Contracts\Exceptions\ContractException;
 use App\TON\Contracts\Jetton\JettonMinter;
 use App\TON\Contracts\Jetton\JettonWallet;
@@ -17,7 +18,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
-use Illuminate\Support\Facades\Log;
+use App\TON\Transactions\TransactionHelper;
 
 abstract class WithdrawUSDTAbstract extends WithdrawAbstract
 {
@@ -34,7 +35,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
      * @throws ContractException
      * @throws TransportException
      */
-    public function process(string $destAddress, string $usdtAmount, string $comment = "")
+    public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "")
     {
         $phrases = config('services.ton.ton_mnemonic');
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
@@ -57,11 +58,11 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
                 Units::toNano("0.1"),
                 $usdtWallet->createTransferBody(
                     new TransferJettonOptions(
-                        Units::toNano($usdtAmount, Units::USDt),
+                        Units::toNano($transferAmount, Units::USDt),
                         new Address($destAddress),
                         $walletAddress,
                         0,
-                        SnakeString::fromString($comment)->cell(true),
+                        SnakeString::fromString($toMemo)->cell(true),
                         Units::toNano("0.0000001")
                     )
                 ),
@@ -71,5 +72,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
             $transfer
         );
         $tonResponse = $transport->sendMessageReturnHash($extMessage, $kp->secretKey);
+        InsertWithdrawTonTransaction::dispatch($tonResponse, $fromMemo, $destAddress, (float)$transferAmount,
+            TransactionHelper::USDT, $toMemo);
     }
 }
