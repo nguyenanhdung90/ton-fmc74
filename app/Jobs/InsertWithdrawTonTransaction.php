@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Units;
 use App\TON\Transactions\TransactionHelper;
 use App\TON\Transports\Toncenter\Models\TonResponse;
@@ -53,7 +52,7 @@ class InsertWithdrawTonTransaction implements ShouldQueue
      *
      * @return void
      */
-    public function handle(TonCenterClientInterface $tonCenterClient)
+    public function handle()
     {
         try {
             if (!$this->tonResponse->ok) {
