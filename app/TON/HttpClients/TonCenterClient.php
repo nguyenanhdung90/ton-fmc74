@@ -116,7 +116,6 @@ class TonCenterClient implements TonCenterClientInterface
     {
         try {
             $uri = $this->baseUri . 'api/v3/transactionsByMessage?' . http_build_query(array_filter($params));
-            Log::info($uri);
             $response = $this->client->request('GET', $uri);
             if ($response->getStatusCode() !== 200) {
                 return null;
