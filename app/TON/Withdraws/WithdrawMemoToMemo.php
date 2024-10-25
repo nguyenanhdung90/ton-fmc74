@@ -63,16 +63,6 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
                 "created_at" => Carbon::now(),
                 "updated_at" => Carbon::now(),
             ]);
-            $tranId = DB::getPdo()->lastInsertId();
-            DB::table('wallet_ton_deposits')->insert([
-                "memo" => $toMemo,
-                "currency" => $currency,
-                "amount" => $amountUnit,
-                'decimals' => $decimals,
-                "transaction_id" => $tranId,
-                "created_at" => Carbon::now(),
-                "updated_at" => Carbon::now(),
-            ]);
         }, 5);
     }
 }

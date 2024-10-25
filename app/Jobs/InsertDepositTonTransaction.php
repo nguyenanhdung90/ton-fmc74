@@ -73,17 +73,7 @@ class InsertDepositTonTransaction implements ShouldQueue
 
             DB::transaction(function () use ($trans) {
                 DB::table('wallet_ton_transactions')->insert($trans);
-                $tranId = DB::getPdo()->lastInsertId();
                 $currency = Arr::get($trans, 'currency');
-                DB::table('wallet_ton_deposits')->insert([
-                    "memo" => Arr::get($trans, 'to_memo'),
-                    "currency" => $currency,
-                    "amount" => Arr::get($trans, 'amount'),
-                    "decimals" => Arr::get($trans, 'decimals'),
-                    "transaction_id" => $tranId,
-                    "created_at" => Carbon::now(),
-                    "updated_at" => Carbon::now(),
-                ]);
                 if (!empty($trans['to_memo'])) {
                     $walletMemo = DB::table('wallet_ton_memos')
                         ->where('memo', Arr::get($trans, 'to_memo'))
