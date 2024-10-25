@@ -25,7 +25,7 @@ class CreateWalletTonTransactions extends Migration
             $table->unsignedInteger('decimals')->default(0);
             $table->string('currency', 20);
             $table->unsignedBigInteger('total_fees')->default(0);
-            $table->unsignedBigInteger('lt');
+            $table->unsignedBigInteger('lt')->nullable();
             $table->timestamps();
         });
     }

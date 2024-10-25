@@ -2,6 +2,7 @@
 
 namespace App\TON\Withdraws;
 
+use App\Jobs\InsertWithdrawTonTransaction;
 use App\TON\Contracts\Wallets\Exceptions\WalletException;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
@@ -21,7 +22,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
      * @throws TonMnemonicException
      * @throws TransportException
      */
-    public function process(string $toAddress, string $tonAmount, string $comment = "")
+    public function process(string $fromMemo, string $toAddress, string $transferAmount, string $comment = "")
     {
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();
@@ -31,15 +32,17 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
         $extMsg = $wallet->createTransferMessage(
             [
                 new Transfer(
-                     new Address($toAddress),
-                     Units::toNano($tonAmount),
-                     $comment,
+                    new Address($toAddress),
+                    Units::toNano($transferAmount),
+                    $comment,
                     SendMode::PAY_GAS_SEPARATELY
                 )
             ],
             new TransferOptions((int)$wallet->seqno($transport))
         );
         $tonResponse = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
+
+        InsertWithdrawTonTransaction::dispatch($tonResponse, $fromMemo, $toAddress, (float)$transferAmount, $comment);
     }
 }
 

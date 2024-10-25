@@ -111,4 +111,24 @@ class TonCenterClient implements TonCenterClientInterface
             return null;
         }
     }
+
+    public function getTransactionsByMessage(array $params): ?Collection
+    {
+        try {
+            $uri = $this->baseUri . 'api/v3/transactionsByMessage?' . http_build_query(array_filter($params));
+            Log::info($uri);
+            $response = $this->client->request('GET', $uri);
+            if ($response->getStatusCode() !== 200) {
+                return null;
+            }
+            $content = $response->getBody()->getContents();
+            $result = json_decode($content, true);
+            $transactions = Arr::get($result, 'transactions', []);
+            return collect($transactions);
+        } catch (GuzzleException $e) {
+            Log::error('Caught exception getTransactionsByMessage: ' . $e->getMessage());
+            printf("Caught exception getTransactionsByMessage: %s \n", $e->getMessage());
+            return null;
+        }
+    }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\InsertWithdrawTonTransaction;
+use App\TON\Interop\Units;
+use App\TON\Transports\Toncenter\Models\TonResponse;
 use App\TON\Withdraws\WithdrawMemoToMemoInterface;
 use App\TON\Withdraws\WithdrawTonV4R2Interface;
 use App\TON\Withdraws\WithdrawUSDTV4R2Interface;
@@ -31,17 +34,30 @@ class TonController extends Controller
         return 'Success';
     }
 
-    public function withdrawTON(Request $request): string
+    public function withdrawTONExample(Request $request): string
     {
-        $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-        $this->withdrawTon->process($destinationAddress, "0.11", 'comment');
-        return 'success';
+        try {
+            $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
+            $this->withdrawTon->process('memo', $destinationAddress, "0.01", 'comment');
+            return 'success';
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
 
-    public function withdrawUSDT(Request $request): string
+    public function withdrawUSDTExample(Request $request): string
     {
         $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
         $this->withdrawUSDT->process($destinationAddress, "0.3", 'plus usdt');
         return 'success';
+    }
+
+    public function parseJetBody(): int
+    {
+//        $result = ['hash' => 'u9UhGM1MK5zBiGjM2aUYrpRD/fW6+uUmmxVj/iF4ur4='];
+//        $tonResponse = new TonResponse(true, $result, '', 1);
+//        $d = (string)Units::toNano('0.00000011');
+//        InsertWithdrawTonTransaction::dispatch($tonResponse, 'fff', 'ddgvcbre', 0.4534, 'fghcvbcvbc');
+//        return 123;
     }
 }

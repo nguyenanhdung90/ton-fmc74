@@ -7,7 +7,6 @@ use App\TON\Transactions\apiV2\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\apiV2\CollectMemoSenderAmountAttribute;
 use App\TON\Transactions\apiV2\CollectTotalFeesAttribute;
 use App\TON\Transactions\apiV2\CollectTransactionAttribute;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
