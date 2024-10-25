@@ -25,7 +25,7 @@ class TonController extends Controller
         $this->withdrawUSDT = $withdrawUSDT;
     }
 
-    public function withdrawOnlyMemo(Request $request): string
+    public function withdrawInternalVirtualCurrencyExchange(Request $request): string
     {
         $this->withdrawMemoToMemo->transfer('10', 'Usdt', 1, 'USDT');
         return 'Success';
@@ -41,7 +41,7 @@ class TonController extends Controller
     public function withdrawUSDT(Request $request): string
     {
         $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-        $this->withdrawUSDT->process($destinationAddress, "0.217", 'plus usdt');
+        $this->withdrawUSDT->process($destinationAddress, "0.3", 'plus usdt');
         return 'success';
     }
 }

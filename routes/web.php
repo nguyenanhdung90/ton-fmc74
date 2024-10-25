@@ -18,7 +18,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/withdrawOnlyMemo', [TonController::class, 'withdrawOnlyMemo']);
+Route::get('/withdrawInternalVirtualCurrencyExchange', [TonController::class, 'withdrawInternalVirtualCurrencyExchange']);
 Route::get('/withdrawUSDT', [TonController::class, 'withdrawUSDT']);
 Route::get('/withdrawTON', [TonController::class, 'withdrawTON']);
 Route::get('/parseJetBody', [TonController::class, 'parseJetBody']);
