@@ -6,12 +6,13 @@ use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class TonPeriodicWithdrawJettonTransactionsCommand extends Command
 {
     /**
-     * The name and signature of the console command.
+     * php artisan ton:periodic_withdraw_jetton
      *
      * @var string
      */
@@ -49,14 +50,89 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', '!=', TransactionHelper::TON)
                     ->whereDate('created_at', '<=', Carbon::now()->subSeconds(5))
-                    ->whereNull('lt')->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
+                    ->whereNull('lt')->whereNotNull('in_msg_hash')
+                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
                 printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
-                    sleep(2);
-                    $msgHash = $withdrawTx->hash;
+                    sleep(1);
+                    $txByMessageList = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
+                    if (!$txByMessageList) {
+                        printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);
+                        continue;
+                    }
+
+                    $txMsg = $txByMessageList->first();
+                    if (!$txMsg) {
+                        printf("Empty transactions \n");
+                        continue;
+                    }
+                    $lt = Arr::get($txMsg, 'lt');
+                    $hash = Arr::get($txMsg, 'hash');
+                    if (!$lt || !$hash) {
+                        return Command::SUCCESS;
+                    }
+                    // start calculate fee
+                    $outAmountOfJetton = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')
+                        + Arr::get($txMsg, 'out_msgs.0.value');
+
+                    $params = [
+                        "account" => config('services.ton.root_ton_wallet'),
+                        "sort" => "asc", "limit" => 2, "start_lt" => Arr::get($txMsg, 'lt'),
+                    ];
+                    sleep(1);
+                    $transactionList = $tonCenterClient->getTransactionsBy($params);
+
+                    if (!$transactionList) {
+                        printf("Can not get excess transactions with msg hash \n");
+                        continue;
+                    }
+                    $nextTransactions = $transactionList->last();
+                    if (!$nextTransactions) {
+                        printf("Empty excess transactions \n");
+                        continue;
+                    }
+                    $inAmountExcess = Arr::get($nextTransactions, 'in_msg.value') -
+                        Arr::get($nextTransactions, 'total_fees');
+                    $feeJet = $outAmountOfJetton - $inAmountExcess;
+                    if ($feeJet <= 0) {
+                        printf("Wrong calculation fee jetton \n");
+                        continue;
+                    }
+                    // end calculate fee
+
+                    DB::transaction(function () use ($withdrawTx, $feeJet, $lt, $hash) {
+                        DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
+                            ->update(['lt' => $lt, 'hash' => $hash, 'total_fees' => $feeJet,
+                                'updated_at' => Carbon::now()]);
+                        if (!empty($withdrawTx->from_memo)) {
+                            $walletTonMemo = DB::table('wallet_ton_memos')
+                                ->where('memo', $withdrawTx->from_memo)
+                                ->where('currency', TransactionHelper::TON)
+                                ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
+                            if ($walletTonMemo) {
+                                $updateAmount = $walletTonMemo->amount - $feeJet;
+                                if ($updateAmount >= 0) {
+                                    DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
+                                        ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
+                                }
+                            }
+
+                            $walletJettonMemo = DB::table('wallet_ton_memos')
+                                ->where('memo', $withdrawTx->from_memo)
+                                ->where('currency', $withdrawTx->currency)
+                                ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
+                            if ($walletJettonMemo) {
+                                $updateJettonAmount = $walletJettonMemo->amount - $withdrawTx->amount;
+                                if ($updateJettonAmount >= 0) {
+                                    DB::table('wallet_ton_memos')->where('id', $walletJettonMemo->id)
+                                        ->update(['amount' => $updateJettonAmount, 'updated_at' => Carbon::now()]);
+                                }
+                            }
+                        }
+                    }, 5);
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw jetton: " . $e->getMessage());

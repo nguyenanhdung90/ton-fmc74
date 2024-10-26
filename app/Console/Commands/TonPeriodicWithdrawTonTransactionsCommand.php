@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Interop\Units;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -25,7 +23,7 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'periodic sync withdraw transaction only for Ton';
+    protected $description = 'periodic sync withdraw transaction and wallet memo only for Ton';
 
     /**
      * Create a new command instance.
@@ -53,17 +51,17 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', TransactionHelper::TON)
                     ->whereDate('created_at', '<=', Carbon::now()->subSeconds(5))
-                    ->whereNull('lt')->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
+                    ->whereNull('lt')->whereNotNull('in_msg_hash')
+                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
                 printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(2);
-                    $msgHash = $withdrawTx->hash;
-                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $msgHash]);
+                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
                     if (!$txByMessages) {
-                        printf("Can not get transactions with msg hash: \n", $msgHash);
+                        printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);
                         continue;
                     }
                     $txByMessage = $txByMessages->first();

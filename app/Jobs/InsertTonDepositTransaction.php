@@ -86,7 +86,7 @@ class InsertTonDepositTransaction implements ShouldQueue
                             $updateAmount = $walletMemo->amount + ($trans['amount'] - $trans['total_fees']);
                         } else {
                             $updateAmount = $walletMemo->amount + $trans['amount'];
-                            // fee jetton
+                            // process fee for jetton
                             $walletTonMemo = DB::table('wallet_ton_memos')
                                 ->where('memo', Arr::get($trans, 'to_memo'))
                                 ->where('currency', TransactionHelper::TON)

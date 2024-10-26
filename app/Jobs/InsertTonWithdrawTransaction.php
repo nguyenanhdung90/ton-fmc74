@@ -23,7 +23,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
     private string $fromMemo;
     private string $toAddress;
     private float $transferAmount;
-    private float $currency;
+    private string $currency;
     private int $decimals;
     private string $toMemo;
 
@@ -74,7 +74,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
                 'type' => TransactionHelper::WITHDRAW,
                 'to_memo' => $this->toMemo,
                 'to_address_wallet' => $this->toAddress,
-                'hash' => $msgHash,
+                'in_msg_hash' => $msgHash,
                 'amount' => (string)Units::toNano($this->transferAmount),
                 'currency' => $this->currency,
                 'decimals' => $this->decimals,
