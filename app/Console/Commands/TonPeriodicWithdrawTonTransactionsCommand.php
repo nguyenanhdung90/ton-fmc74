@@ -45,12 +45,12 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
     {
         while (true) {
             try {
-                printf("Period transaction withdraw ton query every 5s ...\n");
-                sleep(5);
+                printf("Period transaction withdraw ton query every 20s ...\n");
+                sleep(20);
                 $withDrawTransactions = DB::table('wallet_ton_transactions')
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', TransactionHelper::TON)
-                    ->whereDate('created_at', '<=', Carbon::now()->subSeconds(5))
+                    ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
                     ->whereNull('lt')->whereNotNull('in_msg_hash')
                     ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
                 if (!$withDrawTransactions->count()) {
@@ -58,7 +58,7 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                 }
                 printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
-                    sleep(2);
+                    sleep(1);
                     $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
                     if (!$txByMessages) {
                         printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);

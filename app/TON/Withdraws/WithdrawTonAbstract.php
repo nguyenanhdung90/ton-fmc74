@@ -47,9 +47,9 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             $tonResponse,
             $fromMemo,
             $toAddress,
-            (float)$transferAmount,
+            (string)Units::toNano($transferAmount, Units::DEFAULT),
             TransactionHelper::TON,
-            TransactionHelper::USDT_DECIMALS,
+            Units::DEFAULT,
             $toMemo
         );
     }

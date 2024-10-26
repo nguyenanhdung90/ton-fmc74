@@ -36,7 +36,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
         TonResponse $tonResponse,
         string $fromMemo,
         string $toAddress,
-        float $transferAmount,
+        int $transferAmount,
         string $currency,
         int $decimals,
         string $toMemo
@@ -75,7 +75,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
                 'to_memo' => $this->toMemo,
                 'to_address_wallet' => $this->toAddress,
                 'in_msg_hash' => $msgHash,
-                'amount' => (string)Units::toNano($this->transferAmount),
+                'amount' => $this->transferAmount,
                 'currency' => $this->currency,
                 'decimals' => $this->decimals,
                 'created_at' => Carbon::now(),

@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TonPeriodicWithdrawJettonTransactionsCommand extends Command
 {
@@ -44,13 +45,14 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
     {
         while (true) {
             try {
-                printf("Period transaction withdraw jetton query every 5s ...\n");
-                sleep(5);
+                printf("Period transaction withdraw jetton query every 20 ...\n");
+                sleep(20);
                 $withDrawTransactions = DB::table('wallet_ton_transactions')
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', '!=', TransactionHelper::TON)
-                    ->whereDate('created_at', '<=', Carbon::now()->subSeconds(5))
-                    ->whereNull('lt')->whereNotNull('in_msg_hash')
+                    ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
+                    ->whereNull('lt')
+                    ->whereNotNull('in_msg_hash')
                     ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
                 if (!$withDrawTransactions->count()) {
                     continue;
@@ -60,13 +62,13 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                     sleep(1);
                     $txByMessageList = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
                     if (!$txByMessageList) {
-                        printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);
+                        //printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);
                         continue;
                     }
 
                     $txMsg = $txByMessageList->first();
                     if (!$txMsg) {
-                        printf("Empty transactions \n");
+                        //printf("Empty transactions \n");
                         continue;
                     }
                     $lt = Arr::get($txMsg, 'lt');
@@ -86,19 +88,28 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                     $transactionList = $tonCenterClient->getTransactionsBy($params);
 
                     if (!$transactionList) {
-                        printf("Can not get excess transactions with msg hash \n");
+                        //printf("Can not get excess transactions with msg hash \n");
+                        continue;
+                    }
+                    if ($transactionList->count() !== 2) {
+                        //printf("Empty response the next transaction excess \n");
                         continue;
                     }
                     $nextTransactions = $transactionList->last();
                     if (!$nextTransactions) {
-                        printf("Empty excess transactions \n");
+                        //printf("Empty excess transactions \n");
+                        continue;
+                    }
+                    if (Arr::get($nextTransactions, 'prev_trans_hash') !== $hash) {
+                        //printf("Wrong the next excess transactions \n");
                         continue;
                     }
                     $inAmountExcess = Arr::get($nextTransactions, 'in_msg.value') -
                         Arr::get($nextTransactions, 'total_fees');
+
                     $feeJet = $outAmountOfJetton - $inAmountExcess;
                     if ($feeJet <= 0) {
-                        printf("Wrong calculation fee jetton \n");
+                        //printf("Wrong calculation fee jetton \n");
                         continue;
                     }
                     // end calculate fee
