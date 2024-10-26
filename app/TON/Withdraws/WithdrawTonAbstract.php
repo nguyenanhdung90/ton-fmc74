@@ -2,7 +2,7 @@
 
 namespace App\TON\Withdraws;
 
-use App\Jobs\InsertWithdrawTonTransaction;
+use App\Jobs\InsertTonWithdrawTransaction;
 use App\TON\Contracts\Wallets\Exceptions\WalletException;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
@@ -43,9 +43,15 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
         );
         $tonResponse = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
 
-        InsertWithdrawTonTransaction::dispatch($tonResponse, $fromMemo, $toAddress, (float)$transferAmount,
+        InsertTonWithdrawTransaction::dispatch(
+            $tonResponse,
+            $fromMemo,
+            $toAddress,
+            (float)$transferAmount,
             TransactionHelper::TON,
-            $toMemo);
+            TransactionHelper::USDT_DECIMALS,
+            $toMemo
+        );
     }
 }
 

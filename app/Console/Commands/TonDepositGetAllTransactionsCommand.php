@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\InsertDepositTonTransaction;
+use App\Jobs\InsertTonDepositTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
@@ -78,7 +78,7 @@ class TonDepositGetAllTransactionsCommand extends Command
 
                 printf("Processing %s transactions. \n", $numberTx);
                 foreach ($transactions as $transaction) {
-                    InsertDepositTonTransaction::dispatch($transaction, $mapperSource);
+                    InsertTonDepositTransaction::dispatch($transaction, $mapperSource);
                 }
 
                 // set condition of query

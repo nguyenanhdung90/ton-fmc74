@@ -25,7 +25,7 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'periodic sync withdraw transaction only for Ton';
 
     /**
      * Create a new command instance.
@@ -40,21 +40,30 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
     /**
      * Execute the console command.
      *
+     * @param TonCenterClientInterface $tonCenterClient
      * @return int
      */
-    public function handle(TonCenterClientInterface $tonCenterClient)
+    public function handle(TonCenterClientInterface $tonCenterClient): int
     {
         while (true) {
             try {
                 printf("Period transaction withdraw ton query every 5s ...\n");
                 sleep(5);
-                $withDrawTransactions = DB::table('wallet_ton_transactions')->where('type', config('services.ton.withdraw'))
+                $withDrawTransactions = DB::table('wallet_ton_transactions')
+                    ->where('type', TransactionHelper::WITHDRAW)
+                    ->where('currency', TransactionHelper::TON)
+                    ->whereDate('created_at', '<=', Carbon::now()->subSeconds(5))
                     ->whereNull('lt')->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
+                if (!$withDrawTransactions->count()) {
+                    continue;
+                }
                 printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(2);
-                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->hash]);
+                    $msgHash = $withdrawTx->hash;
+                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $msgHash]);
                     if (!$txByMessages) {
+                        printf("Can not get transactions with msg hash: \n", $msgHash);
                         continue;
                     }
                     $txByMessage = $txByMessages->first();
@@ -65,7 +74,7 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                     $lt = Arr::get($txByMessage, 'lt');
                     $hash = Arr::get($txByMessage, 'hash');
                     if (!$lt || !$hash) {
-                        return;
+                        return Command::SUCCESS;
                     }
 
                     $feeWithDraw = (int)Arr::get($txByMessage, 'total_fees', 0) +
@@ -90,10 +99,10 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                     }, 5);
                 }
             } catch (\Exception $e) {
-                printf($e->getMessage());
+                printf("Exception periodic withdraw ton: " . $e->getMessage());
                 continue;
             }
         }
-        return 0;
+        return Command::SUCCESS;
     }
 }

@@ -14,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class InsertWithdrawTonTransaction implements ShouldQueue
+class InsertTonWithdrawTransaction implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -24,6 +24,7 @@ class InsertWithdrawTonTransaction implements ShouldQueue
     private string $toAddress;
     private float $transferAmount;
     private float $currency;
+    private int $decimals;
     private string $toMemo;
 
     /**
@@ -37,6 +38,7 @@ class InsertWithdrawTonTransaction implements ShouldQueue
         string $toAddress,
         float $transferAmount,
         string $currency,
+        int $decimals,
         string $toMemo
     ) {
         $this->tonResponse = $tonResponse;
@@ -44,6 +46,7 @@ class InsertWithdrawTonTransaction implements ShouldQueue
         $this->toAddress = $toAddress;
         $this->transferAmount = $transferAmount;
         $this->currency = $currency;
+        $this->decimals = $decimals;
         $this->toMemo = $toMemo;
     }
 
@@ -68,13 +71,13 @@ class InsertWithdrawTonTransaction implements ShouldQueue
             $tonTransaction = [
                 'from_address_wallet' => config('services.ton.root_ton_wallet'),
                 'from_memo' => $this->fromMemo,
-                'type' => config('services.ton.withdraw'),
+                'type' => TransactionHelper::WITHDRAW,
                 'to_memo' => $this->toMemo,
                 'to_address_wallet' => $this->toAddress,
                 'hash' => $msgHash,
                 'amount' => (string)Units::toNano($this->transferAmount),
                 'currency' => $this->currency,
-                'decimals' => TransactionHelper::TON_DECIMALS,
+                'decimals' => $this->decimals,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\TON\Withdraws\WithdrawMemoToMemoInterface;
 use App\TON\Withdraws\WithdrawTonV4R2Interface;
 use App\TON\Withdraws\WithdrawUSDTV4R2Interface;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TonController extends Controller
@@ -55,6 +56,9 @@ class TonController extends Controller
 
     public function parseJetBody(): int
     {
+        $date = Carbon::now();
+        $date2 = Carbon::now()->subSeconds(10);
+        $d = 11;
 //        $result = ['hash' => 'u9UhGM1MK5zBiGjM2aUYrpRD/fW6+uUmmxVj/iF4ur4='];
 //        $tonResponse = new TonResponse(true, $result, '', 1);
 //        $d = (string)Units::toNano('0.00000011');
