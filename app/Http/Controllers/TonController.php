@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvalidJettonException;
+use App\TON\Interop\Boc\Cell;
+use App\TON\Interop\Bytes;
 use App\TON\Interop\Units;
 use App\TON\Transactions\TransactionHelper;
 use App\TON\Withdraws\WithdrawMemoToMemoInterface;
@@ -39,7 +42,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawTon->process('memo', $destinationAddress, "0.00000001", 'comment');
+            $this->withdrawTon->process('memo', $destinationAddress, 0.1, 'comment');
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();
@@ -50,7 +53,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawUSDT->process('memo', $destinationAddress, "0.0001", 'plus usdt');
+            $this->withdrawUSDT->process('memo', $destinationAddress, 0.16, 'plus usdt');
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();
@@ -59,19 +62,33 @@ class TonController extends Controller
 
     public function parseJetBody(): int
     {
-        $r = Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s');
-        $withDrawTransactions = DB::table('wallet_ton_transactions')
-            ->where('type', TransactionHelper::WITHDRAW)
-            ->where('currency', '!=', TransactionHelper::TON)
-            ->where('created_at', '<=', $r)
-            ->whereNull('lt')
-            ->whereNotNull('in_msg_hash')
-            ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
-        $count = $withDrawTransactions->count();
-        $result = ['hash' => 'u9UhGM1MK5zBiGjM2aUYrpRD/fW6+uUmmxVj/iF4ur4='];
-//        $tonResponse = new TonResponse(true, $result, '', 1);
-//        $d = (string)Units::toNano('0.00000011');
-//        InsertWithdrawTonTransaction::dispatch($tonResponse, 'fff', 'ddgvcbre', 0.4534, 'fghcvbcvbc');
-//        return 123;
+//        $body = "te6cckEBAQEADgAAGNUydtsAAAAAAAAE0YPCqrM=";
+//        $bytes = Bytes::base64ToBytes($body);
+//        $cell = Cell::oneFromBoc($bytes, true);
+//        $slice = $cell->beginParse();
+//        $remainBit = count($slice->getRemainingBits());
+//        if ($remainBit < 32) {
+//            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body,
+//                InvalidJettonException::INVALID_JETTON);
+//        }
+//        $opcode = Bytes::bytesToHexString($slice->loadBits(32));
+//        $remainBit2 = count($slice->getRemainingBits());
+//        $opcode2 = Bytes::bytesToHexString($slice->loadBits(64));
+
+
+        $body = "te6cckEBAgEAZgABqA+KfqUAAAAAAAAE0TD0JAgA7VXTOnm1nqZwAAXJ3jcbmmgwcchS8AxfjW+a3ifCYC8AO3ycm6IqEzqTP31CO4HpddUdlBkDfnRtqVkExmgmIQODkQEAGgAAAABwbHVzIHVzZHQOOy89";
+        $bytes = Bytes::base64ToBytes($body);
+        $cell = Cell::oneFromBoc($bytes, true);
+        $slice = $cell->beginParse();
+        $remainBit = count($slice->getRemainingBits());
+        if ($remainBit < 32) {
+            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body,
+                InvalidJettonException::INVALID_JETTON);
+        }
+        $opcode = Bytes::bytesToHexString($slice->loadBits(32));
+        $remainBit2 = count($slice->getRemainingBits());
+        $opcode2 = Bytes::bytesToHexString($slice->loadBits(64));
+        $dd = hexdec($opcode2);
+        return 123;
     }
 }

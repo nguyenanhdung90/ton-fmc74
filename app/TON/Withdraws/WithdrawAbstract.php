@@ -2,7 +2,11 @@
 
 namespace App\TON\Withdraws;
 
+use App\Models\WalletTonMemo;
+use App\TON\Exceptions\WithdrawTonException;
 use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\Interop\Units;
+use App\TON\Transactions\TransactionHelper;
 use Http\Client\Common\HttpMethodsClient;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
@@ -14,7 +18,7 @@ abstract class WithdrawAbstract
 {
     abstract public function getWallet($pubicKey);
 
-    protected function getBaseUri()
+    protected function getBaseUri(): string
     {
         return config('services.ton.is_main') ? TonCenterClientInterface::MAIN_BASE_URI
             : TonCenterClientInterface::TEST_BASE_URI;
@@ -41,5 +45,20 @@ abstract class WithdrawAbstract
             )
         );
         return new ToncenterTransport($tonCenter);
+    }
+
+    /**
+     * @throws WithdrawTonException
+     */
+    protected function isValidWalletTransferAmount(string $fromMemo, float $transferAmount, string $currency, int
+    $decimals = Units::DEFAULT)
+    {
+        $walletMemo = WalletTonMemo::where('memo', $fromMemo)->where('currency', $currency)->first();
+        if (!$walletMemo) {
+            throw new WithdrawTonException("There is not memo ton account");
+        }
+        if ($walletMemo->amount < (string)Units::toNano($transferAmount, $decimals)) {
+            throw new WithdrawTonException("Amount of Ton wallet is not enough");
+        }
     }
 }

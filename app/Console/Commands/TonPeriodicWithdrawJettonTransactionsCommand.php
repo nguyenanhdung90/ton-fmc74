@@ -50,6 +50,7 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                 $withDrawTransactions = DB::table('wallet_ton_transactions')
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', '!=', TransactionHelper::TON)
+                    ->whereNotNull('in_msg_hash')
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
                     ->whereNull('lt')
                     ->whereNotNull('in_msg_hash')
@@ -71,52 +72,48 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                         //printf("Empty transactions \n");
                         continue;
                     }
-                    $lt = Arr::get($txMsg, 'lt');
-                    $hash = Arr::get($txMsg, 'hash');
-                    if (!$lt || !$hash) {
-                        return Command::SUCCESS;
+                    if (!Arr::get($txMsg, 'lt') || !Arr::get($txMsg, 'hash')) {
+                        continue;
                     }
-                    // start calculate fee
-                    $outAmountOfJetton = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')
-                        + Arr::get($txMsg, 'out_msgs.0.value');
+                    if (empty(Arr::get($txMsg, 'out_msgs'))) {
+                        continue;
+                    }
 
-                    $params = [
-                        "account" => config('services.ton.root_ton_wallet'),
-                        "sort" => "asc", "limit" => 2, "start_lt" => Arr::get($txMsg, 'lt'),
-                    ];
-                    sleep(1);
-                    $transactionList = $tonCenterClient->getTransactionsBy($params);
-
-                    if (!$transactionList) {
-                        //printf("Can not get excess transactions with msg hash \n");
-                        continue;
-                    }
-                    if ($transactionList->count() !== 2) {
-                        //printf("Empty response the next transaction excess \n");
-                        continue;
-                    }
-                    $nextTransactions = $transactionList->last();
-                    if (!$nextTransactions) {
-                        //printf("Empty excess transactions \n");
-                        continue;
-                    }
-                    if (Arr::get($nextTransactions, 'prev_trans_hash') !== $hash) {
-                        //printf("Wrong the next excess transactions \n");
-                        continue;
-                    }
-                    $inAmountExcess = Arr::get($nextTransactions, 'in_msg.value') -
-                        Arr::get($nextTransactions, 'total_fees');
-
-                    $feeJet = $outAmountOfJetton - $inAmountExcess;
-                    if ($feeJet <= 0) {
-                        //printf("Wrong calculation fee jetton \n");
-                        continue;
-                    }
+//                    $params = [
+//                        "account" => config('services.ton.root_ton_wallet'),
+//                        "sort" => "asc", "limit" => 2, "start_lt" => Arr::get($txMsg, 'lt'),
+//                    ];
+//                    sleep(1);
+//                    $transactionList = $tonCenterClient->getTransactionsBy($params);
+//
+//                    if (!$transactionList) {
+//                        //printf("Can not get excess transactions with msg hash \n");
+//                        continue;
+//                    }
+//                    if ($transactionList->count() !== 2) {
+//                        //printf("Empty response the next transaction excess \n");
+//                        continue;
+//                    }
+//                    $nextTransactions = $transactionList->last();
+//                    if (!$nextTransactions) {
+//                        //printf("Empty excess transactions \n");
+//                        continue;
+//                    }
+//                    if (Arr::get($nextTransactions, 'prev_trans_hash') !== $hash) {
+//                        //printf("Wrong the next excess transactions \n");
+//                        continue;
+//                    }
+//                    $inAmountExcess = Arr::get($nextTransactions, 'in_msg.value') -
+//                        Arr::get($nextTransactions, 'total_fees');
                     // end calculate fee
 
-                    DB::transaction(function () use ($withdrawTx, $feeJet, $lt, $hash) {
+                    DB::transaction(function () use ($withdrawTx, $txMsg) {
+                        $totalFees = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')
+                            + Arr::get($txMsg, 'out_msgs.0.value');
                         DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                            ->update(['lt' => $lt, 'hash' => $hash, 'total_fees' => $feeJet,
+                            ->update(['lt' => Arr::get($txMsg, 'lt'),
+                                'hash' => Arr::get($txMsg, 'hash'),
+                                'total_fees' => $totalFees,
                                 'updated_at' => Carbon::now()]);
                         if (!empty($withdrawTx->from_memo)) {
                             $walletTonMemo = DB::table('wallet_ton_memos')
@@ -124,10 +121,12 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                                 ->where('currency', TransactionHelper::TON)
                                 ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
                             if ($walletTonMemo) {
-                                $updateAmount = $walletTonMemo->amount - $feeJet;
+                                $updateAmount = $walletTonMemo->amount - $totalFees;
                                 if ($updateAmount >= 0) {
                                     DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
                                         ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
+                                    DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
+                                        ->update(['is_sync_fee' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
 

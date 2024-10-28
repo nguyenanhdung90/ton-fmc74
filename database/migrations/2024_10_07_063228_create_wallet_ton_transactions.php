@@ -17,16 +17,18 @@ class CreateWalletTonTransactions extends Migration
             $table->id();
             $table->string('from_address_wallet', 66)->nullable();
             $table->string('from_memo', 50)->nullable();
-            $table->enum('type', ['DEPOSIT', 'WITHDRAW']);
+            $table->enum('type', ['DEPOSIT', 'WITHDRAW', 'WITHDRAW_EXCESS']);
             $table->string('to_memo', 50)->nullable();
             $table->string('to_address_wallet', 66)->nullable();
             $table->string('hash', '44')->nullable()->index();
+            $table->unsignedBigInteger('lt')->nullable();
             $table->string('in_msg_hash', '44')->nullable();
-            $table->unsignedBigInteger('amount')->default(0);
+            $table->unsignedBigInteger('amount')->nullable();
             $table->unsignedInteger('decimals')->default(0);
             $table->string('currency', 20);
             $table->unsignedBigInteger('total_fees')->default(0);
-            $table->unsignedBigInteger('lt')->nullable();
+            $table->unsignedBigInteger('query_id')->nullable();
+            $table->boolean('is_sync_fee')->default(0);
             $table->timestamps();
         });
     }

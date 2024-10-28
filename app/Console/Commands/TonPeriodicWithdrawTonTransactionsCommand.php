@@ -68,29 +68,29 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                     if (!$txByMessage) {
                         continue;
                     }
-
-                    $lt = Arr::get($txByMessage, 'lt');
-                    $hash = Arr::get($txByMessage, 'hash');
-                    if (!$lt || !$hash) {
-                        return Command::SUCCESS;
+                    if (empty(Arr::get($txByMessage, 'out_msgs'))) {
+                        continue;
+                    }
+                    if (!Arr::get($txByMessage, 'lt') || !Arr::get($txByMessage, 'hash')) {
+                        continue;
                     }
 
-                    $feeWithDraw = (int)Arr::get($txByMessage, 'total_fees', 0) +
-                        (int)Arr::get($txByMessage, 'out_msgs.0.fwd_fee', 0);
-
-                    DB::transaction(function () use ($withdrawTx, $feeWithDraw, $lt, $hash) {
+                    DB::transaction(function () use ($withdrawTx, $txByMessage) {
+                        $updatedTransaction = $this->getUpdatedTransactionBy($withdrawTx, $txByMessage);
                         DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                            ->update(['lt' => $lt, 'hash' => $hash, 'total_fees' => $feeWithDraw,
-                                'updated_at' => Carbon::now()]);
+                            ->update($updatedTransaction);
                         if (!empty($withdrawTx->from_memo)) {
                             $walletMemo = DB::table('wallet_ton_memos')->where('memo', $withdrawTx->from_memo)
                                 ->where('currency', TransactionHelper::TON)
                                 ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
                             if ($walletMemo) {
-                                $updateAmount = $walletMemo->amount - ($withdrawTx->amount + $feeWithDraw);
+                                $updateAmount = $walletMemo->amount -
+                                    ($withdrawTx->amount + $updatedTransaction['total_fees']);
                                 if ($updateAmount >= 0) {
                                     DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
                                         ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
+                                    DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
+                                        ->update(['is_sync_fee' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
                         }
@@ -102,5 +102,26 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
             }
         }
         return Command::SUCCESS;
+    }
+
+    private function isTransferAllRemainingBalance($withdrawTx): bool
+    {
+        return is_null($withdrawTx->amount);
+    }
+
+    private function getUpdatedTransactionBy($withdrawTx, $txByMessage): array
+    {
+        $feeWithDraw = (int)Arr::get($txByMessage, 'total_fees', 0) +
+            (int)Arr::get($txByMessage, 'out_msgs.0.fwd_fee', 0);
+        $updatedTransaction = [
+            'lt' => Arr::get($txByMessage, 'lt'),
+            'hash' => Arr::get($txByMessage, 'hash'),
+            'total_fees' => $feeWithDraw,
+            'updated_at' => Carbon::now()
+        ];
+        if ($this->isTransferAllRemainingBalance($withdrawTx)) {
+            $updatedTransaction['amount'] = (int)Arr::get($txByMessage, 'out_msgs.0.value', 0);
+        }
+        return $updatedTransaction;
     }
 }
