@@ -62,12 +62,11 @@ class TonPeriodicDepositTransactionCommand extends Command
         Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
-                printf("Period transaction deposit query: %s \n", json_encode($this->params));
+                printf("Period transaction deposit query every 5s ...\n");
                 sleep(5);
                 $transactions = $this->tonCenterClient->getTransactionJsonRPC($this->params);
                 $numberTx = $transactions->count();
                 if (!$numberTx) {
-                    printf("There are no transactions and continue after 5s ... \n");
                     continue;
                 }
 
@@ -76,7 +75,6 @@ class TonPeriodicDepositTransactionCommand extends Command
                 });
                 $mapperSource = $this->mapperJetMasterByAddress->request($sources);
 
-                printf("Processing %s transactions. \n", $numberTx);
                 foreach ($transactions as $transaction) {
                     SyncTonDepositTransaction::dispatch($transaction, $mapperSource);
                 }

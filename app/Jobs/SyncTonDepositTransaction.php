@@ -72,7 +72,7 @@ class SyncTonDepositTransaction implements ShouldQueue
                 $trans['amount']);
 
             DB::transaction(function () use ($trans) {
-                DB::table('wallet_ton_transactions')->insert($trans);
+                $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
                 $currency = Arr::get($trans, 'currency');
                 if (!empty($trans['to_memo'])) {
                     $walletMemo = DB::table('wallet_ton_memos')
@@ -84,8 +84,8 @@ class SyncTonDepositTransaction implements ShouldQueue
                     if ($walletMemo) {
                         if ($currency === TransactionHelper::TON) {
                             $updateAmount = $walletMemo->amount + ($trans['amount'] - $trans['total_fees']);
-                            DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
-                                ->update(['amount' => $updateAmount, 'is_sync_amount_ton' => true]);
+                            DB::table('wallet_ton_transactions')->where('id', $transactionId)
+                                ->update(['is_sync_amount_ton' => true]);
                         } else {
                             $updateAmount = $walletMemo->amount + $trans['amount'];
                             // process fee for jetton
@@ -96,18 +96,21 @@ class SyncTonDepositTransaction implements ShouldQueue
                             if ($walletTonMemo && ($walletTonMemo->amount - $trans['total_fees']) > 0) {
                                 $updateFeeTonAmount = $walletTonMemo->amount - $trans['total_fees'];
                                 DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
-                                    ->update(['amount' => $updateFeeTonAmount, 'is_sync_amount_ton' => true]);
+                                    ->update(['amount' => $updateFeeTonAmount]);
+                                DB::table('wallet_ton_transactions')->where('id', $transactionId)
+                                    ->update(['is_sync_amount_ton' => true]);
                             }
-
-                            DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
-                                ->update(['amount' => $updateAmount, 'is_sync_amount_jetton' => true]);
+                            DB::table('wallet_ton_transactions')->where('id', $transactionId)
+                                ->update(['is_sync_amount_jetton' => true]);
                         }
+                        DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
+                            ->update(['amount' => $updateAmount]);
                     }
                 }
             }, 5);
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());
-            printf("Exception: %s \n", $e->getMessage());
+            //printf("Exception: %s \n", $e->getMessage());
         }
     }
 }

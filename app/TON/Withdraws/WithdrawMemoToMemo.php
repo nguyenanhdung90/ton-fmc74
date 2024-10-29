@@ -4,6 +4,7 @@ namespace App\TON\Withdraws;
 
 use App\Exceptions\InvalidWithdrawMemoToMemoException;
 use App\Models\WalletTonMemo;
+use App\TON\Interop\Units;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
     /**
      * @throws InvalidWithdrawMemoToMemoException
      */
-    public function transfer(string $fromMemo, string $toMemo, int $amount, string $currency)
+    public function transfer(string $fromMemo, string $toMemo, float $amount, string $currency, int $decimals)
     {
         $sourceWalletTonMemo = WalletTonMemo::where('memo', $fromMemo)
             ->where('currency', $currency)->lockForUpdate()
@@ -23,7 +24,7 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
                 InvalidWithdrawMemoToMemoException::NONE_EXIST_SOURCE_MEMO);
         }
         $decimals = $sourceWalletTonMemo->decimals;
-        $amountUnit = $amount * pow(10, $decimals);
+        $amountUnit = (string)Units::toNano($amount, $decimals);
         if ($amountUnit <= 0) {
             throw new InvalidWithdrawMemoToMemoException('Amount is not less than zero',
                 InvalidWithdrawMemoToMemoException::INVALID_AMOUNT);
