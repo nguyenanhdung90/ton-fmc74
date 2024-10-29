@@ -62,8 +62,8 @@ class TonPeriodicDepositTransactionCommand extends Command
         Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
-                printf("Period transaction deposit query every 5s ...\n");
-                sleep(5);
+                printf("Period transaction deposit query every 20s ...\n");
+                sleep(20);
                 $transactions = $this->tonCenterClient->getTransactionJsonRPC($this->params);
                 $numberTx = $transactions->count();
                 if (!$numberTx) {
