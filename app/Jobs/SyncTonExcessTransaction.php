@@ -81,7 +81,7 @@ class SyncTonExcessTransaction implements ShouldQueue
                             DB::table('wallet_ton_memos')->where('id', $tonWallet->id)
                                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
                             DB::table('wallet_ton_transactions')->where('id', $lastInsertedId)
-                                ->update(['is_sync_amount_wallet' => true, 'updated_at' => Carbon::now()]);
+                                ->update(['is_sync_amount_ton' => true, 'updated_at' => Carbon::now()]);
                         }
                     }
                 }

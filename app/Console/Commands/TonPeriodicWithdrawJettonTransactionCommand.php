@@ -53,7 +53,8 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
                     ->whereNull('lt')
                     ->whereNotNull('in_msg_hash')
-                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
+                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)
+                    ->get();
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
@@ -97,7 +98,7 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                                     DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
                                         ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
                                     DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                                        ->update(['is_sync_amount_wallet' => true, 'updated_at' => Carbon::now()]);
+                                        ->update(['is_sync_amount_ton' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
 
@@ -110,6 +111,9 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                                 if ($updateJettonAmount >= 0) {
                                     DB::table('wallet_ton_memos')->where('id', $walletJettonMemo->id)
                                         ->update(['amount' => $updateJettonAmount, 'updated_at' => Carbon::now()]);
+
+                                    DB::table('wallet_ton_transactions')->where('id', $walletJettonMemo->id)
+                                        ->update(['is_sync_amount_jetton' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
                         }

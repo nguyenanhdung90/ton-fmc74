@@ -10,6 +10,6 @@ class WalletTonTransaction extends Model
 
     protected $fillable = [
         'from_address_wallet', 'from_memo', 'type', 'to_memo', 'to_address_wallet', 'hash', 'in_msg_hash',
-        'amount', 'currency', 'total_fees', 'lt', 'decimals', 'query_id', 'is_sync_amount_wallet'
+        'amount', 'currency', 'total_fees', 'lt', 'decimals', 'query_id', 'is_sync_amount_ton', 'is_sync_amount_jetton'
     ];
 }

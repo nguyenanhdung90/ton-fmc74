@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class InsertTonDepositTransaction implements ShouldQueue
+class SyncTonDepositTransaction implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -84,6 +84,8 @@ class InsertTonDepositTransaction implements ShouldQueue
                     if ($walletMemo) {
                         if ($currency === TransactionHelper::TON) {
                             $updateAmount = $walletMemo->amount + ($trans['amount'] - $trans['total_fees']);
+                            DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
+                                ->update(['amount' => $updateAmount, 'is_sync_amount_ton' => true]);
                         } else {
                             $updateAmount = $walletMemo->amount + $trans['amount'];
                             // process fee for jetton
@@ -94,11 +96,12 @@ class InsertTonDepositTransaction implements ShouldQueue
                             if ($walletTonMemo && ($walletTonMemo->amount - $trans['total_fees']) > 0) {
                                 $updateFeeTonAmount = $walletTonMemo->amount - $trans['total_fees'];
                                 DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
-                                    ->update(['amount' => $updateFeeTonAmount]);
+                                    ->update(['amount' => $updateFeeTonAmount, 'is_sync_amount_ton' => true]);
                             }
+
+                            DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
+                                ->update(['amount' => $updateAmount, 'is_sync_amount_jetton' => true]);
                         }
-                        DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
-                            ->update(['amount' => $updateAmount]);
                     }
                 }
             }, 5);

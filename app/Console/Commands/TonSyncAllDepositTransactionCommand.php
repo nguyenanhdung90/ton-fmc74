@@ -2,21 +2,21 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\InsertTonDepositTransaction;
+use App\Jobs\SyncTonDepositTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
-class TonDepositSyncAllTransactionCommand extends Command
+class TonSyncAllDepositTransactionCommand extends Command
 {
     /**
-     * php artisan ton:get_all_deposit
+     * php artisan ton:sync_all_deposit
      *
      * @var string
      */
-    protected $signature = 'ton:get_all_deposit {--limit=100}';
+    protected $signature = 'ton:sync_all_deposit {--limit=100}';
 
     /**
      * The console command description.
@@ -57,7 +57,7 @@ class TonDepositSyncAllTransactionCommand extends Command
         Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
-                printf("New query: %s \n", json_encode(array_filter($this->params)));
+                printf("New query transaction deposit : %s \n", json_encode(array_filter($this->params)));
                 sleep(1);
                 $transactions = $this->tonCenterClient->getTransactionJsonRPC($this->params);
                 $numberTx = $transactions->count();
@@ -78,7 +78,7 @@ class TonDepositSyncAllTransactionCommand extends Command
 
                 printf("Processing %s transactions. \n", $numberTx);
                 foreach ($transactions as $transaction) {
-                    InsertTonDepositTransaction::dispatch($transaction, $mapperSource);
+                    SyncTonDepositTransaction::dispatch($transaction, $mapperSource);
                 }
 
                 // set condition of query
