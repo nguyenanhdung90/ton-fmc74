@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InsertTonWithdrawTransaction implements ShouldQueue
 {
@@ -25,6 +26,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
     private string $currency;
     private int $decimals;
     private string $toMemo;
+    private ?int $queryId;
 
     /**
      * Create a new job instance.
@@ -38,7 +40,8 @@ class InsertTonWithdrawTransaction implements ShouldQueue
         int $transferAmount,
         string $currency,
         int $decimals,
-        string $toMemo
+        string $toMemo,
+        ?int $queryId = null
     ) {
         $this->tonResponse = $tonResponse;
         $this->fromMemo = $fromMemo;
@@ -47,6 +50,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
         $this->currency = $currency;
         $this->decimals = $decimals;
         $this->toMemo = $toMemo;
+        $this->queryId = $queryId;
     }
 
     /**
@@ -67,7 +71,7 @@ class InsertTonWithdrawTransaction implements ShouldQueue
                 // There is no hash message
                 return;
             }
-            $tonTransaction = [
+            $transaction = [
                 'from_address_wallet' => config('services.ton.root_ton_wallet'),
                 'from_memo' => $this->fromMemo,
                 'type' => TransactionHelper::WITHDRAW,
@@ -77,11 +81,16 @@ class InsertTonWithdrawTransaction implements ShouldQueue
                 'amount' => $this->transferAmount,
                 'currency' => $this->currency,
                 'decimals' => $this->decimals,
+                'query_id' => $this->queryId,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
-            DB::table('wallet_ton_transactions')->insert($tonTransaction);
+            DB::table('wallet_ton_transactions')->insert($transaction);
         } catch (\Exception $e) {
+            Log::error('InsertTonWithdrawTransaction: ' . $e->getMessage());
+            if (!empty($transaction)) {
+                Log::error('Error insert transactions withdraw: ', $transaction);
+            }
             printf("Exception Insert Withdraw Ton Transaction : %s \n", $e->getMessage());
         }
     }

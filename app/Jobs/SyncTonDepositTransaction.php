@@ -106,7 +106,7 @@ class SyncTonDepositTransaction implements ShouldQueue
                 }
             }, 5);
         } catch (\Exception $e) {
-            Log::error("Message: " . ' | ' . $e->getMessage());
+            Log::error("Exception message: " . ' | ' . $e->getMessage());
             printf("Exception: %s \n", $e->getMessage());
         }
     }

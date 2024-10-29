@@ -49,7 +49,7 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
                 ->update(['amount' => $updateSourceAmount]);
             DB::table('wallet_ton_memos')->where('memo', $toMemo)->where('currency', $currency)
                 ->update(['amount' => $updateDestinationAmount]);
-            DB::table('wallet_ton_transactions')->insert([
+            $transaction = [
                 'from_address_wallet' => null,
                 'from_memo' => $fromMemo,
                 'type' => TransactionHelper::WITHDRAW,
@@ -62,7 +62,13 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
                 'lt' => Carbon::now()->timestamp,
                 "created_at" => Carbon::now(),
                 "updated_at" => Carbon::now(),
-            ]);
+            ];
+            if ($currency === TransactionHelper::TON) {
+                $transaction['is_sync_amount_ton'] = true;
+            } else {
+                $transaction['is_sync_amount_jetton'] = true;
+            }
+            DB::table('wallet_ton_transactions')->insert($transaction);
         }, 5);
     }
 }

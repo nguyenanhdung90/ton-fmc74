@@ -55,10 +55,10 @@ abstract class WithdrawAbstract
     {
         $walletMemo = WalletTonMemo::where('memo', $fromMemo)->where('currency', $currency)->first();
         if (!$walletMemo) {
-            throw new WithdrawTonException("There is not memo ton account");
+            throw new WithdrawTonException("There is not memo account");
         }
         if ($walletMemo->amount < (string)Units::toNano($transferAmount, $decimals)) {
-            throw new WithdrawTonException("Amount of Ton wallet is not enough");
+            throw new WithdrawTonException("Amount of wallet is not enough");
         }
     }
 }

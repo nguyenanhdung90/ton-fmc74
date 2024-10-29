@@ -112,7 +112,7 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                                     DB::table('wallet_ton_memos')->where('id', $walletJettonMemo->id)
                                         ->update(['amount' => $updateJettonAmount, 'updated_at' => Carbon::now()]);
 
-                                    DB::table('wallet_ton_transactions')->where('id', $walletJettonMemo->id)
+                                    DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
                                         ->update(['is_sync_amount_jetton' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
