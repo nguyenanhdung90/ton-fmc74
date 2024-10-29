@@ -37,7 +37,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawTon->process('memo', $destinationAddress, 0.001639, 'comment');
+            $this->withdrawTon->process('memo', $destinationAddress, 0.166, 'comment');
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();
@@ -48,7 +48,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawUSDT->process('memo', $destinationAddress, 0.002227, 'plus usdt');
+            $this->withdrawUSDT->process('memo', $destinationAddress, 0.002327, 'plus usdt');
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();

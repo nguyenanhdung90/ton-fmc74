@@ -39,7 +39,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
                     new Address($toAddress),
                     Units::toNano($transferAmount),
                     $toMemo,
-                    SendMode::PAY_GAS_SEPARATELY
+                    SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE
                 )
             ],
             new TransferOptions((int)$wallet->seqno($transport))
