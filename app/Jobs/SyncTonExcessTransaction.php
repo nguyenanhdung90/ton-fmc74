@@ -61,6 +61,15 @@ class SyncTonExcessTransaction implements ShouldQueue
                 return;
             }
 
+            $count = DB::table('wallet_ton_transactions')
+                ->where('type', TransactionHelper::WITHDRAW_EXCESS)
+                ->where('query_id', $trans['query_id'])
+                ->where('currency', $trans['currency'])
+                ->count();
+            if ($count) {
+                return;
+            }
+
             DB::transaction(function () use ($trans) {
                 $lastInsertedId = DB::table('wallet_ton_transactions')->insertGetId($trans);
 

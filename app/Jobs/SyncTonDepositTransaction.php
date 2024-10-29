@@ -56,7 +56,10 @@ class SyncTonDepositTransaction implements ShouldQueue
                 return;
             }
             $hash = Arr::get($this->data, 'transaction_id.hash');
-            $countTransaction = DB::table('wallet_ton_transactions')->where('hash', $hash)->count();
+            $countTransaction = DB::table('wallet_ton_transactions')
+                ->where('hash', $hash)
+                ->where('type', TransactionHelper::DEPOSIT)
+                ->count();
             if ($countTransaction) {
                 return;
             }

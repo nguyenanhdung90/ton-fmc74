@@ -75,8 +75,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
                         Units::toNano("0.0000002")//100
                     )
                 ),
-                SendMode::combine([SendMode::PAY_GAS_SEPARATELY, SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE,
-                    SendMode::IGNORE_ERRORS])
+                SendMode::combine([SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE, SendMode::IGNORE_ERRORS])
             )],
             $transfer
         );
