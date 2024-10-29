@@ -62,7 +62,7 @@ class SyncTonExcessTransaction implements ShouldQueue
             }
 
             DB::transaction(function () use ($trans) {
-                DB::table('wallet_ton_transactions')->insert($trans);
+                $lastInsertedId = DB::table('wallet_ton_transactions')->insertGetId($trans);
 
                 $withdrawTran = DB::table('wallet_ton_transactions')
                     ->where('type', TransactionHelper::WITHDRAW)
@@ -80,7 +80,7 @@ class SyncTonExcessTransaction implements ShouldQueue
 
                             DB::table('wallet_ton_memos')->where('id', $tonWallet->id)
                                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-                            DB::table('wallet_ton_transactions')->where('id', $withdrawTran->id)
+                            DB::table('wallet_ton_transactions')->where('id', $lastInsertedId)
                                 ->update(['is_sync_amount_wallet' => true, 'updated_at' => Carbon::now()]);
                         }
                     }

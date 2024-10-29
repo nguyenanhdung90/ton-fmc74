@@ -56,14 +56,14 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
         $toLt = $lastTransaction ? $lastTransaction->lt : 0;
         Arr::set($this->params, 'to_lt', $toLt);
         while (true) {
-            printf("Period transaction excess query: %s \n", json_encode($this->params));
-            sleep(5);
+            printf("Period transaction withdraw excess query every 20 ...\n");
+            sleep(20);
             $transactions = $this->tonCenterClient->getTransactionJsonRPC($this->params);
             $numberTx = $transactions->count();
             if (!$numberTx) {
-                printf("There are no transactions and continue after 5s ... \n");
                 continue;
             }
+            printf("Processing %s withdraw transactions. \n", $numberTx);
             foreach ($transactions as $transaction) {
                 if (empty(Arr::get($transaction, 'out_msgs'))) {
                     SyncTonExcessTransaction::dispatch($transaction);

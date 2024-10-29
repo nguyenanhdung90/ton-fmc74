@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class TonPeriodicWithdrawJettonTransactionCommand extends Command
 {
@@ -78,10 +77,6 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                     if (empty(Arr::get($txMsg, 'out_msgs'))) {
                         continue;
                     }
-
-//                    $inAmountExcess = Arr::get($nextTransactions, 'in_msg.value') -
-//                        Arr::get($nextTransactions, 'total_fees');
-                    // end calculate fee
 
                     DB::transaction(function () use ($withdrawTx, $txMsg) {
                         $totalFees = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')

@@ -9,7 +9,7 @@ use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
-class TonDepositGetAllTransactionCommand extends Command
+class TonDepositSyncAllTransactionCommand extends Command
 {
     /**
      * php artisan ton:get_all_deposit
