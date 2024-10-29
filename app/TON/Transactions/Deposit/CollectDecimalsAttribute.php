@@ -1,6 +1,6 @@
 <?php
 
-namespace App\TON\Transactions\apiV2;
+namespace App\TON\Transactions\Deposit;
 
 use App\TON\Interop\Units;
 use App\TON\Transactions\CollectAttribute;

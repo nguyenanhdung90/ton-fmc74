@@ -3,20 +3,21 @@
 namespace App\Console\Commands;
 
 use App\Jobs\InsertTonDepositTransaction;
+use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
-class TonDepositGetAllTransactionsCommand extends Command
+class TonPeriodicDepositTransactionCommand extends Command
 {
     /**
-     * php artisan ton:get_all_deposit
+     * php artisan ton:periodic_deposit
      *
      * @var string
      */
-    protected $signature = 'ton:get_all_deposit {--limit=100}';
+    protected $signature = 'ton:periodic_deposit {--limit=100}';
 
     /**
      * The console command description.
@@ -25,7 +26,7 @@ class TonDepositGetAllTransactionsCommand extends Command
      */
     protected $description = 'Command description';
 
-    protected TonCenterClientInterface $tonCenterV2Client;
+    protected TonCenterClientInterface $tonCenterClient;
 
     protected MapperJetMasterByAddressInterface $mapperJetMasterByAddress;
 
@@ -37,38 +38,37 @@ class TonDepositGetAllTransactionsCommand extends Command
      * @return void
      */
     public function __construct(
-        TonCenterClientInterface $tonCenterV2Client,
+        TonCenterClientInterface $tonCenterClient,
         MapperJetMasterByAddressInterface $mapperJetMasterByAddress
     ) {
         parent::__construct();
-        $this->tonCenterV2Client = $tonCenterV2Client;
+        $this->tonCenterClient = $tonCenterClient;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
-        $this->params = [
-            "limit" => null,
-            "address" => config('services.ton.root_ton_wallet'),
-            "lt" => null,
-            "hash" => null
-        ];
+        $this->params = ["limit" => null, "address" => config('services.ton.root_ton_wallet'), "to_lt" => null];
     }
 
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
     public function handle(): int
     {
+        $lastTransaction = WalletTonTransaction::where('type', 'type', TransactionHelper::DEPOSIT)
+            ->orderBy('id', 'desc')->first();
+        $toLt = $lastTransaction ? $lastTransaction->lt : 0;
         $limit = min($this->option('limit'), TransactionHelper::MAX_LIMIT_TRANSACTION);
+        Arr::set($this->params, 'to_lt', $toLt);
         Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
-                printf("New query: %s \n", json_encode(array_filter($this->params)));
-                sleep(1);
-                $transactions = $this->tonCenterV2Client->getTransactionJsonRPC($this->params);
+                printf("Period transaction deposit query: %s \n", json_encode($this->params));
+                sleep(5);
+                $transactions = $this->tonCenterClient->getTransactionJsonRPC($this->params);
                 $numberTx = $transactions->count();
-                $lt = Arr::get($this->params, 'lt');
-                if (!$lt && !$numberTx) {
-                    printf("End, there are no transactions for the first loop \n");
-                    break;
-                }
-                if ($lt && $numberTx == 1) {
-                    printf("End, there are no transactions for the next loop \n");
-                    break;
+                if (!$numberTx) {
+                    printf("There are no transactions and continue after 5s ... \n");
+                    continue;
                 }
 
                 $sources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
@@ -82,11 +82,10 @@ class TonDepositGetAllTransactionsCommand extends Command
                 }
 
                 // set condition of query
-                $lastTx = $transactions->last();
-                Arr::set($this->params, 'lt', Arr::get($lastTx, 'transaction_id.lt'));
-                Arr::set($this->params, 'hash', Arr::get($lastTx, 'transaction_id.hash'));
+                $lastTx = $transactions->first();
+                Arr::set($this->params, 'to_lt', Arr::get($lastTx, 'transaction_id.lt'));
             } catch (\Exception $e) {
-                printf($e->getMessage() . "\n");
+                printf($e->getMessage());
                 continue;
             }
         }

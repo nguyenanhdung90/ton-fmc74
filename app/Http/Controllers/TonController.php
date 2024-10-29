@@ -75,8 +75,7 @@ class TonController extends Controller
 //        $remainBit2 = count($slice->getRemainingBits());
 //        $opcode2 = Bytes::bytesToHexString($slice->loadBits(64));
 
-
-        $body = "te6cckEBAgEAZgABqA+KfqUAAAAAAAAE0TD0JAgA7VXTOnm1nqZwAAXJ3jcbmmgwcchS8AxfjW+a3ifCYC8AO3ycm6IqEzqTP31CO4HpddUdlBkDfnRtqVkExmgmIQODkQEAGgAAAABwbHVzIHVzZHQOOy89";
+        $body = "te6cckEBAgEAtAABnCkkMVYSxjHhTWJG2kNlhutF+7zc6i+rjA+/QRtgx4ApnF/xZnfV3cggRuf0v1xEA7amkCWtJdox7ljTnrkY4gIpqaMXZx8ZmgAAAG0AAQEAwUgB2+Tk3RFQmdSZ++oR3A9LrqjsoMgb86NtSsgmM0ExCB0AHaq6Z082s9TOAAC5O8bjc00GDjkKXgGL8a3zW8T4TAXSpZ3OCAAAAAAAAAAAAAAAAAAAAAAAMbe2trK3OkAWSMA0";
         $bytes = Bytes::base64ToBytes($body);
         $cell = Cell::oneFromBoc($bytes, true);
         $slice = $cell->beginParse();
@@ -87,8 +86,8 @@ class TonController extends Controller
         }
         $opcode = Bytes::bytesToHexString($slice->loadBits(32));
         $remainBit2 = count($slice->getRemainingBits());
-        $opcode2 = Bytes::bytesToHexString($slice->loadBits(64));
-        $dd = hexdec($opcode2);
+        $hexQueryId = Bytes::bytesToHexString($slice->loadBits(64));
+        $dd = hexdec($hexQueryId);
         return 123;
     }
 }

@@ -11,7 +11,9 @@ class TransactionHelper
     const USDT = 'USDT';
     const DEPOSIT = 'DEPOSIT';
     const WITHDRAW = 'WITHDRAW';
+    const WITHDRAW_EXCESS = 'WITHDRAW_EXCESS';
     const JET_OPCODE = '7362d09c';
+    const EXCESS_OPCODE = 'd53276db';
 
     /**
      * @throws \Exception

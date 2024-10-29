@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\TON\Interop\Units;
 use App\TON\Transactions\TransactionHelper;
 use App\TON\Transports\Toncenter\Models\TonResponse;
 use Carbon\Carbon;

@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class TonPeriodicWithdrawJettonTransactionsCommand extends Command
+class TonPeriodicWithdrawJettonTransactionCommand extends Command
 {
     /**
      * php artisan ton:periodic_withdraw_jetton
@@ -79,30 +79,6 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                         continue;
                     }
 
-//                    $params = [
-//                        "account" => config('services.ton.root_ton_wallet'),
-//                        "sort" => "asc", "limit" => 2, "start_lt" => Arr::get($txMsg, 'lt'),
-//                    ];
-//                    sleep(1);
-//                    $transactionList = $tonCenterClient->getTransactionsBy($params);
-//
-//                    if (!$transactionList) {
-//                        //printf("Can not get excess transactions with msg hash \n");
-//                        continue;
-//                    }
-//                    if ($transactionList->count() !== 2) {
-//                        //printf("Empty response the next transaction excess \n");
-//                        continue;
-//                    }
-//                    $nextTransactions = $transactionList->last();
-//                    if (!$nextTransactions) {
-//                        //printf("Empty excess transactions \n");
-//                        continue;
-//                    }
-//                    if (Arr::get($nextTransactions, 'prev_trans_hash') !== $hash) {
-//                        //printf("Wrong the next excess transactions \n");
-//                        continue;
-//                    }
 //                    $inAmountExcess = Arr::get($nextTransactions, 'in_msg.value') -
 //                        Arr::get($nextTransactions, 'total_fees');
                     // end calculate fee
@@ -126,7 +102,7 @@ class TonPeriodicWithdrawJettonTransactionsCommand extends Command
                                     DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
                                         ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
                                     DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                                        ->update(['is_sync_fee' => true, 'updated_at' => Carbon::now()]);
+                                        ->update(['is_sync_amount_wallet' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
 

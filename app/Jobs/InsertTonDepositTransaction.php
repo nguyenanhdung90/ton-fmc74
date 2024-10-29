@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use App\TON\Transactions\apiV2\CollectDecimalsAttribute;
-use App\TON\Transactions\apiV2\CollectHashLtCurrencyAttribute;
-use App\TON\Transactions\apiV2\CollectMemoSenderAmountAttribute;
-use App\TON\Transactions\apiV2\CollectTotalFeesAttribute;
-use App\TON\Transactions\apiV2\CollectTransactionAttribute;
+use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
+use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
+use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;
+use App\TON\Transactions\Deposit\CollectTotalFeesAttribute;
+use App\TON\Transactions\Deposit\CollectTransactionAttribute;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

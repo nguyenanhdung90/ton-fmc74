@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class TonPeriodicWithdrawTonTransactionsCommand extends Command
+class TonPeriodicWithdrawTonTransactionCommand extends Command
 {
     /**
      * php artisan ton:periodic_withdraw_ton
@@ -90,7 +90,7 @@ class TonPeriodicWithdrawTonTransactionsCommand extends Command
                                     DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
                                         ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
                                     DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                                        ->update(['is_sync_fee' => true, 'updated_at' => Carbon::now()]);
+                                        ->update(['is_sync_amount_wallet' => true, 'updated_at' => Carbon::now()]);
                                 }
                             }
                         }
