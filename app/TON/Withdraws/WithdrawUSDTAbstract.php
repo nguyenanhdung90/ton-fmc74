@@ -20,10 +20,6 @@ use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
 use App\TON\Transactions\TransactionHelper;
-use App\TON\Transports\Toncenter\Models\TonResponse;
-use Carbon\Carbon;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 
 abstract class WithdrawUSDTAbstract extends WithdrawAbstract
 {
@@ -72,7 +68,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
                         $walletAddress,
                         $queryId,
                         SnakeString::fromString($toMemo)->cell(true),
-                        Units::toNano("0.0000002")//100
+                        Units::toNano("0.0000001")
                     )
                 ),
                 SendMode::combine([SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE, SendMode::IGNORE_ERRORS])
