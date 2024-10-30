@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawJetton;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -58,6 +59,7 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
+
                 printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(1);
@@ -79,45 +81,19 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                         continue;
                     }
 
-                    DB::transaction(function () use ($withdrawTx, $txMsg) {
-                        $totalFees = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')
-                            + Arr::get($txMsg, 'out_msgs.0.value');
-                        DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                            ->update(['lt' => Arr::get($txMsg, 'lt'),
-                                'hash' => Arr::get($txMsg, 'hash'),
-                                'total_fees' => $totalFees,
-                                'updated_at' => Carbon::now()]);
-                        if (!empty($withdrawTx->from_memo)) {
-                            $walletTonMemo = DB::table('wallet_ton_memos')
-                                ->where('memo', $withdrawTx->from_memo)
-                                ->where('currency', TransactionHelper::TON)
-                                ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
-                            if ($walletTonMemo) {
-                                $updateAmount = $walletTonMemo->amount - $totalFees;
-                                if ($updateAmount >= 0) {
-                                    DB::table('wallet_ton_memos')->where('id', $walletTonMemo->id)
-                                        ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-                                    DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                                        ->update(['is_sync_amount_ton' => true, 'updated_at' => Carbon::now()]);
-                                }
-                            }
-
-                            $walletJettonMemo = DB::table('wallet_ton_memos')
-                                ->where('memo', $withdrawTx->from_memo)
-                                ->where('currency', $withdrawTx->currency)
-                                ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
-                            if ($walletJettonMemo) {
-                                $updateJettonAmount = $walletJettonMemo->amount - $withdrawTx->amount;
-                                if ($updateJettonAmount >= 0) {
-                                    DB::table('wallet_ton_memos')->where('id', $walletJettonMemo->id)
-                                        ->update(['amount' => $updateJettonAmount, 'updated_at' => Carbon::now()]);
-
-                                    DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                                        ->update(['is_sync_amount_jetton' => true, 'updated_at' => Carbon::now()]);
-                                }
-                            }
-                        }
-                    }, 5);
+                    $totalFees = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')
+                        + Arr::get($txMsg, 'out_msgs.0.value');
+                    DB::table('wallet_ton_transactions')
+                        ->where('id', $withdrawTx->id)
+                        ->update([
+                            'lt' => Arr::get($txMsg, 'lt'),
+                            'hash' => Arr::get($txMsg, 'hash'),
+                            'total_fees' => $totalFees,
+                            'updated_at' => Carbon::now()
+                        ]);
+                    $transaction = DB::table('wallet_ton_transactions')->find($withdrawTx->id);
+                    $syncMemoWallet = new SyncWithdrawJetton($transaction);
+                    $syncMemoWallet->process();
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw jetton: " . $e->getMessage());

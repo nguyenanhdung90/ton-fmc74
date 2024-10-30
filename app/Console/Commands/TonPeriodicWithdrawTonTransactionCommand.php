@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawTon;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -75,26 +76,13 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                         continue;
                     }
 
-                    DB::transaction(function () use ($withdrawTx, $txByMessage) {
-                        $updatedTransaction = $this->getUpdatedTransactionBy($withdrawTx, $txByMessage);
-                        DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                            ->update($updatedTransaction);
-                        if (!empty($withdrawTx->from_memo)) {
-                            $walletMemo = DB::table('wallet_ton_memos')->where('memo', $withdrawTx->from_memo)
-                                ->where('currency', TransactionHelper::TON)
-                                ->lockForUpdate()->get(['id', 'memo', 'currency', 'amount'])->first();
-                            if ($walletMemo) {
-                                $updateAmount = $walletMemo->amount -
-                                    ($withdrawTx->amount + $updatedTransaction['total_fees']);
-                                if ($updateAmount >= 0) {
-                                    DB::table('wallet_ton_memos')->where('id', $walletMemo->id)
-                                        ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-                                    DB::table('wallet_ton_transactions')->where('id', $withdrawTx->id)
-                                        ->update(['is_sync_amount_ton' => true, 'updated_at' => Carbon::now()]);
-                                }
-                            }
-                        }
-                    }, 5);
+                    $updatedTransaction = $this->getUpdatedTransactionBy($withdrawTx, $txByMessage);
+                    DB::table('wallet_ton_transactions')
+                        ->where('id', $withdrawTx->id)
+                        ->update($updatedTransaction);
+                    $transaction = DB::table('wallet_ton_transactions')->find($withdrawTx->id);
+                    $syncMemoWallet = new SyncWithdrawTon($transaction);
+                    $syncMemoWallet->process();
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw ton: " . $e->getMessage());

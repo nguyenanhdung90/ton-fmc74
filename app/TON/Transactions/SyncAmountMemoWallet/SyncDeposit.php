@@ -12,12 +12,12 @@ class SyncDeposit extends SyncMemoWalletAbstract
     {
         DB::beginTransaction();
         try {
-            if (empty($this->transaction->from_memo)) {
+            if (empty($this->transaction->to_memo)) {
                 return;
             }
             $walletTon = DB::table('wallet_ton_memos')
-                ->where('currency', TransactionHelper::TON)
-                ->where('memo', $this->transaction->from_memo)
+                ->where('currency', $this->transaction->currency)
+                ->where('memo', $this->transaction->to_memo)
                 ->lockForUpdate()
                 ->first();
             if (!$walletTon) {
@@ -48,7 +48,7 @@ class SyncDeposit extends SyncMemoWalletAbstract
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
 
             printf("Sync withdraw ton id: %s, transfer amount: %s, to Ton memo: %s, memo id: %s", $this->transaction->id,
-                $updateAmount, $this->transaction->from_memo, $walletTon->id);
+                $updateAmount, $this->transaction->to_memo, $walletTon->id);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

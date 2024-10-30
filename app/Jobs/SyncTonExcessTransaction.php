@@ -9,8 +9,8 @@ use App\TON\Transactions\Excess\CollectHashLtAttribute;
 use App\TON\Transactions\Excess\CollectQueryIdAttribute;
 use App\TON\Transactions\Excess\CollectToAddressWalletAttribute;
 use App\TON\Transactions\Excess\CollectTotalFeesAttribute;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncTransactionExcess;
 use App\TON\Transactions\TransactionHelper;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -70,32 +70,12 @@ class SyncTonExcessTransaction implements ShouldQueue
                 return;
             }
 
-            DB::transaction(function () use ($trans) {
-                $lastInsertedId = DB::table('wallet_ton_transactions')->insertGetId($trans);
-
-                $withdrawTran = DB::table('wallet_ton_transactions')
-                    ->where('type', TransactionHelper::WITHDRAW)
-                    ->where('query_id', $trans['query_id'])->first();
-                if ($withdrawTran) {
-                    $tonWallet = DB::table('wallet_ton_memos')
-                        ->where('currency', TransactionHelper::TON)
-                        ->where('memo', $withdrawTran->from_memo)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($tonWallet) {
-                        if ($trans['amount'] > $trans['total_fees']) {
-                            $updateAmount = $tonWallet->amount + ($trans['amount'] - $trans['total_fees']);
-
-                            DB::table('wallet_ton_memos')->where('id', $tonWallet->id)
-                                ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-                            DB::table('wallet_ton_transactions')->where('id', $lastInsertedId)
-                                ->update(['is_sync_amount_ton' => true, 'updated_at' => Carbon::now()]);
-                        }
-                    }
-                }
-            }, 5);
-            Log::info('excess: ', $trans);
+            $lastInsertedId = DB::table('wallet_ton_transactions')->insertGetId($trans);
+            $transaction = DB::table('wallet_ton_transactions')->find($lastInsertedId);
+            if ($transaction) {
+                $syncMemoWallet = new SyncTransactionExcess($transaction);
+                $syncMemoWallet->process();
+            }
         } catch (\Exception $e) {
             Log::error("Message: " . ' | ' . $e->getMessage());
             printf("Exception: %s \n", $e->getMessage());
