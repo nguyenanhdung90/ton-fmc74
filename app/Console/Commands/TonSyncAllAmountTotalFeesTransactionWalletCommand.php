@@ -3,9 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Models\WalletTonTransaction;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncFixDeposit;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixDepositJetton;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixDepositTon;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncFixExcess;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncFixWithdraw;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixWithdrawJetton;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixWithdrawTon;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncMemoWalletAbstract;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
@@ -13,11 +15,11 @@ use Illuminate\Console\Command;
 class TonSyncAllAmountTotalFeesTransactionWalletCommand extends Command
 {
     /**
-     * php artisan ton:sync_all_amount_transaction_wallet
+     * php artisan ton:sync_all_fix_amount_fee
      *
      * @var string
      */
-    protected $signature = 'ton:sync_all_amount_transaction_wallet';
+    protected $signature = 'ton:sync_all_fix_amount_fee';
 
     /**
      * The console command description.
@@ -50,6 +52,7 @@ class TonSyncAllAmountTotalFeesTransactionWalletCommand extends Command
         })
             ->whereNotNull('hash')
             ->whereNotNull('lt')
+            //->where('id', 57)
             ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION);
         $i = 0;
         while (true) {
@@ -63,11 +66,17 @@ class TonSyncAllAmountTotalFeesTransactionWalletCommand extends Command
                 if ($item->type === TransactionHelper::WITHDRAW_EXCESS) {
                     $syncMemoWallet = new SyncFixExcess($item);
                 }
-                if ($item->type === TransactionHelper::DEPOSIT) {
-                    $syncMemoWallet = new SyncFixDeposit($item);
+                if ($item->type === TransactionHelper::DEPOSIT && $item->currency === TransactionHelper::TON) {
+                    $syncMemoWallet = new SyncFixDepositTon($item);
                 }
-                if ($item->type === TransactionHelper::WITHDRAW) {
-                    $syncMemoWallet = new SyncFixWithdraw($item);
+                if ($item->type === TransactionHelper::DEPOSIT && $item->currency !== TransactionHelper::TON) {
+                    $syncMemoWallet = new SyncFixDepositJetton($item);
+                }
+                if ($item->type === TransactionHelper::WITHDRAW && $item->currency === TransactionHelper::TON) {
+                    $syncMemoWallet = new SyncFixWithdrawTon($item);
+                }
+                if ($item->type === TransactionHelper::WITHDRAW && $item->currency !== TransactionHelper::TON) {
+                    $syncMemoWallet = new SyncFixWithdrawJetton($item);
                 }
                 if (!empty($syncMemoWallet) && $syncMemoWallet instanceof SyncMemoWalletAbstract) {
                     $syncMemoWallet->process();

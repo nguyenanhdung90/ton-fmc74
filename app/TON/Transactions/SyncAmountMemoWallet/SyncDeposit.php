@@ -31,20 +31,21 @@ class SyncDeposit extends SyncMemoWalletAbstract
                     ->update(['is_sync_amount' => true, 'is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
             } else {
                 $updateAmount = $walletMemo->amount + $this->transaction->amount;
-                // process fee for jetton
+                // process fee
                 $walletTon = DB::table('wallet_ton_memos')
                     ->where('memo', $this->transaction->to_memo)
                     ->where('currency', TransactionHelper::TON)
                     ->lockForUpdate()
                     ->get(['id', 'memo', 'currency', 'amount'])
                     ->first();
-                if ($walletTon && ($walletTon->amount - $this->transaction->total_fees) > 0) {
-                    $updateFeeTonAmount = $walletTon->amount - $this->transaction->total_fees;
+                $updateFee = $walletTon->amount - $this->transaction->total_fees;
+                if ($walletTon && $updateFee > 0) {
                     DB::table('wallet_ton_memos')->where('id', $walletTon->id)
-                        ->update(['amount' => $updateFeeTonAmount, 'updated_at' => Carbon::now()]);
+                        ->update(['amount' => $updateFee, 'updated_at' => Carbon::now()]);
                     DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                         ->update(['is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
                 }
+                // end fee
                 DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                     ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
             }
