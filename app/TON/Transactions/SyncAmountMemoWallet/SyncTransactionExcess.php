@@ -48,8 +48,8 @@ class SyncTransactionExcess extends SyncMemoWalletAbstract
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                 ->update(['is_sync_amount' => true, 'is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
-            printf("Sync excess id: %s, transfer amount: %s, to Ton memo: %s, memo id: %s \n", $withdraw->id,
-                $transferAmount, $withdraw->from_memo, $walletTon->id);
+            printf("Sync excess id: %s, transfer amount: %s, to Ton memo: %s, memo id: %s \n",
+                $this->transaction->id, $transferAmount, $withdraw->from_memo, $walletTon->id);
             DB::commit();
             return;
         } catch (\Exception $e) {

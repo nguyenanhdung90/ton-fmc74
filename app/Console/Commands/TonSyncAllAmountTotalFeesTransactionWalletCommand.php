@@ -3,15 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Models\WalletTonTransaction;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncDeposit;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixDeposit;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixExcess;
+use App\TON\Transactions\SyncAmountMemoWallet\SyncFixWithdraw;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncMemoWalletAbstract;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncTransactionExcess;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawJetton;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawTon;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 
-class TonSyncAllAmountTransactionWalletCommand extends Command
+class TonSyncAllAmountTotalFeesTransactionWalletCommand extends Command
 {
     /**
      * php artisan ton:sync_all_amount_transaction_wallet
@@ -61,18 +60,14 @@ class TonSyncAllAmountTransactionWalletCommand extends Command
                 break;
             }
             $transactions->each(function ($item, $key) {
-                /** @var WalletTonTransaction $item */
-                if ($item->needSyncExcess()) {
-                    $syncMemoWallet = new SyncTransactionExcess($item);
+                if ($item->type === TransactionHelper::WITHDRAW_EXCESS) {
+                    $syncMemoWallet = new SyncFixExcess($item);
                 }
-                if ($item->needSyncWithdrawTon()) {
-                    $syncMemoWallet = new SyncWithdrawTon($item);
+                if ($item->type === TransactionHelper::DEPOSIT) {
+                    $syncMemoWallet = new SyncFixDeposit($item);
                 }
-                if ($item->needSyncWithdrawJetton()) {
-                    $syncMemoWallet = new SyncWithdrawJetton($item);
-                }
-                if ($item->needSyncDeposit()) {
-                    $syncMemoWallet = new SyncDeposit($item);
+                if ($item->type === TransactionHelper::WITHDRAW) {
+                    $syncMemoWallet = new SyncFixWithdraw($item);
                 }
                 if (!empty($syncMemoWallet) && $syncMemoWallet instanceof SyncMemoWalletAbstract) {
                     $syncMemoWallet->process();
