@@ -46,8 +46,8 @@ class TonSyncAllAmountTransactionWalletCommand extends Command
     {
         $query = WalletTonTransaction::query();
         $query->where(function ($query) {
-            $query->orWhere('is_sync_amount_ton', 0);
-            $query->orWhere('is_sync_amount_jetton', 0);
+            $query->orWhere('is_sync_amount', 0);
+            $query->orWhere('is_sync_total_fees', 0);
         })
             ->whereNotNull('hash')
             ->whereNotNull('lt')
@@ -57,20 +57,21 @@ class TonSyncAllAmountTransactionWalletCommand extends Command
             $offset = TransactionHelper::MAX_LIMIT_TRANSACTION * $i;
             $transactions = $query->offset($offset)->get();
             if (!$transactions->count()) {
+                printf("Empty transaction \n");
                 break;
             }
             $transactions->each(function ($item, $key) {
                 /** @var WalletTonTransaction $item */
-                if (!$item->isSyncExcess()) {
+                if ($item->needSyncExcess()) {
                     $syncMemoWallet = new SyncTransactionExcess($item);
                 }
-                if (!$item->isSyncWithdrawTon()) {
+                if ($item->needSyncWithdrawTon()) {
                     $syncMemoWallet = new SyncWithdrawTon($item);
                 }
-                if (!$item->isSyncWithdrawJetton()) {
+                if ($item->needSyncWithdrawJetton()) {
                     $syncMemoWallet = new SyncWithdrawJetton($item);
                 }
-                if (!$item->isSyncDeposit()) {
+                if ($item->needSyncDeposit()) {
                     $syncMemoWallet = new SyncDeposit($item);
                 }
                 if (!empty($syncMemoWallet) && $syncMemoWallet instanceof SyncMemoWalletAbstract) {

@@ -17,7 +17,7 @@ class TonPeriodicDepositTransactionCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'ton:periodic_deposit {--limit=100}';
+    protected $signature = 'ton:periodic_deposit';
 
     /**
      * The console command description.
@@ -44,7 +44,11 @@ class TonPeriodicDepositTransactionCommand extends Command
         parent::__construct();
         $this->tonCenterClient = $tonCenterClient;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
-        $this->params = ["limit" => null, "address" => config('services.ton.root_ton_wallet'), "to_lt" => null];
+        $this->params = [
+            "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
+            "address" => config('services.ton.root_ton_wallet'),
+            "to_lt" => null
+        ];
     }
 
     /**
@@ -55,11 +59,9 @@ class TonPeriodicDepositTransactionCommand extends Command
     public function handle(): int
     {
         $lastTransaction = WalletTonTransaction::where('type', 'type', TransactionHelper::DEPOSIT)
-            ->orderBy('id', 'desc')->first();
-        $toLt = $lastTransaction ? $lastTransaction->lt : 0;
-        $limit = min($this->option('limit'), TransactionHelper::MAX_LIMIT_TRANSACTION);
+            ->orderBy('lt', 'desc')->first();
+        $toLt = $lastTransaction ? $lastTransaction->lt : null;
         Arr::set($this->params, 'to_lt', $toLt);
-        Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
                 printf("Period transaction deposit query every 20s ...\n");

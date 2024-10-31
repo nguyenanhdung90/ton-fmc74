@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawTon;
 use App\TON\Transactions\TransactionHelper;
@@ -57,7 +58,7 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
-                printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
+               // printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(1);
                     $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
@@ -80,7 +81,7 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                     DB::table('wallet_ton_transactions')
                         ->where('id', $withdrawTx->id)
                         ->update($updatedTransaction);
-                    $transaction = DB::table('wallet_ton_transactions')->find($withdrawTx->id);
+                    $transaction = WalletTonTransaction::find($withdrawTx->id);
                     $syncMemoWallet = new SyncWithdrawTon($transaction);
                     $syncMemoWallet->process();
                 }
@@ -92,7 +93,7 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function isTransferAllRemainingBalance($withdrawTx): bool
+    private function isWithdrawAllRemainingBalance($withdrawTx): bool
     {
         return is_null($withdrawTx->amount);
     }
@@ -107,7 +108,7 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
             'total_fees' => $feeWithDraw,
             'updated_at' => Carbon::now()
         ];
-        if ($this->isTransferAllRemainingBalance($withdrawTx)) {
+        if ($this->isWithdrawAllRemainingBalance($withdrawTx)) {
             $updatedTransaction['amount'] = (int)Arr::get($txByMessage, 'out_msgs.0.value', 0);
         }
         return $updatedTransaction;

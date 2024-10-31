@@ -22,11 +22,12 @@ class InsertTonWithdrawTransaction implements ShouldQueue
 
     private string $fromMemo;
     private string $toAddress;
-    private float $transferAmount;
+    private float $transferUnit;
     private string $currency;
     private int $decimals;
     private string $toMemo;
     private ?int $queryId;
+    private bool $isAllRemainBalance;
 
     /**
      * Create a new job instance.
@@ -37,20 +38,22 @@ class InsertTonWithdrawTransaction implements ShouldQueue
         TonResponse $tonResponse,
         string $fromMemo,
         string $toAddress,
-        int $transferAmount,
+        int $transferUnit,
         string $currency,
         int $decimals,
         string $toMemo,
-        ?int $queryId = null
+        ?int $queryId = null,
+        bool $isAllRemainBalance = false
     ) {
         $this->tonResponse = $tonResponse;
         $this->fromMemo = $fromMemo;
         $this->toAddress = $toAddress;
-        $this->transferAmount = $transferAmount;
+        $this->transferUnit = $transferUnit;
         $this->currency = $currency;
         $this->decimals = $decimals;
         $this->toMemo = $toMemo;
         $this->queryId = $queryId;
+        $this->isAllRemainBalance = $isAllRemainBalance;
     }
 
     /**
@@ -78,13 +81,15 @@ class InsertTonWithdrawTransaction implements ShouldQueue
                 'to_memo' => $this->toMemo,
                 'to_address_wallet' => $this->toAddress,
                 'in_msg_hash' => $msgHash,
-                'amount' => $this->transferAmount,
                 'currency' => $this->currency,
                 'decimals' => $this->decimals,
                 'query_id' => $this->queryId,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
+            if (!$this->isAllRemainBalance) {
+                $transaction['amount'] = $this->transferUnit;
+            }
             DB::table('wallet_ton_transactions')->insert($transaction);
         } catch (\Exception $e) {
             Log::error('InsertTonWithdrawTransaction: ' . $e->getMessage());

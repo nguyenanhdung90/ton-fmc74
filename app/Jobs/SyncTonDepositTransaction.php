@@ -2,13 +2,13 @@
 
 namespace App\Jobs;
 
+use App\Models\WalletTonTransaction;
 use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
 use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;
 use App\TON\Transactions\Deposit\CollectTotalFeesAttribute;
 use App\TON\Transactions\Deposit\CollectTransactionAttribute;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncDeposit;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncMemoWalletAbstract;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -73,11 +73,10 @@ class SyncTonDepositTransaction implements ShouldQueue
             $decimals = new CollectDecimalsAttribute($memoSenderAmount);
             $trans = $decimals->collect($this->data);
 
-            printf("Inserting tran hash: %s currency: %s amount: %s \n", $trans['hash'], $trans['currency'],
-                $trans['amount']);
-
+            printf("Insert tran hash: %s currency: %s amount: %s \n", $trans['hash'], $trans['currency']
+                , $trans['amount']);
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
-            $transaction = DB::table('wallet_ton_transactions')->find($transactionId);
+            $transaction = WalletTonTransaction::find($transactionId);
             if ($transaction) {
                 $syncMemoWallet = new SyncDeposit($transaction);
                 $syncMemoWallet->process();

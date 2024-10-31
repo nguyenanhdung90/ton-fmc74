@@ -3,7 +3,6 @@
 namespace App\TON\Withdraws;
 
 use App\Jobs\InsertTonWithdrawTransaction;
-use App\Models\WalletTonMemo;
 use App\TON\Contracts\Wallets\Exceptions\WalletException;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
@@ -25,21 +24,27 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
      * @throws TransportException
      * @throws WithdrawTonException
      */
-    public function process(string $fromMemo, string $toAddress, float $transferAmount, string $toMemo = "")
+    public function process(string $fromMemo, string $toAddress,
+                            float $transferAmount, string $toMemo = "", bool $isAllRemainBalance = false)
     {
-        $this->isValidWalletTransferAmount($fromMemo, $transferAmount, TransactionHelper::TON);
+        $walletMemo = $this->validGetWalletMemo($fromMemo, $transferAmount, TransactionHelper::TON);
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
         /** @var WalletV4R2 $wallet */
         $wallet = $this->getWallet($kp->publicKey);
+        $sendMode = $isAllRemainBalance ?
+            SendMode::combine([SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE, SendMode::IGNORE_ERRORS]) :
+            SendMode::PAY_GAS_SEPARATELY;
+        $amountWalletDecimal = (string)Units::fromNano($walletMemo->amount, $walletMemo->decimals);
+        $transferUnit = $isAllRemainBalance ? Units::toNano($amountWalletDecimal) : Units::toNano($transferAmount);
         $extMsg = $wallet->createTransferMessage(
             [
                 new Transfer(
                     new Address($toAddress),
-                    Units::toNano($transferAmount),
+                    $transferUnit,
                     $toMemo,
-                    SendMode::combine([SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE, SendMode::IGNORE_ERRORS])
+                    $sendMode
                 )
             ],
             new TransferOptions((int)$wallet->seqno($transport))
@@ -50,10 +55,12 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             $tonResponse,
             $fromMemo,
             $toAddress,
-            (string)Units::toNano($transferAmount),
+            (string)$transferUnit,
             TransactionHelper::TON,
             Units::DEFAULT,
-            $toMemo
+            $toMemo,
+            null,
+            $isAllRemainBalance
         );
     }
 }

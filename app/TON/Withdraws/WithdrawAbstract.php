@@ -50,8 +50,8 @@ abstract class WithdrawAbstract
     /**
      * @throws WithdrawTonException
      */
-    protected function isValidWalletTransferAmount(string $fromMemo, float $transferAmount, string $currency, int
-    $decimals = Units::DEFAULT)
+    protected function validGetWalletMemo(string $fromMemo, float $transferAmount,
+                                          string $currency, int $decimals = Units::DEFAULT)
     {
         $walletMemo = WalletTonMemo::where('memo', $fromMemo)->where('currency', $currency)->first();
         if (!$walletMemo) {
@@ -60,5 +60,6 @@ abstract class WithdrawAbstract
         if ($walletMemo->amount < (string)Units::toNano($transferAmount, $decimals)) {
             throw new WithdrawTonException("Amount of wallet is not enough");
         }
+        return $walletMemo;
     }
 }

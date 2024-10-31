@@ -11,32 +11,26 @@ class WalletTonTransaction extends Model
 
     protected $fillable = [
         'from_address_wallet', 'from_memo', 'type', 'to_memo', 'to_address_wallet', 'hash', 'in_msg_hash',
-        'amount', 'currency', 'total_fees', 'lt', 'decimals', 'query_id', 'is_sync_amount_ton', 'is_sync_amount_jetton'
+        'amount', 'currency', 'total_fees', 'lt', 'decimals', 'query_id', 'is_sync_amount', 'is_sync_total_fees'
     ];
 
-    public function isSyncExcess(): bool
+    public function needSyncExcess(): bool
     {
-        return $this->type === TransactionHelper::WITHDRAW_EXCESS && $this->is_sync_amount_ton;
+        return $this->type === TransactionHelper::WITHDRAW_EXCESS && (!$this->is_sync_amount || !$this->is_sync_total_fees);
     }
 
-    public function isSyncWithdrawTon(): bool
+    public function needSyncWithdrawTon(): bool
     {
-        return $this->type === TransactionHelper::WITHDRAW && $this->is_sync_amount_ton;
+        return $this->type === TransactionHelper::WITHDRAW && $this->currency === TransactionHelper::TON && (!$this->is_sync_amount || !$this->is_sync_total_fees);
     }
 
-    public function isSyncWithdrawJetton(): bool
+    public function needSyncWithdrawJetton(): bool
     {
-        return $this->type === TransactionHelper::WITHDRAW && $this->currency !== TransactionHelper::TON &&
-            $this->is_sync_amount_ton && $this->is_sync_amount_jetton;
+        return $this->type === TransactionHelper::WITHDRAW && $this->currency !== TransactionHelper::TON && (!$this->is_sync_amount || !$this->is_sync_total_fees);
     }
 
-    public function isSyncDeposit(): bool
+    public function needSyncDeposit(): bool
     {
-        if ($this->currency === TransactionHelper::TON) {
-            return $this->type === TransactionHelper::DEPOSIT && $this->is_sync_amount_ton;
-        } else {
-            return $this->type === TransactionHelper::DEPOSIT && $this->is_sync_amount_ton
-                && $this->is_sync_amount_jetton;
-        }
+        return $this->type === TransactionHelper::DEPOSIT && (!$this->is_sync_amount || !$this->is_sync_total_fees);
     }
 }

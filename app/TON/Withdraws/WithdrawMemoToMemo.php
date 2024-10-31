@@ -65,9 +65,9 @@ class WithdrawMemoToMemo implements WithdrawMemoToMemoInterface
                 "updated_at" => Carbon::now(),
             ];
             if ($currency === TransactionHelper::TON) {
-                $transaction['is_sync_amount_ton'] = true;
+                $transaction['is_sync_amount'] = true;
             } else {
-                $transaction['is_sync_amount_jetton'] = true;
+                $transaction['is_sync_total_fees'] = true;
             }
             DB::table('wallet_ton_transactions')->insert($transaction);
         }, 5);

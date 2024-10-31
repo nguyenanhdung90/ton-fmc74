@@ -38,7 +38,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
      */
     public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "")
     {
-        $this->isValidWalletTransferAmount($fromMemo, $transferAmount,
+        $this->validGetWalletMemo($fromMemo, $transferAmount,
             TransactionHelper::USDT, Units::USDt);
 
         $phrases = config('services.ton.ton_mnemonic');

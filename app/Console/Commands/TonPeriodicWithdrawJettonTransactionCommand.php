@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawJetton;
 use App\TON\Transactions\TransactionHelper;
@@ -91,7 +92,7 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                             'total_fees' => $totalFees,
                             'updated_at' => Carbon::now()
                         ]);
-                    $transaction = DB::table('wallet_ton_transactions')->find($withdrawTx->id);
+                    $transaction = WalletTonTransaction::find($withdrawTx->id);
                     $syncMemoWallet = new SyncWithdrawJetton($transaction);
                     $syncMemoWallet->process();
                 }

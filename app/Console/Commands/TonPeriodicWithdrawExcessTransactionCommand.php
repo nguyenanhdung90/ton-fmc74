@@ -63,7 +63,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
             if (!$numberTx) {
                 continue;
             }
-            printf("Processing %s withdraw transactions. \n", $numberTx);
+            //printf("Processing %s withdraw transactions. \n", $numberTx);
             foreach ($transactions as $transaction) {
                 if (empty(Arr::get($transaction, 'out_msgs'))) {
                     SyncTonExcessTransaction::dispatch($transaction);

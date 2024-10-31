@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\WalletTonTransaction;
 use App\TON\Transactions\Excess\CollectAmountAttribute;
 use App\TON\Transactions\Excess\CollectExcessTransactionAttribute;
 use App\TON\Transactions\Excess\CollectFromAddressWalletAttribute;
@@ -70,8 +71,8 @@ class SyncTonExcessTransaction implements ShouldQueue
                 return;
             }
 
-            $lastInsertedId = DB::table('wallet_ton_transactions')->insertGetId($trans);
-            $transaction = DB::table('wallet_ton_transactions')->find($lastInsertedId);
+            $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
+            $transaction = WalletTonTransaction::find($transactionId);
             if ($transaction) {
                 $syncMemoWallet = new SyncTransactionExcess($transaction);
                 $syncMemoWallet->process();

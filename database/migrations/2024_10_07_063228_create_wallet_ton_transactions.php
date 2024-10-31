@@ -28,8 +28,8 @@ class CreateWalletTonTransactions extends Migration
             $table->string('currency', 20);
             $table->unsignedBigInteger('total_fees')->default(0);
             $table->unsignedBigInteger('query_id')->nullable();
-            $table->boolean('is_sync_amount_ton')->default(0);
-            $table->boolean('is_sync_amount_jetton')->default(0);
+            $table->boolean('is_sync_amount')->default(0);
+            $table->boolean('is_sync_total_fees')->default(0);
             $table->unique(['query_id', 'currency', 'type'], 'query id');
             $table->timestamps();
 

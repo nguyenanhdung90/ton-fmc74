@@ -16,7 +16,7 @@ class TonSyncAllDepositTransactionCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'ton:sync_all_deposit {--limit=100}';
+    protected $signature = 'ton:sync_all_deposit';
 
     /**
      * The console command description.
@@ -44,7 +44,7 @@ class TonSyncAllDepositTransactionCommand extends Command
         $this->tonCenterClient = $tonCenterClient;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
         $this->params = [
-            "limit" => null,
+            "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
             "address" => config('services.ton.root_ton_wallet'),
             "lt" => null,
             "hash" => null
@@ -53,8 +53,6 @@ class TonSyncAllDepositTransactionCommand extends Command
 
     public function handle(): int
     {
-        $limit = min($this->option('limit'), TransactionHelper::MAX_LIMIT_TRANSACTION);
-        Arr::set($this->params, 'limit', $limit);
         while (true) {
             try {
                 printf("New query transaction deposit : %s \n", json_encode(array_filter($this->params)));
@@ -76,7 +74,7 @@ class TonSyncAllDepositTransactionCommand extends Command
                 });
                 $mapperSource = $this->mapperJetMasterByAddress->request($sources);
 
-                printf("Processing %s transactions. \n", $numberTx);
+                //printf("Processing %s transactions. \n", $numberTx);
                 foreach ($transactions as $transaction) {
                     SyncTonDepositTransaction::dispatch($transaction, $mapperSource);
                 }
