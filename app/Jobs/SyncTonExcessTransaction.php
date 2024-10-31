@@ -71,6 +71,8 @@ class SyncTonExcessTransaction implements ShouldQueue
                 return;
             }
 
+            printf("Insert tran hash: %s currency: %s amount: %s \n", $trans['hash'], $trans['currency']
+                , $trans['amount']);
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
             $transaction = WalletTonTransaction::find($transactionId);
             if ($transaction) {

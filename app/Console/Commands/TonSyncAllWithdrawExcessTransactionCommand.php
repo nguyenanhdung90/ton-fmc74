@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Jobs\SyncTonExcessTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;

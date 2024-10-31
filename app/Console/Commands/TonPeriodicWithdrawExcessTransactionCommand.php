@@ -51,7 +51,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
     public function handle(): int
     {
         $lastTransaction = WalletTonTransaction::where('type', TransactionHelper::WITHDRAW_EXCESS)
-            ->orderBy('id', 'desc')
+            ->orderBy('lt', 'desc')
             ->first();
         $toLt = $lastTransaction ? $lastTransaction->lt : 0;
         Arr::set($this->params, 'to_lt', $toLt);

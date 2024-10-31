@@ -20,7 +20,6 @@ class SyncTransactionExcess extends SyncMemoWalletAbstract
             $withdraw = DB::table('wallet_ton_transactions')
                 ->where('query_id', $this->transaction->query_id)
                 ->where('type', TransactionHelper::WITHDRAW)
-                ->where('currency', $this->transaction->currency)
                 ->first();
             if (!$withdraw) {
                 DB::rollBack();
