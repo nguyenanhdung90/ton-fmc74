@@ -25,23 +25,23 @@ class SyncWithdrawTon extends SyncMemoWalletAbstract
                 DB::rollBack();
                 return;
             }
-            if ($walletTon->amount < $this->transaction->amount) {
+            $updateAmount = $walletTon->amount - $this->transaction->amount;
+            if ($updateAmount < 0) {
                 DB::rollBack();
                 return;
             }
-            $updateAmount = $walletTon->amount - $this->transaction->amount - $this->transaction->total_fees;
-            if ($updateAmount < 0) {
-                $updateAmount = $walletTon->amount - $this->transaction->amount;
+            $updateAmountFee = $updateAmount - $this->transaction->total_fees;
+            if ($updateAmountFee < 0) {
+                DB::table('wallet_ton_memos')->where('id', $walletTon->id)
+                    ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
                 DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                     ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
             } else {
+                DB::table('wallet_ton_memos')->where('id', $walletTon->id)
+                    ->update(['amount' => $updateAmountFee, 'updated_at' => Carbon::now()]);
                 DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                     ->update(['is_sync_amount' => true, 'is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
             }
-
-            DB::table('wallet_ton_memos')->where('id', $walletTon->id)
-                ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-
             printf("Sync withdraw ton id: %s, transfer amount: %s, to Ton memo: %s, memo id: %s \n",
                 $this->transaction->id,
                 $updateAmount, $this->transaction->from_memo, $walletTon->id);

@@ -23,10 +23,10 @@ class SyncWithdrawJetton extends SyncMemoWalletAbstract
                 ->lockForUpdate()
                 ->first();
             if ($walletTon) {
-                $updateAmount = $walletTon->amount - $this->transaction->total_fees;
-                if ($updateAmount >= 0) {
+                $updateFee = $walletTon->amount - $this->transaction->total_fees;
+                if ($updateFee >= 0) {
                     DB::table('wallet_ton_memos')->where('id', $walletTon->id)
-                        ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
+                        ->update(['amount' => $updateFee, 'updated_at' => Carbon::now()]);
                     DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                         ->update(['is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
                 }
