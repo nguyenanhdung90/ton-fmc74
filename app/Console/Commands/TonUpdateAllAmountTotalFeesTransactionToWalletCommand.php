@@ -11,7 +11,7 @@ use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdra
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 
-class TonUpdateAllAmountTotalFeesTransactionWalletCommand extends Command
+class TonUpdateAllAmountTotalFeesTransactionToWalletCommand extends Command
 {
     /**
      * php artisan ton:update_all_amount_fee_transaction
