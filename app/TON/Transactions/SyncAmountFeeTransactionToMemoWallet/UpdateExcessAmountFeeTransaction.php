@@ -23,7 +23,7 @@ class UpdateExcessAmountFeeTransaction implements UpdateAmountFeeTransactionInte
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
-            if (empty($transaction->query_id)) {
+            if (!$transaction || empty($transaction->query_id)) {
                 DB::rollBack();
                 return;
             }

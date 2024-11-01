@@ -23,7 +23,8 @@ class UpdateWithdrawFeeTransaction implements UpdateAmountFeeTransactionInterfac
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
-            if (empty($transaction->from_memo) || $transaction->is_sync_total_fees) {
+            if (!$transaction || empty($transaction->from_memo) || $transaction->is_sync_total_fees) {
+                DB::rollBack();
                 return;
             }
             $wallet = DB::table('wallet_ton_memos')
