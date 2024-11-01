@@ -6,6 +6,6 @@ class TransactionWithdrawAmount extends TransactionUpdateToWalletAbstract
 {
     public function getUpdateTransactionToWallet(): UpdateAmountFeeTransactionInterface
     {
-        return new UpdateWithdrawAmountTransaction($this->transaction);
+        return new UpdateWithdrawAmountTransaction($this->transactionId);
     }
 }

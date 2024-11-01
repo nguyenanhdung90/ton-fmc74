@@ -77,13 +77,10 @@ class TonSyncDepositTransaction implements ShouldQueue
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
             printf("Insert tran id: %s currency: %s amount: %s \n", $transactionId, $trans['currency']
                 , $trans['amount']);
-            $transaction = WalletTonTransaction::find($transactionId);
-            if ($transaction) {
-                $depositAmount = new TransactionDepositAmount($transaction);
-                $depositAmount->updateToAmountWallet();
-                $depositFee = new TransactionDepositFee($transaction);
-                $depositFee->updateToAmountWallet();
-            }
+            $depositAmount = new TransactionDepositAmount($transactionId);
+            $depositAmount->updateToAmountWallet();
+            $depositFee = new TransactionDepositFee($transactionId);
+            $depositFee->updateToAmountWallet();
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());
             //printf("Exception: %s \n", $e->getMessage());

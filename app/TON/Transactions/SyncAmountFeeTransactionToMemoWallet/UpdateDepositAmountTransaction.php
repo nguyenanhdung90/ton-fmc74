@@ -2,43 +2,47 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\Models\WalletTonTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateDepositAmountTransaction implements UpdateAmountFeeTransactionInterface
 {
-    protected WalletTonTransaction $transaction;
+    protected int $transactionId;
 
-    public function __construct(WalletTonTransaction $transaction)
+    public function __construct(int $transactionId)
     {
-        $this->transaction = $transaction;
+        $this->transactionId = $transactionId;
     }
 
     public function process()
     {
-        if (empty($this->transaction->to_memo) || $this->transaction->is_sync_amount
-            || empty($this->transaction->currency)) {
-            return;
-        }
         DB::beginTransaction();
         try {
+            $transaction = DB::table('wallet_ton_transactions')
+                ->where('id', $this->transactionId)
+                ->lockForUpdate()
+                ->first();
+            if (!$transaction || empty($transaction->to_memo) || $transaction->is_sync_amount
+                || empty($transaction->currency)) {
+                DB::rollBack();
+                return;
+            }
             $wallet = DB::table('wallet_ton_memos')
-                ->where('currency', $this->transaction->currency)
-                ->where('memo', $this->transaction->to_memo)
+                ->where('currency', $transaction->currency)
+                ->where('memo', $transaction->to_memo)
                 ->lockForUpdate()
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
                 return;
             }
-            $updateAmount = $wallet->amount + $this->transaction->amount;
+            $updateAmount = $wallet->amount + $transaction->amount;
             DB::table('wallet_ton_memos')->where('id', $wallet->id)
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-            DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
+            DB::table('wallet_ton_transactions')->where('id', $transaction->id)
                 ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
             printf("Update amount deposit tran id: %s, update amount: %s, currency: %s, to memo id: %s \n",
-                $this->transaction->id, $updateAmount, $this->transaction->currency, $wallet->id);
+                $transaction->id, $updateAmount, $transaction->currency, $wallet->id);
             DB::commit();
             return;
         } catch (\Exception $e) {

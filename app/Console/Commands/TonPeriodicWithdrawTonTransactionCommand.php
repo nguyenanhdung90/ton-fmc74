@@ -83,13 +83,10 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                     DB::table('wallet_ton_transactions')
                         ->where('id', $withdrawTx->id)
                         ->update($updatedTransaction);
-                    $transaction = WalletTonTransaction::find($withdrawTx->id);
-                    if ($transaction) {
-                        $withdrawAmount = new TransactionWithdrawAmount($transaction);
-                        $withdrawAmount->updateToAmountWallet();
-                        $withdrawFee = new TransactionWithdrawFee($transaction);
-                        $withdrawFee->updateToAmountWallet();
-                    }
+                    $withdrawAmount = new TransactionWithdrawAmount($withdrawTx->id);
+                    $withdrawAmount->updateToAmountWallet();
+                    $withdrawFee = new TransactionWithdrawFee($withdrawTx->id);
+                    $withdrawFee->updateToAmountWallet();
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw ton: " . $e->getMessage());

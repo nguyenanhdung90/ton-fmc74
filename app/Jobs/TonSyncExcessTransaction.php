@@ -74,11 +74,8 @@ class TonSyncExcessTransaction implements ShouldQueue
             printf("Insert tran hash: %s currency: %s amount: %s \n", $trans['hash'], $trans['currency']
                 , $trans['amount']);
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
-            $transaction = WalletTonTransaction::find($transactionId);
-            if ($transaction) {
-                $excess = new TransactionExcess($transaction);
-                $excess->updateToAmountWallet();
-            }
+            $excess = new TransactionExcess($transactionId);
+            $excess->updateToAmountWallet();
         } catch (\Exception $e) {
             Log::error("Message: " . ' | ' . $e->getMessage());
             printf("Exception: %s \n", $e->getMessage());

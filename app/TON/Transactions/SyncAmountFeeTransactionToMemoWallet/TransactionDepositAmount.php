@@ -6,6 +6,6 @@ class TransactionDepositAmount extends TransactionUpdateToWalletAbstract
 {
     public function getUpdateTransactionToWallet(): UpdateAmountFeeTransactionInterface
     {
-        return new UpdateDepositAmountTransaction($this->transaction);
+        return new UpdateDepositAmountTransaction($this->transactionId);
     }
 }

@@ -91,13 +91,10 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                             'total_fees' => $totalFees,
                             'updated_at' => Carbon::now()
                         ]);
-                    $transaction = WalletTonTransaction::find($withdrawTx->id);
-                    if ($transaction) {
-                        $withdrawAmount = new TransactionWithdrawAmount($transaction);
-                        $withdrawAmount->updateToAmountWallet();
-                        $withdrawFee = new TransactionWithdrawFee($transaction);
-                        $withdrawFee->updateToAmountWallet();
-                    }
+                    $withdrawAmount = new TransactionWithdrawAmount($withdrawTx->id);
+                    $withdrawAmount->updateToAmountWallet();
+                    $withdrawFee = new TransactionWithdrawFee($withdrawTx->id);
+                    $withdrawFee->updateToAmountWallet();
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw jetton: " . $e->getMessage());

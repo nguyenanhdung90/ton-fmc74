@@ -6,11 +6,11 @@ use App\Models\WalletTonTransaction;
 
 abstract class TransactionUpdateToWalletAbstract
 {
-    protected WalletTonTransaction $transaction;
+    protected int $transactionId;
 
-    public function __construct(WalletTonTransaction $transaction)
+    public function __construct(int $transactionId)
     {
-        $this->transaction = $transaction;
+        $this->transactionId = $transactionId;
     }
 
     abstract public function getUpdateTransactionToWallet(): UpdateAmountFeeTransactionInterface;

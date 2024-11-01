@@ -7,6 +7,7 @@ use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDeposit
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositFee;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionExcess;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawFee;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 
@@ -64,26 +65,26 @@ class TonUpdateAllAmountTotalFeesTransactionWalletCommand extends Command
             $transactions->each(function ($item, $key) {
                 switch ($item->type) {
                     case TransactionHelper::WITHDRAW_EXCESS:
-                        $transaction = new TransactionExcess($item);
+                        $transaction = new TransactionExcess($item->id);
                         $transaction->updateToAmountWallet();
                         break;
                     case TransactionHelper::DEPOSIT:
                         if (!$item->is_sync_amount) {
-                            $transaction = new TransactionDepositAmount($item);
+                            $transaction = new TransactionDepositAmount($item->id);
                             $transaction->updateToAmountWallet();
                         }
                         if (!$item->is_sync_total_fees) {
-                            $transaction = new TransactionDepositFee($item);
+                            $transaction = new TransactionDepositFee($item->id);
                             $transaction->updateToAmountWallet();
                         }
                         break;
                     case TransactionHelper::WITHDRAW:
                         if (!$item->is_sync_amount) {
-                            $transaction = new TransactionWithdrawAmount($item);
+                            $transaction = new TransactionWithdrawAmount($item->id);
                             $transaction->updateToAmountWallet();
                         }
                         if (!$item->is_sync_total_fees) {
-                            $transaction = new TransactionWithdrawFee($item);
+                            $transaction = new TransactionWithdrawFee($item->id);
                             $transaction->updateToAmountWallet();
                         }
                         break;

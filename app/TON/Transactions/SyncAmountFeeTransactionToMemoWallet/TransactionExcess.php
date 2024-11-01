@@ -6,6 +6,6 @@ class TransactionExcess extends TransactionUpdateToWalletAbstract
 {
     public function getUpdateTransactionToWallet(): UpdateAmountFeeTransactionInterface
     {
-        return new UpdateExcessAmountFeeTransaction($this->transaction);
+        return new UpdateExcessAmountFeeTransaction($this->transactionId);
     }
 }
