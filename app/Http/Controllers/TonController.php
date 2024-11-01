@@ -49,7 +49,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawUSDT->process('memo', $destinationAddress, 0.111, 'plus usdt');
+            $this->withdrawUSDT->process('memo', $destinationAddress, 0.555, 'plus usdt');
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();

@@ -60,7 +60,7 @@ class UpdateExcessAmountFeeTransaction implements UpdateAmountFeeTransactionInte
                     ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
                 DB::table('wallet_ton_transactions')->where('id', $transaction->id)
                     ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
-                printf("Sync excess amount tran id: %s, updated amount: %s, to memo id: %s  \n",
+                printf("Update excess amount tran id: %s, updated amount: %s, to memo id: %s  \n",
                     $transaction->id, $updateAmount, $wallet->id);
             }
 
