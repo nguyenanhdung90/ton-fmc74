@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\WalletTonTransaction;
 use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
 use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;

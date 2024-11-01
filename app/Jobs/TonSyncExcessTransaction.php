@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\WalletTonTransaction;
 use App\TON\Transactions\Excess\CollectAmountAttribute;
 use App\TON\Transactions\Excess\CollectExcessTransactionAttribute;
 use App\TON\Transactions\Excess\CollectFromAddressWalletAttribute;
