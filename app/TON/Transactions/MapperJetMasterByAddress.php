@@ -10,11 +10,11 @@ use Illuminate\Support\Collection;
 
 class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
 {
-    protected TonCenterClientInterface $tonCenterV2Client;
+    protected TonCenterClientInterface $tonCenterClient;
 
-    public function __construct(TonCenterClientInterface $tonCenterV2Client)
+    public function __construct(TonCenterClientInterface $tonCenterClient)
     {
-        $this->tonCenterV2Client = $tonCenterV2Client;
+        $this->tonCenterClient = $tonCenterClient;
     }
 
     /**
@@ -66,7 +66,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
                 "address" => $sourceChunk->implode(','),
             ];
             sleep(1);
-            $jetWallet = $this->tonCenterV2Client->getJetWallets($params);
+            $jetWallet = $this->tonCenterClient->getJetWallets($params);
             if (!$jetWallet) {
                 return null;
             }
@@ -96,7 +96,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
                 "address" => $jetWalletChunk->implode(',')
             ];
             sleep(1);
-            $jetMaster = $this->tonCenterV2Client->getJetMasters($params);
+            $jetMaster = $this->tonCenterClient->getJetMasters($params);
             if (!$jetMaster) {
                 return null;
             }
