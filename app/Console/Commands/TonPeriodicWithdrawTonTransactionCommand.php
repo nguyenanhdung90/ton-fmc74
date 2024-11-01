@@ -4,7 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawTon;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawFee;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -53,8 +54,10 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', TransactionHelper::TON)
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
-                    ->whereNull('lt')->whereNotNull('in_msg_hash')
-                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)->get();
+                    ->whereNull('lt')
+                    ->whereNotNull('in_msg_hash')
+                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)
+                    ->get();
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
@@ -63,7 +66,6 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                     sleep(1);
                     $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
                     if (!$txByMessages) {
-                        printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);
                         continue;
                     }
                     $txByMessage = $txByMessages->first();
@@ -82,8 +84,12 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                         ->where('id', $withdrawTx->id)
                         ->update($updatedTransaction);
                     $transaction = WalletTonTransaction::find($withdrawTx->id);
-                    $syncMemoWallet = new SyncWithdrawTon($transaction);
-                    $syncMemoWallet->process();
+                    if ($transaction) {
+                        $withdrawAmount = new TransactionWithdrawAmount($transaction);
+                        $withdrawAmount->updateToAmountWallet();
+                        $withdrawFee = new TransactionWithdrawFee($transaction);
+                        $withdrawFee->updateToAmountWallet();
+                    }
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw ton: " . $e->getMessage());

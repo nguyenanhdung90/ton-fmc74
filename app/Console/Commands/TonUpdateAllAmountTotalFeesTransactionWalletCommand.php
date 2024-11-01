@@ -3,12 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\WalletTonTransaction;
-use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionWithdrawFee;
-use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionWithdrawAmount;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncMemoWalletAbstract;
-use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionDepositAmount;
-use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionDepositFee;
-use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionExcess;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositFee;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionExcess;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawAmount;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 
@@ -66,27 +64,27 @@ class TonUpdateAllAmountTotalFeesTransactionWalletCommand extends Command
             $transactions->each(function ($item, $key) {
                 switch ($item->type) {
                     case TransactionHelper::WITHDRAW_EXCESS:
-                        $syncMemoWallet = new UpdateTransactionExcess($item);
-                        $syncMemoWallet->process();
+                        $transaction = new TransactionExcess($item);
+                        $transaction->updateToAmountWallet();
                         break;
                     case TransactionHelper::DEPOSIT:
                         if (!$item->is_sync_amount) {
-                            $syncMemoWallet = new UpdateTransactionDepositAmount($item);
-                            $syncMemoWallet->process();
+                            $transaction = new TransactionDepositAmount($item);
+                            $transaction->updateToAmountWallet();
                         }
                         if (!$item->is_sync_total_fees) {
-                            $syncMemoWallet = new UpdateTransactionDepositFee($item);
-                            $syncMemoWallet->process();
+                            $transaction = new TransactionDepositFee($item);
+                            $transaction->updateToAmountWallet();
                         }
                         break;
                     case TransactionHelper::WITHDRAW:
                         if (!$item->is_sync_amount) {
-                            $syncMemoWallet = new UpdateTransactionWithdrawAmount($item);
-                            $syncMemoWallet->process();
+                            $transaction = new TransactionWithdrawAmount($item);
+                            $transaction->updateToAmountWallet();
                         }
                         if (!$item->is_sync_total_fees) {
-                            $syncMemoWallet = new UpdateTransactionWithdrawFee($item);
-                            $syncMemoWallet->process();
+                            $transaction = new TransactionWithdrawFee($item);
+                            $transaction->updateToAmountWallet();
                         }
                         break;
                 }

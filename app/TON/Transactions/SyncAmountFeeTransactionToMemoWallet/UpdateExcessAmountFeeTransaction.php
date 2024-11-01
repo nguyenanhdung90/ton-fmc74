@@ -1,15 +1,22 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountMemoWallet;
+namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
 use App\Models\WalletTonTransaction;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class UpdateTransactionExcess extends SyncMemoWalletAbstract
+class UpdateExcessAmountFeeTransaction implements UpdateAmountFeeTransactionInterface
 {
-    public function process(): void
+    protected WalletTonTransaction $transaction;
+
+    public function __construct(WalletTonTransaction $transaction)
+    {
+        $this->transaction = $transaction;
+    }
+
+    public function process()
     {
         if (empty($this->transaction->query_id)) {
             return;

@@ -4,7 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncWithdrawJetton;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawFee;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -64,37 +65,39 @@ class TonPeriodicWithdrawJettonTransactionCommand extends Command
                 printf("Check over %s transactions \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(1);
-                    $txByMessageList = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
-                    if (!$txByMessageList) {
-                        //printf("Can not get transactions with msg hash: \n", $withdrawTx->in_msg_hash);
+                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
+                    if (!$txByMessages) {
                         continue;
                     }
 
-                    $txMsg = $txByMessageList->first();
-                    if (!$txMsg) {
-                        //printf("Empty transactions \n");
+                    $txByMessage = $txByMessages->first();
+                    if (!$txByMessage) {
                         continue;
                     }
-                    if (!Arr::get($txMsg, 'lt') || !Arr::get($txMsg, 'hash')) {
+                    if (!Arr::get($txByMessage, 'lt') || !Arr::get($txByMessage, 'hash')) {
                         continue;
                     }
-                    if (empty(Arr::get($txMsg, 'out_msgs'))) {
+                    if (empty(Arr::get($txByMessage, 'out_msgs'))) {
                         continue;
                     }
 
-                    $totalFees = Arr::get($txMsg, 'total_fees') + Arr::get($txMsg, 'out_msgs.0.fwd_fee')
-                        + Arr::get($txMsg, 'out_msgs.0.value');
+                    $totalFees = Arr::get($txByMessage, 'total_fees') + Arr::get($txByMessage, 'out_msgs.0.fwd_fee')
+                        + Arr::get($txByMessage, 'out_msgs.0.value');
                     DB::table('wallet_ton_transactions')
                         ->where('id', $withdrawTx->id)
                         ->update([
-                            'lt' => Arr::get($txMsg, 'lt'),
-                            'hash' => Arr::get($txMsg, 'hash'),
+                            'lt' => Arr::get($txByMessage, 'lt'),
+                            'hash' => Arr::get($txByMessage, 'hash'),
                             'total_fees' => $totalFees,
                             'updated_at' => Carbon::now()
                         ]);
                     $transaction = WalletTonTransaction::find($withdrawTx->id);
-                    $syncMemoWallet = new SyncWithdrawJetton($transaction);
-                    $syncMemoWallet->process();
+                    if ($transaction) {
+                        $withdrawAmount = new TransactionWithdrawAmount($transaction);
+                        $withdrawAmount->updateToAmountWallet();
+                        $withdrawFee = new TransactionWithdrawFee($transaction);
+                        $withdrawFee->updateToAmountWallet();
+                    }
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw jetton: " . $e->getMessage());

@@ -1,14 +1,22 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountMemoWallet;
+namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
+use App\Models\WalletTonTransaction;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class UpdateTransactionWithdrawFee extends SyncMemoWalletAbstract
+class UpdateWithdrawFeeTransaction implements UpdateAmountFeeTransactionInterface
 {
-    public function process(): void
+    protected WalletTonTransaction $transaction;
+
+    public function __construct(WalletTonTransaction $transaction)
+    {
+        $this->transaction = $transaction;
+    }
+
+    public function process()
     {
         if (empty($this->transaction->from_memo) || $this->transaction->is_sync_total_fees) {
             return;

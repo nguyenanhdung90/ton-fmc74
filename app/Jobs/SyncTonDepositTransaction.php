@@ -3,12 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\WalletTonTransaction;
-use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
+use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;
 use App\TON\Transactions\Deposit\CollectTotalFeesAttribute;
 use App\TON\Transactions\Deposit\CollectTransactionAttribute;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncDeposit;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositFee;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -78,8 +79,10 @@ class SyncTonDepositTransaction implements ShouldQueue
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
             $transaction = WalletTonTransaction::find($transactionId);
             if ($transaction) {
-                $syncMemoWallet = new SyncDeposit($transaction);
-                $syncMemoWallet->process();
+                $depositAmount = new TransactionDepositAmount($transaction);
+                $depositAmount->updateToAmountWallet();
+                $depositFee = new TransactionDepositFee($transaction);
+                $depositFee->updateToAmountWallet();
             }
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());

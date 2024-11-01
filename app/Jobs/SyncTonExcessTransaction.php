@@ -10,7 +10,7 @@ use App\TON\Transactions\Excess\CollectHashLtAttribute;
 use App\TON\Transactions\Excess\CollectQueryIdAttribute;
 use App\TON\Transactions\Excess\CollectToAddressWalletAttribute;
 use App\TON\Transactions\Excess\CollectTotalFeesAttribute;
-use App\TON\Transactions\SyncAmountMemoWallet\SyncTransactionExcess;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionExcess;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -76,8 +76,8 @@ class SyncTonExcessTransaction implements ShouldQueue
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
             $transaction = WalletTonTransaction::find($transactionId);
             if ($transaction) {
-                $syncMemoWallet = new SyncTransactionExcess($transaction);
-                $syncMemoWallet->process();
+                $excess = new TransactionExcess($transaction);
+                $excess->updateToAmountWallet();
             }
         } catch (\Exception $e) {
             Log::error("Message: " . ' | ' . $e->getMessage());

@@ -1,14 +1,21 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountMemoWallet;
+namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\TON\Transactions\TransactionHelper;
+use App\Models\WalletTonTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class UpdateTransactionDepositAmount extends SyncMemoWalletAbstract
+class UpdateDepositAmountTransaction implements UpdateAmountFeeTransactionInterface
 {
-    public function process(): void
+    protected WalletTonTransaction $transaction;
+
+    public function __construct(WalletTonTransaction $transaction)
+    {
+        $this->transaction = $transaction;
+    }
+
+    public function process()
     {
         if (empty($this->transaction->to_memo) || $this->transaction->is_sync_amount
             || empty($this->transaction->currency)) {
