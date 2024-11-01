@@ -37,8 +37,8 @@ class UpdateDepositAmountTransaction implements UpdateAmountFeeTransactionInterf
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                 ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
-            printf("Update amount deposit tran id: %s, update amount: %s, currency: %s \n", $this->transaction->id,
-                $updateAmount, $this->transaction->currency);
+            printf("Update amount deposit tran id: %s, update amount: %s, currency: %s, to memo id: %s \n",
+                $this->transaction->id, $updateAmount, $this->transaction->currency, $wallet->id);
             DB::commit();
             return;
         } catch (\Exception $e) {

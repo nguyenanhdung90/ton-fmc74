@@ -74,9 +74,9 @@ class TonSyncDepositTransaction implements ShouldQueue
             $decimals = new CollectDecimalsAttribute($memoSenderAmount);
             $trans = $decimals->collect($this->data);
 
-            printf("Insert tran hash: %s currency: %s amount: %s \n", $trans['hash'], $trans['currency']
-                , $trans['amount']);
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
+            printf("Insert tran id: %s currency: %s amount: %s \n", $transactionId, $trans['currency']
+                , $trans['amount']);
             $transaction = WalletTonTransaction::find($transactionId);
             if ($transaction) {
                 $depositAmount = new TransactionDepositAmount($transaction);
