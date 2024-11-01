@@ -64,27 +64,31 @@ class TonUpdateAllAmountTotalFeesTransactionWalletCommand extends Command
             }
             printf("Check over %s transactions \n", $transactions->count());
             $transactions->each(function ($item, $key) {
-                if ($item->type === TransactionHelper::WITHDRAW_EXCESS) {
-                    $syncMemoWallet = new UpdateTransactionExcess($item);
-                }
-
-                if ($item->type === TransactionHelper::DEPOSIT && !$item->is_sync_amount) {
-                    $syncMemoWallet = new UpdateTransactionDepositAmount($item);
-                }
-                if ($item->type === TransactionHelper::DEPOSIT && !$item->is_sync_total_fees) {
-                    $syncMemoWallet = new UpdateTransactionDepositFee($item);
-                }
-
-
-                if ($item->type === TransactionHelper::WITHDRAW && !$item->is_sync_amount) {
-                    $syncMemoWallet = new UpdateTransactionWithdrawAmount($item);
-                }
-                if ($item->type === TransactionHelper::WITHDRAW && !$item->is_sync_total_fees) {
-                    $syncMemoWallet = new UpdateTransactionWithdrawFee($item);
-                }
-
-                if (!empty($syncMemoWallet) && $syncMemoWallet instanceof SyncMemoWalletAbstract) {
-                    $syncMemoWallet->process();
+                switch ($item->type) {
+                    case TransactionHelper::WITHDRAW_EXCESS:
+                        $syncMemoWallet = new UpdateTransactionExcess($item);
+                        $syncMemoWallet->process();
+                        break;
+                    case TransactionHelper::DEPOSIT:
+                        if (!$item->is_sync_amount) {
+                            $syncMemoWallet = new UpdateTransactionDepositAmount($item);
+                            $syncMemoWallet->process();
+                        }
+                        if (!$item->is_sync_total_fees) {
+                            $syncMemoWallet = new UpdateTransactionDepositFee($item);
+                            $syncMemoWallet->process();
+                        }
+                        break;
+                    case TransactionHelper::WITHDRAW:
+                        if (!$item->is_sync_amount) {
+                            $syncMemoWallet = new UpdateTransactionWithdrawAmount($item);
+                            $syncMemoWallet->process();
+                        }
+                        if (!$item->is_sync_total_fees) {
+                            $syncMemoWallet = new UpdateTransactionWithdrawFee($item);
+                            $syncMemoWallet->process();
+                        }
+                        break;
                 }
             });
             $i++;

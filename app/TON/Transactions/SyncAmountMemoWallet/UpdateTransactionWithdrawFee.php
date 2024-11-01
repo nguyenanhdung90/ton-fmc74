@@ -27,7 +27,7 @@ class UpdateTransactionWithdrawFee extends SyncMemoWalletAbstract
                         ->update(['amount' => $updateFeeAmount, 'updated_at' => Carbon::now()]);
                     DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                         ->update(['is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
-                    printf("Sync fee withdraw tran id: %s, update fee amount: %s \n", $this->transaction->id, $updateFeeAmount);
+                    printf("Update fee withdraw tran id: %s, update fee amount: %s \n", $this->transaction->id, $updateFeeAmount);
                 }
             }
             DB::commit();

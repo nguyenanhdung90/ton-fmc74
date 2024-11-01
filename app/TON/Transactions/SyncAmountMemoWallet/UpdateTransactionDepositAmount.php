@@ -30,7 +30,8 @@ class UpdateTransactionDepositAmount extends SyncMemoWalletAbstract
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                 ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
-            printf("Sync amount deposit tran id: %s, update amount: %s \n", $this->transaction->id, $updateAmount);
+            printf("Update amount deposit tran id: %s, update amount: %s, currency: %s \n", $this->transaction->id,
+                $updateAmount, $this->transaction->currency);
             DB::commit();
             return;
         } catch (\Exception $e) {

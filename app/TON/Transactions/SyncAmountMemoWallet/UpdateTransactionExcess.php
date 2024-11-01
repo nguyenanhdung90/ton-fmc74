@@ -59,7 +59,7 @@ class UpdateTransactionExcess extends SyncMemoWalletAbstract
                         ->update(['amount' => $updateFeeAmount, 'updated_at' => Carbon::now()]);
                     DB::table('wallet_ton_transactions')->where('id', $this->transaction->id)
                         ->update(['is_sync_total_fees' => true, 'updated_at' => Carbon::now()]);
-                    printf("Sync excess fee tran id: %s, updated amount: %s \n",
+                    printf("Update excess fee tran id: %s, updated amount: %s \n",
                         $this->transaction->id, $updateFeeAmount);
                 }
             }
