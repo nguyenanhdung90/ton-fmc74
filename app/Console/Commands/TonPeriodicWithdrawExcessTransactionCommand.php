@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SyncTonExcessTransaction;
+use App\Jobs\TonSyncExcessTransaction;
 use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\TransactionHelper;
@@ -66,7 +66,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
             printf("Check over %s transactions \n", $numberTx);
             foreach ($transactions as $transaction) {
                 if (empty(Arr::get($transaction, 'out_msgs'))) {
-                    SyncTonExcessTransaction::dispatch($transaction);
+                    TonSyncExcessTransaction::dispatch($transaction);
                 }
             }
             // set condition of query

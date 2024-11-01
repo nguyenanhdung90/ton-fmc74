@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SyncTonDepositTransaction;
+use App\Jobs\TonSyncDepositTransaction;
 use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
@@ -79,7 +79,7 @@ class TonPeriodicDepositTransactionCommand extends Command
 
                 printf("Check over %s transactions \n", $numberTx);
                 foreach ($transactions as $transaction) {
-                    SyncTonDepositTransaction::dispatch($transaction, $mapperSource);
+                    TonSyncDepositTransaction::dispatch($transaction, $mapperSource);
                 }
 
                 // set condition of query
