@@ -27,7 +27,8 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
     public function process(string $fromMemo, string $toAddress,
                             float $transferAmount, string $toMemo = "", bool $isAllRemainBalance = false)
     {
-        $walletMemo = $this->validGetWalletMemo($fromMemo, $transferAmount, TransactionHelper::TON);
+        $walletMemo = $this->validGetWalletMemo($fromMemo, $transferAmount, TransactionHelper::TON, Units::DEFAULT,
+            $isAllRemainBalance);
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));

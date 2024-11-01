@@ -2,7 +2,6 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +22,7 @@ class UpdateWithdrawAmountTransaction implements UpdateAmountFeeTransactionInter
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
-            if (empty($transaction->from_memo) || $transaction->is_sync_amount
+            if (!$transaction || empty($transaction->from_memo) || $transaction->is_sync_amount
                 || empty($transaction->currency)) {
                 DB::rollBack();
                 return;
@@ -38,11 +37,6 @@ class UpdateWithdrawAmountTransaction implements UpdateAmountFeeTransactionInter
                 DB::rollBack();
                 return;
             }
-            $wallet = DB::table('wallet_ton_memos')
-                ->where('currency', TransactionHelper::TON)
-                ->where('memo', $transaction->from_memo)
-                ->lockForUpdate()
-                ->first();
             $updateAmount = $wallet->amount - $transaction->amount;
             if ($updateAmount >= 0) {
                 DB::table('wallet_ton_memos')->where('id', $wallet->id)

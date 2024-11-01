@@ -6,13 +6,12 @@ use App\Models\WalletTonMemo;
 use App\TON\Exceptions\WithdrawTonException;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Units;
-use App\TON\Transactions\TransactionHelper;
-use Http\Client\Common\HttpMethodsClient;
-use Http\Discovery\Psr17FactoryDiscovery;
-use Http\Discovery\Psr18ClientDiscovery;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
 use App\TON\Transports\Toncenter\ToncenterTransport;
+use Http\Client\Common\HttpMethodsClient;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
 
 abstract class WithdrawAbstract
 {
@@ -51,11 +50,15 @@ abstract class WithdrawAbstract
      * @throws WithdrawTonException
      */
     protected function validGetWalletMemo(string $fromMemo, float $transferAmount,
-                                          string $currency, int $decimals = Units::DEFAULT)
+                                          string $currency, int $decimals = Units::DEFAULT,
+                                          bool $isAllRemainBalance = false)
     {
         $walletMemo = WalletTonMemo::where('memo', $fromMemo)->where('currency', $currency)->first();
         if (!$walletMemo) {
             throw new WithdrawTonException("There is not memo account");
+        }
+        if ($isAllRemainBalance) {
+            return $walletMemo;
         }
         if ($walletMemo->amount < (string)Units::toNano($transferAmount, $decimals)) {
             throw new WithdrawTonException("Amount of wallet is not enough");
