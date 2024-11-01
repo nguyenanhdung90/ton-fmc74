@@ -58,7 +58,7 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                 if (!$withDrawTransactions->count()) {
                     continue;
                 }
-               // printf("Processing %s withdraw transactions. \n", $withDrawTransactions->count());
+                printf("Check over %s transactions \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTx) {
                     sleep(1);
                     $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);

@@ -11,12 +11,6 @@ class UpdateTransactionExcess extends SyncMemoWalletAbstract
 {
     public function process(): void
     {
-        if (empty($withdrawTran->from_memo)) {
-            return;
-        }
-        if ($this->transaction->is_sync_amount && $this->transaction->is_sync_total_fees) {
-            return;
-        }
         if (empty($this->transaction->query_id)) {
             return;
         }
@@ -24,6 +18,12 @@ class UpdateTransactionExcess extends SyncMemoWalletAbstract
             ->where('type', TransactionHelper::WITHDRAW)
             ->first();
         if (!$withdrawTran) {
+            return;
+        }
+        if (empty($withdrawTran->from_memo)) {
+            return;
+        }
+        if ($this->transaction->is_sync_amount && $this->transaction->is_sync_total_fees) {
             return;
         }
         DB::beginTransaction();

@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\WalletTonTransaction;
-use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionDepositJettonAmount;
 use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionWithdrawFee;
 use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionWithdrawAmount;
 use App\TON\Transactions\SyncAmountMemoWallet\SyncMemoWalletAbstract;
@@ -13,14 +12,14 @@ use App\TON\Transactions\SyncAmountMemoWallet\UpdateTransactionExcess;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 
-class TonSyncAllAmountTotalFeesTransactionWalletCommand extends Command
+class TonUpdateAllAmountTotalFeesTransactionWalletCommand extends Command
 {
     /**
-     * php artisan ton:sync_all_fix_amount_fee
+     * php artisan ton:update_all_amount_fee_transaction
      *
      * @var string
      */
-    protected $signature = 'ton:sync_all_fix_amount_fee';
+    protected $signature = 'ton:update_all_amount_fee_transaction';
 
     /**
      * The console command description.
@@ -58,10 +57,12 @@ class TonSyncAllAmountTotalFeesTransactionWalletCommand extends Command
         while (true) {
             $offset = TransactionHelper::MAX_LIMIT_TRANSACTION * $i;
             $transactions = $query->offset($offset)->get();
+
             if (!$transactions->count()) {
                 printf("Empty transaction \n");
                 break;
             }
+            printf("Check over %s transactions \n", $transactions->count());
             $transactions->each(function ($item, $key) {
                 if ($item->type === TransactionHelper::WITHDRAW_EXCESS) {
                     $syncMemoWallet = new UpdateTransactionExcess($item);

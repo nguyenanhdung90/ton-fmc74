@@ -68,6 +68,7 @@ class TonSyncAllWithdrawExcessTransactionCommand extends Command
                     printf("End, there are no transactions for the next loop \n");
                     break;
                 }
+                printf("Check over %s transactions \n", $numberTx);
                 foreach ($transactions as $transaction) {
                     if (empty(Arr::get($transaction, 'out_msgs'))) {
                         SyncTonExcessTransaction::dispatch($transaction);

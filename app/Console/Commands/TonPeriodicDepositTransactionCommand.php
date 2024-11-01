@@ -77,6 +77,7 @@ class TonPeriodicDepositTransactionCommand extends Command
                 });
                 $mapperSource = $this->mapperJetMasterByAddress->request($sources);
 
+                printf("Check over %s transactions \n", $numberTx);
                 foreach ($transactions as $transaction) {
                     SyncTonDepositTransaction::dispatch($transaction, $mapperSource);
                 }
