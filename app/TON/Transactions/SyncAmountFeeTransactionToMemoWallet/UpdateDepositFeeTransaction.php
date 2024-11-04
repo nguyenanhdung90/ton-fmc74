@@ -15,7 +15,7 @@ class UpdateDepositFeeTransaction implements UpdateAmountFeeTransactionInterface
         $this->transactionId = $transactionId;
     }
 
-    public function process()
+    public function process(array $data)
     {
         DB::beginTransaction();
         try {
