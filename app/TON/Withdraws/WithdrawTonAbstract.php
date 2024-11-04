@@ -37,16 +37,16 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             null,
             $isAllRemainBalance
         );
-        if ($isAllRemainBalance) {
-            $transferNano = $wallet->amount - TransactionHelper::getFixedFeeByCurrency(TransactionHelper::TON);
-            $transferDecimal = (string)Units::fromNano($transferNano);
-            $transferUnit = Units::toNano($transferDecimal);
-        } else {
-            $transferUnit = Units::toNano($transferAmount);
-        }
         if (!$transactionId) {
             throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
         }
+
+        if ($isAllRemainBalance) {
+            $transferNano = $wallet->amount - TransactionHelper::getFixedFeeByCurrency(TransactionHelper::TON);
+            $transferAmount = (string)Units::fromNano($transferNano);
+        }
+        $transferUnit = Units::toNano($transferAmount);
+
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
@@ -64,7 +64,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             new TransferOptions((int)$wallet->seqno($transport))
         );
         $responseMessage = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
-        $this->syncBy($responseMessage, $transactionId);
+        $this->syncProcessingOrFailedBy($responseMessage, $transactionId);
     }
 }
 

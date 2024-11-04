@@ -56,11 +56,10 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
 
         if ($isAllRemainBalance) {
             $transferNano = $wallet->amount - TransactionHelper::getFixedFeeByCurrency(TransactionHelper::USDT);
-            $transferDecimal = (string)Units::fromNano($transferNano, Units::USDt);
-            $transferUnit = Units::toNano($transferDecimal, Units::USDt);
-        } else {
-            $transferUnit = Units::toNano($transferAmount, Units::USDt);
+            $transferAmount = (string)Units::fromNano($transferNano, Units::USDt);
         }
+        $transferUnit = Units::toNano($transferAmount, Units::USDt);
+
         $phrases = config('services.ton.ton_mnemonic');
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
         $wallet = $this->getWallet($kp->publicKey);
@@ -95,6 +94,6 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
             $transfer
         );
         $responseMessage = $transport->sendMessageReturnHash($extMessage, $kp->secretKey);
-        $this->syncBy($responseMessage, $transactionId);
+        $this->syncProcessingOrFailedBy($responseMessage, $transactionId);
     }
 }

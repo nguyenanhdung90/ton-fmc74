@@ -125,7 +125,7 @@ abstract class WithdrawAbstract
         }
     }
 
-    protected function syncBy(TonResponse $responseMessage, int $transactionId): void
+    protected function syncProcessingOrFailedBy(TonResponse $responseMessage, int $transactionId): void
     {
         if (!$responseMessage->ok || empty(Arr::get($responseMessage->result, 'hash'))) {
             $withdrawAmount = new TransactionFailedWithdrawAmount($transactionId);
