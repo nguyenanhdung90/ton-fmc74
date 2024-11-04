@@ -20,6 +20,7 @@ class CollectTransactionAttribute implements CollectAttributeInterface
             'amount' => null,
             'decimals' => null,
             'type' => TransactionHelper::DEPOSIT,
+            'status' => TransactionHelper::SUCCESS,
             'currency' => null,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

@@ -2,7 +2,6 @@
 
 namespace App\TON\Withdraws;
 
-use App\Jobs\TonInsertWithdrawTransaction;
 use App\TON\Contracts\Wallets\Exceptions\WalletException;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
@@ -27,33 +26,9 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
     public function process(string $fromMemo, string $toAddress,
                             float $transferAmount, string $toMemo = "", bool $isAllRemainBalance = false)
     {
-        $walletMemo = $this->validGetWalletMemo($fromMemo, $transferAmount, TransactionHelper::TON, Units::DEFAULT,
-            $isAllRemainBalance);
-        $phrases = config('services.ton.ton_mnemonic');
-        $transport = $this->getTransport();
-        $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
-        /** @var WalletV4R2 $wallet */
-        $wallet = $this->getWallet($kp->publicKey);
-        $sendMode = $isAllRemainBalance ?
-            SendMode::combine([SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE, SendMode::IGNORE_ERRORS]) :
-            SendMode::PAY_GAS_SEPARATELY;
-        $amountWalletDecimal = (string)Units::fromNano($walletMemo->amount, $walletMemo->decimals);
-        $transferUnit = $isAllRemainBalance ? Units::toNano($amountWalletDecimal) : Units::toNano($transferAmount);
-        $extMsg = $wallet->createTransferMessage(
-            [
-                new Transfer(
-                    new Address($toAddress),
-                    $transferUnit,
-                    $toMemo,
-                    $sendMode
-                )
-            ],
-            new TransferOptions((int)$wallet->seqno($transport))
-        );
-        $tonResponse = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
-
-        TonInsertWithdrawTransaction::dispatch(
-            $tonResponse,
+        $this->validGetWalletMemo($fromMemo, TransactionHelper::TON);
+        $transferUnit = Units::toNano($transferAmount);
+        $transactionId = $this->syncToWalletGetIdTransaction(
             $fromMemo,
             $toAddress,
             (string)$transferUnit,
@@ -63,6 +38,27 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             null,
             $isAllRemainBalance
         );
+        if (!$transactionId) {
+            throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
+        }
+        $phrases = config('services.ton.ton_mnemonic');
+        $transport = $this->getTransport();
+        $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
+        /** @var WalletV4R2 $wallet */
+        $wallet = $this->getWallet($kp->publicKey);
+        $extMsg = $wallet->createTransferMessage(
+            [
+                new Transfer(
+                    new Address($toAddress),
+                    $transferUnit,
+                    $toMemo,
+                    SendMode::PAY_GAS_SEPARATELY
+                )
+            ],
+            new TransferOptions((int)$wallet->seqno($transport))
+        );
+        $responseMessage = $transport->sendMessageReturnHash($extMsg, $kp->secretKey);
+        $this->syncBy($responseMessage, $transactionId);
     }
 }
 

@@ -3,15 +3,15 @@
 namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawAmount;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawFee;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionFailedWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionSuccessWithdrawAmount;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class TonPeriodicWithdrawTonTransactionCommand extends Command
+class TonPeriodicWithdrawTransactionCommand extends Command
 {
     /**
      * php artisan ton:periodic_withdraw_ton
@@ -53,7 +53,7 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                     ->where('type', TransactionHelper::WITHDRAW)
                     ->where('currency', TransactionHelper::TON)
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
-                    ->whereNull('lt')
+                    ->where('status', TransactionHelper::INITIATED)
                     ->whereNotNull('in_msg_hash')
                     ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)
                     ->get();
@@ -61,9 +61,9 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                     continue;
                 }
                 printf("Check over %s transactions \n", $withDrawTransactions->count());
-                foreach ($withDrawTransactions as $withdrawTx) {
+                foreach ($withDrawTransactions as $withdrawTransaction) {
                     sleep(1);
-                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTx->in_msg_hash]);
+                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTransaction->in_msg_hash]);
                     if (!$txByMessages) {
                         continue;
                     }
@@ -72,20 +72,11 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
                         continue;
                     }
                     if (empty(Arr::get($txByMessage, 'out_msgs'))) {
-                        continue;
+                        $withdrawAmount = new TransactionFailedWithdrawAmount($withdrawTransaction->id);
+                    } else {
+                        $withdrawAmount = new TransactionSuccessWithdrawAmount($withdrawTransaction->id);
                     }
-                    if (!Arr::get($txByMessage, 'lt') || !Arr::get($txByMessage, 'hash')) {
-                        continue;
-                    }
-
-                    $updatedTransaction = $this->getUpdatedTransactionBy($withdrawTx, $txByMessage);
-                    DB::table('wallet_ton_transactions')
-                        ->where('id', $withdrawTx->id)
-                        ->update($updatedTransaction);
-                    $withdrawAmount = new TransactionWithdrawAmount($withdrawTx->id);
-                    $withdrawAmount->updateToAmountWallet();
-                    $withdrawFee = new TransactionWithdrawFee($withdrawTx->id);
-                    $withdrawFee->updateToAmountWallet();
+                    $withdrawAmount->syncTransactionWallet($txByMessage);
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw ton: " . $e->getMessage());
@@ -93,26 +84,5 @@ class TonPeriodicWithdrawTonTransactionCommand extends Command
             }
         }
         return Command::SUCCESS;
-    }
-
-    private function isWithdrawAllRemainingBalance($withdrawTx): bool
-    {
-        return is_null($withdrawTx->amount);
-    }
-
-    private function getUpdatedTransactionBy($withdrawTx, $txByMessage): array
-    {
-        $feeWithDraw = (int)Arr::get($txByMessage, 'total_fees', 0) +
-            (int)Arr::get($txByMessage, 'out_msgs.0.fwd_fee', 0);
-        $updatedTransaction = [
-            'lt' => Arr::get($txByMessage, 'lt'),
-            'hash' => Arr::get($txByMessage, 'hash'),
-            'total_fees' => $feeWithDraw,
-            'updated_at' => Carbon::now()
-        ];
-        if ($this->isWithdrawAllRemainingBalance($withdrawTx)) {
-            $updatedTransaction['amount'] = (int)Arr::get($txByMessage, 'out_msgs.0.value', 0);
-        }
-        return $updatedTransaction;
     }
 }

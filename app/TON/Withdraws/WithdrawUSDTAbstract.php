@@ -2,7 +2,6 @@
 
 namespace App\TON\Withdraws;
 
-use App\Jobs\TonInsertWithdrawTransaction;
 use App\TON\Contracts\Exceptions\ContractException;
 use App\TON\Contracts\Jetton\JettonMinter;
 use App\TON\Contracts\Jetton\JettonWallet;
@@ -36,11 +35,25 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
      * @throws TransportException
      * @throws WithdrawTonException
      */
-    public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "")
+    public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "",
+                            bool $isAllRemainBalance = false)
     {
-        $this->validGetWalletMemo($fromMemo, $transferAmount,
-            TransactionHelper::USDT, Units::USDt);
-
+        $this->validGetWalletMemo($fromMemo, TransactionHelper::USDT);
+        $transferUnit = Units::toNano($transferAmount, Units::USDt);
+        $queryId = hexdec(uniqid());
+        $transactionId = $this->syncToWalletGetIdTransaction(
+            $fromMemo,
+            $destAddress,
+            (string)$transferUnit,
+            TransactionHelper::USDT,
+            Units::USDt,
+            $toMemo,
+            $queryId,
+            $isAllRemainBalance
+        );
+        if (!$transactionId) {
+            throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
+        }
         $phrases = config('services.ton.ton_mnemonic');
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
         $wallet = $this->getWallet($kp->publicKey);
@@ -56,7 +69,6 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
             null, 0, $usdtWalletAddress
         ));
         $transfer = new TransferOptions((int)$wallet->seqno($transport));
-        $queryId = hexdec(uniqid());
         $extMessage = $wallet->createTransferMessage([
             new Transfer(
                 $usdtWalletAddress,
@@ -75,16 +87,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
             )],
             $transfer
         );
-        $tonResponse = $transport->sendMessageReturnHash($extMessage, $kp->secretKey);
-        TonInsertWithdrawTransaction::dispatch(
-            $tonResponse,
-            $fromMemo,
-            $destAddress,
-            (string)Units::toNano($transferAmount, Units::USDt),
-            TransactionHelper::USDT,
-            Units::USDt,
-            $toMemo,
-            $queryId
-        );
+        $responseMessage = $transport->sendMessageReturnHash($extMessage, $kp->secretKey);
+        $this->syncBy($responseMessage, $transactionId);
     }
 }

@@ -21,6 +21,7 @@ class CollectExcessTransactionAttribute implements CollectAttributeInterface
             'query_id' => null,
             'decimals' => Units::DEFAULT,
             'type' => TransactionHelper::WITHDRAW_EXCESS,
+            'status' => TransactionHelper::SUCCESS,
             'currency' => TransactionHelper::TON,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

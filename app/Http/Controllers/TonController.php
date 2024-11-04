@@ -2,36 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\TON\Interop\Units;
-use App\TON\Transactions\TransactionHelper;
-use App\TON\Withdraws\WithdrawMemoToMemoInterface;
 use App\TON\Withdraws\WithdrawTonV4R2Interface;
 use App\TON\Withdraws\WithdrawUSDTV4R2Interface;
 use Illuminate\Http\Request;
 
 class TonController extends Controller
 {
-    private WithdrawMemoToMemoInterface $withdrawMemoToMemo;
 
     private WithdrawTonV4R2Interface $withdrawTon;
 
     private WithdrawUSDTV4R2Interface $withdrawUSDT;
 
     public function __construct(
-        WithdrawMemoToMemoInterface $withdrawMemoToMemo,
         WithdrawTonV4R2Interface $withdrawTon,
         WithdrawUSDTV4R2Interface $withdrawUSDT
     ) {
-        $this->withdrawMemoToMemo = $withdrawMemoToMemo;
         $this->withdrawTon = $withdrawTon;
         $this->withdrawUSDT = $withdrawUSDT;
-    }
-
-    public function withdrawInternalVirtualCurrencyExchange(Request $request): string
-    {
-        $this->withdrawMemoToMemo->transfer('memo', 'memo2', 0.00321,
-            TransactionHelper::USDT, Units::USDt);
-        return 'Success';
     }
 
     public function withdrawTONExample(Request $request): string
@@ -54,10 +41,5 @@ class TonController extends Controller
         } catch (\Exception $e) {
             return $e->getMessage();
         }
-    }
-
-    public function parseJetBody(): int
-    {
-        return 1;
     }
 }

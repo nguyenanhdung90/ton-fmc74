@@ -77,9 +77,9 @@ class TonSyncDepositTransaction implements ShouldQueue
             printf("Insert tran id: %s currency: %s amount: %s \n", $transactionId, $trans['currency']
                 , $trans['amount']);
             $depositAmount = new TransactionDepositAmount($transactionId);
-            $depositAmount->updateToAmountWallet();
+            $depositAmount->syncTransactionWallet();
             $depositFee = new TransactionDepositFee($transactionId);
-            $depositFee->updateToAmountWallet();
+            $depositFee->syncTransactionWallet();
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());
             //printf("Exception: %s \n", $e->getMessage());

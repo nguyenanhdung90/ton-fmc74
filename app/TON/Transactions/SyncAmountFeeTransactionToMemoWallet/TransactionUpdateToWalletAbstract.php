@@ -13,9 +13,9 @@ abstract class TransactionUpdateToWalletAbstract
 
     abstract public function getUpdateTransactionToWallet(): UpdateAmountFeeTransactionInterface;
 
-    public function updateToAmountWallet()
+    public function syncTransactionWallet(array $data = [])
     {
         $updateTransactionToWallet = $this->getUpdateTransactionToWallet();
-        $updateTransactionToWallet->process();
+        $updateTransactionToWallet->process($data);
     }
 }

@@ -14,13 +14,18 @@ class TransactionHelper
     const WITHDRAW_EXCESS = 'WITHDRAW_EXCESS';
     const JET_OPCODE = '7362d09c';
     const EXCESS_OPCODE = 'd53276db';
+    const INITIATED = 'INITIATED';
+    const PROCESSING = 'PROCESSING';
+    const SUCCESS = 'SUCCESS';
+    const FAILED = 'FAILED';
 
-    /**
-     * @throws \Exception
-     */
-    public static function uniqueTransactionHash(): string
+    public static function getFixedFeeByCurrency(string $currency)
     {
-        $bytes = random_bytes(22);
-        return bin2hex($bytes);
+        switch ($currency) {
+            case self::USDT:
+                return config('services.ton.fixed_fee_usdt');
+            default:
+                return config('services.ton.fixed_fee_ton');
+        }
     }
 }

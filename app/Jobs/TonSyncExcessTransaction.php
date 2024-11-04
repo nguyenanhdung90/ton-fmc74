@@ -9,7 +9,6 @@ use App\TON\Transactions\Excess\CollectHashLtAttribute;
 use App\TON\Transactions\Excess\CollectQueryIdAttribute;
 use App\TON\Transactions\Excess\CollectToAddressWalletAttribute;
 use App\TON\Transactions\Excess\CollectTotalFeesAttribute;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionExcess;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -61,20 +60,18 @@ class TonSyncExcessTransaction implements ShouldQueue
                 return;
             }
 
-            $count = DB::table('wallet_ton_transactions')
+            $existedExcess = DB::table('wallet_ton_transactions')
                 ->where('type', TransactionHelper::WITHDRAW_EXCESS)
                 ->where('query_id', $trans['query_id'])
                 ->where('currency', $trans['currency'])
                 ->count();
-            if ($count) {
+            if ($existedExcess) {
                 return;
             }
 
             printf("Insert tran hash: %s currency: %s amount: %s \n", $trans['hash'], $trans['currency']
                 , $trans['amount']);
-            $transactionId = DB::table('wallet_ton_transactions')->insertGetId($trans);
-            $excess = new TransactionExcess($transactionId);
-            $excess->updateToAmountWallet();
+            DB::table('wallet_ton_transactions')->insert($trans);
         } catch (\Exception $e) {
             Log::error("Message: " . ' | ' . $e->getMessage());
             printf("Exception: %s \n", $e->getMessage());

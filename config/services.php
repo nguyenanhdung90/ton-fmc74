@@ -37,5 +37,7 @@ return [
         'root_usdt_test' => env('ROOT_USDT_TEST'),
         'root_usdt_main' => env('ROOT_USDT_MAIN'),
         'ton_mnemonic' => env('TON_MNEMONIC'),
+        'fixed_fee_ton' => env('FIXED_FEE_TON'),
+        'fixed_fee_usdt' => env('FIXED_FEE_USDT')
     ]
 ];
