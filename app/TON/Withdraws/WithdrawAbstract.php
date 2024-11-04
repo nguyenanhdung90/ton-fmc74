@@ -63,6 +63,9 @@ abstract class WithdrawAbstract
         return $wallet;
     }
 
+    /**
+     * @throws WithdrawTonException
+     */
     protected function syncToWalletGetIdTransaction(
         string $fromMemo,
         string $toAddress,
@@ -90,7 +93,7 @@ abstract class WithdrawAbstract
                 DB::rollBack();
                 throw new WithdrawTonException("Minimum amount of wallet is greater than " . $fixedFee);
             }
-            $remainBalance = $isAllRemainBalance ? $remainFixedFeeBalance : ($remainFixedFeeBalance - $transferUnit);
+            $remainBalance = $isAllRemainBalance ? 0 : ($remainFixedFeeBalance - $transferUnit);
             if ($remainBalance < 0) {
                 DB::rollBack();
                 throw new WithdrawTonException("Amount of wallet is not enough");
@@ -107,7 +110,7 @@ abstract class WithdrawAbstract
                 'amount' => $amount,
                 'is_sync_amount' => true,
                 'query_id' => $queryId,
-                'fixed_fee' => config('services.ton.fixed_fee_ton'),
+                'fixed_fee' => $fixedFee,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
@@ -118,7 +121,7 @@ abstract class WithdrawAbstract
             return $transactionId;
         } catch (\Exception $e) {
             DB::rollBack();
-            return null;
+            throw new WithdrawTonException($e->getMessage());
         }
     }
 

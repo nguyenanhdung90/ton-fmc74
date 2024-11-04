@@ -51,9 +51,8 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                 sleep(20);
                 $withDrawTransactions = DB::table('wallet_ton_transactions')
                     ->where('type', TransactionHelper::WITHDRAW)
-                    ->where('currency', TransactionHelper::TON)
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
-                    ->where('status', TransactionHelper::INITIATED)
+                    ->whereNotIn('status', [TransactionHelper::SUCCESS, TransactionHelper::FAILED])
                     ->whereNotNull('in_msg_hash')
                     ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)
                     ->get();
@@ -69,9 +68,13 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                     }
                     $txByMessage = $txByMessages->first();
                     if (!$txByMessage) {
+                        printf("Failed with empty transaction, id: %s \n", $withdrawTransaction->id);
+                        $withdrawAmount = new TransactionFailedWithdrawAmount($withdrawTransaction->id);
+                        $withdrawAmount->syncTransactionWallet();
                         continue;
                     }
                     if (empty(Arr::get($txByMessage, 'out_msgs'))) {
+                        printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
                         $withdrawAmount = new TransactionFailedWithdrawAmount($withdrawTransaction->id);
                     } else {
                         $withdrawAmount = new TransactionSuccessWithdrawAmount($withdrawTransaction->id);

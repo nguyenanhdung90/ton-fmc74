@@ -38,13 +38,12 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
     public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "",
                             bool $isAllRemainBalance = false)
     {
-        $this->validGetWalletMemo($fromMemo, TransactionHelper::USDT);
-        $transferUnit = Units::toNano($transferAmount, Units::USDt);
+        $wallet = $this->validGetWalletMemo($fromMemo, TransactionHelper::USDT);
         $queryId = hexdec(uniqid());
         $transactionId = $this->syncToWalletGetIdTransaction(
             $fromMemo,
             $destAddress,
-            (string)$transferUnit,
+            (string)Units::toNano($transferAmount, Units::USDt),
             TransactionHelper::USDT,
             Units::USDt,
             $toMemo,
@@ -53,6 +52,14 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
         );
         if (!$transactionId) {
             throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
+        }
+
+        if ($isAllRemainBalance) {
+            $transferNano = $wallet->amount - TransactionHelper::getFixedFeeByCurrency(TransactionHelper::USDT);
+            $transferDecimal = (string)Units::fromNano($transferNano, Units::USDt);
+            $transferUnit = Units::toNano($transferDecimal, Units::USDt);
+        } else {
+            $transferUnit = Units::toNano($transferAmount, Units::USDt);
         }
         $phrases = config('services.ton.ton_mnemonic');
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
@@ -75,7 +82,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
                 Units::toNano("0.1"),
                 $usdtWallet->createTransferBody(
                     new TransferJettonOptions(
-                        Units::toNano($transferAmount, Units::USDt),
+                        $transferUnit,
                         new Address($destAddress),
                         $walletAddress,
                         $queryId,

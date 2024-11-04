@@ -26,18 +26,24 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
     public function process(string $fromMemo, string $toAddress,
                             float $transferAmount, string $toMemo = "", bool $isAllRemainBalance = false)
     {
-        $this->validGetWalletMemo($fromMemo, TransactionHelper::TON);
-        $transferUnit = Units::toNano($transferAmount);
+        $wallet = $this->validGetWalletMemo($fromMemo, TransactionHelper::TON);
         $transactionId = $this->syncToWalletGetIdTransaction(
             $fromMemo,
             $toAddress,
-            (string)$transferUnit,
+            (string)Units::toNano($transferAmount),
             TransactionHelper::TON,
             Units::DEFAULT,
             $toMemo,
             null,
             $isAllRemainBalance
         );
+        if ($isAllRemainBalance) {
+            $transferNano = $wallet->amount - TransactionHelper::getFixedFeeByCurrency(TransactionHelper::TON);
+            $transferDecimal = (string)Units::fromNano($transferNano);
+            $transferUnit = Units::toNano($transferDecimal);
+        } else {
+            $transferUnit = Units::toNano($transferAmount);
+        }
         if (!$transactionId) {
             throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
         }
