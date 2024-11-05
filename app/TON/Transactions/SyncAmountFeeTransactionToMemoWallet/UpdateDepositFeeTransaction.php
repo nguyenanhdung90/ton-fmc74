@@ -23,7 +23,7 @@ class UpdateDepositFeeTransaction implements UpdateAmountFeeTransactionInterface
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
-            if (!$transaction || empty($transaction->to_memo) || $transaction->is_sync_total_fees_of_ton) {
+            if (!$transaction || empty($transaction->to_memo) || $transaction->is_sync_occur_ton) {
                 DB::rollBack();
                 return;
             }
@@ -36,12 +36,12 @@ class UpdateDepositFeeTransaction implements UpdateAmountFeeTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $updateFeeAmount = $wallet->amount - $transaction->total_fees_of_ton;
+            $updateFeeAmount = $wallet->amount - $transaction->occur_ton;
             if ($updateFeeAmount >= 0) {
                 DB::table('wallet_ton_memos')->where('id', $wallet->id)
                     ->update(['amount' => $updateFeeAmount, 'updated_at' => Carbon::now()]);
                 DB::table('wallet_ton_transactions')->where('id', $transaction->id)
-                    ->update(['is_sync_total_fees_of_ton' => true, 'updated_at' => Carbon::now()]);
+                    ->update(['is_sync_occur_ton' => true, 'updated_at' => Carbon::now()]);
                 printf("Update fee deposit tran id: %s, updateFeeAmount: %s, to memo id: %s \n",
                     $transaction->id, $updateFeeAmount, $wallet->id);
             }

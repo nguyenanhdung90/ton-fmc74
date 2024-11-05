@@ -26,11 +26,11 @@ class CreateWalletTonTransactions extends Migration
             $table->unsignedBigInteger('amount')->nullable();
             $table->unsignedInteger('decimals')->default(0);
             $table->string('currency', 20);
-            $table->unsignedBigInteger('total_fees_of_ton')->nullable();
+            $table->bigInteger('occur_ton')->nullable();
             $table->unsignedBigInteger('fixed_fee')->nullable();
             $table->unsignedBigInteger('query_id')->nullable();
             $table->boolean('is_sync_amount')->default(0);
-            $table->boolean('is_sync_total_fees_of_ton')->default(0);
+            $table->boolean('is_sync_occur_ton')->default(0);
             $table->boolean('is_sync_fixed_fee')->default(0);
             $table->enum('status', ['INITIATED', 'PROCESSING', 'SUCCESS', 'FAILED'])->default("INITIATED");
             $table->unique(['query_id', 'currency', 'type'], 'query id');

@@ -8,7 +8,7 @@ use App\TON\Transactions\Excess\CollectFromAddressWalletAttribute;
 use App\TON\Transactions\Excess\CollectHashLtAttribute;
 use App\TON\Transactions\Excess\CollectQueryIdAttribute;
 use App\TON\Transactions\Excess\CollectToAddressWalletAttribute;
-use App\TON\Transactions\Excess\CollectTotalFeesAttribute;
+use App\TON\Transactions\Excess\CollectOccurTonAttribute;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -47,14 +47,14 @@ class TonSyncExcessTransaction implements ShouldQueue
                 return;
             }
 
-            $collectExcessTransaction = new CollectExcessTransactionAttribute();
-            $collectQueryId = new CollectQueryIdAttribute($collectExcessTransaction);
-            $collectHashLt = new CollectHashLtAttribute($collectQueryId);
-            $collectAmount = new CollectAmountAttribute($collectHashLt);
-            $collectFromAddressWallet = new CollectFromAddressWalletAttribute($collectAmount);
-            $collectToAddressWallet = new CollectToAddressWalletAttribute($collectFromAddressWallet);
-            $collectTotalFees = new CollectTotalFeesAttribute($collectToAddressWallet);
-            $trans = $collectTotalFees->collect($this->data);
+            $excessTransaction = new CollectExcessTransactionAttribute();
+            $queryId = new CollectQueryIdAttribute($excessTransaction);
+            $hashLt = new CollectHashLtAttribute($queryId);
+            $amount = new CollectAmountAttribute($hashLt);
+            $collectFromAddressWallet = new CollectFromAddressWalletAttribute($amount);
+            $toAddressWallet = new CollectToAddressWalletAttribute($collectFromAddressWallet);
+            $occurTon = new CollectOccurTonAttribute($toAddressWallet);
+            $trans = $occurTon->collect($this->data);
 
             if (!$trans['query_id']) {
                 return;

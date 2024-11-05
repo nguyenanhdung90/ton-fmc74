@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class TonController extends Controller
 {
-
     private WithdrawTonV4R2Interface $withdrawTon;
 
     private WithdrawUSDTV4R2Interface $withdrawUSDT;
@@ -25,7 +24,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawTon->process('memo', $destinationAddress, 0.0608, 'memo', false);
+            $this->withdrawTon->process('memo', $destinationAddress, 0.0509, 'memo', false);
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();

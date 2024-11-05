@@ -39,16 +39,16 @@ class UpdateSuccessWithdrawAmountTransaction implements UpdateAmountFeeTransacti
             }
 
             if ($transaction->currency === TransactionHelper::TON) {
-                $totalFees = Arr::get($data, 'total_fees_of_ton', 0);
+                $totalFees = Arr::get($data, 'occur_ton', 0);
             } else {
-                $totalFees = Arr::get($data, 'total_fees_of_ton', 0) + Arr::get($data, 'out_msgs.0.value');
+                $totalFees = Arr::get($data, 'occur_ton', 0) + Arr::get($data, 'out_msgs.0.value');
             }
             DB::table('wallet_ton_transactions')
                 ->where('id', $transaction->id)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),
                     'hash' => Arr::get($data, 'hash'),
-                    'total_fees_of_ton' => $totalFees,
+                    'occur_ton' => $totalFees,
                     'status' => TransactionHelper::SUCCESS,
                     'updated_at' => Carbon::now()
                 ]);

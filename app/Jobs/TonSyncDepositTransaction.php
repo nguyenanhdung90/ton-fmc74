@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
 use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;
-use App\TON\Transactions\Deposit\CollectTotalFeesAttribute;
+use App\TON\Transactions\Deposit\CollectOccurTonAttribute;
 use App\TON\Transactions\Deposit\CollectTransactionAttribute;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositAmount;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositFee;
@@ -68,8 +68,8 @@ class TonSyncDepositTransaction implements ShouldQueue
 
             $collectTransaction = new CollectTransactionAttribute();
             $hashLtCurrency = new CollectHashLtCurrencyAttribute($collectTransaction);
-            $totalFee = new CollectTotalFeesAttribute($hashLtCurrency);
-            $memoSenderAmount = new CollectMemoSenderAmountAttribute($totalFee);
+            $occurTon = new CollectOccurTonAttribute($hashLtCurrency);
+            $memoSenderAmount = new CollectMemoSenderAmountAttribute($occurTon);
             $decimals = new CollectDecimalsAttribute($memoSenderAmount);
             $trans = $decimals->collect($this->data);
 
