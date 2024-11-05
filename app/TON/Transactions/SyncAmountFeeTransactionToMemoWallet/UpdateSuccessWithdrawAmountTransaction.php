@@ -38,17 +38,17 @@ class UpdateSuccessWithdrawAmountTransaction implements UpdateAmountFeeTransacti
                 return;
             }
 
-            $totalFees = (int)Arr::get($data, 'total_fees', 0) +
-                (int)Arr::get($data, 'out_msgs.0.fwd_fee', 0);
-            if ($transaction->currency !== TransactionHelper::TON) {
-                $totalFees += (int)Arr::get($data, 'out_msgs.0.value');
+            if ($transaction->currency === TransactionHelper::TON) {
+                $totalFees = Arr::get($data, 'total_fees_of_ton', 0);
+            } else {
+                $totalFees = Arr::get($data, 'total_fees_of_ton', 0) + Arr::get($data, 'out_msgs.0.value');
             }
             DB::table('wallet_ton_transactions')
                 ->where('id', $transaction->id)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),
                     'hash' => Arr::get($data, 'hash'),
-                    'total_fees' => $totalFees,
+                    'total_fees_of_ton' => $totalFees,
                     'status' => TransactionHelper::SUCCESS,
                     'updated_at' => Carbon::now()
                 ]);
@@ -58,5 +58,20 @@ class UpdateSuccessWithdrawAmountTransaction implements UpdateAmountFeeTransacti
             DB::rollBack();
             return;
         }
+    }
+
+    private function isSameSourceDestinationOfWithdraw(array $transactionByMessage): bool
+    {
+        if (empty(Arr::get($transactionByMessage, 'out_msgs'))) {
+            return false;
+        }
+        if (empty(Arr::get($transactionByMessage, 'out_msgs.0.source'))) {
+            return false;
+        }
+        if (empty(Arr::get($transactionByMessage, 'out_msgs.0.destination'))) {
+            return false;
+        }
+        return Arr::get($transactionByMessage, 'out_msgs.0.destination')
+            === Arr::get($transactionByMessage, 'out_msgs.0.source');
     }
 }

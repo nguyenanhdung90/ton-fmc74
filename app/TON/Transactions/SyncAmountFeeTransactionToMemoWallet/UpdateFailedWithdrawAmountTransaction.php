@@ -45,6 +45,7 @@ class UpdateFailedWithdrawAmountTransaction implements UpdateAmountFeeTransactio
                     'hash' => Arr::get($data, 'hash'),
                     'status' => TransactionHelper::FAILED,
                     'is_sync_amount' => false,
+                    'is_sync_fixed_fee' => false,
                     'updated_at' => Carbon::now()
                 ]);
             $fixedFee = TransactionHelper::getFixedFeeByCurrency($transaction->currency);

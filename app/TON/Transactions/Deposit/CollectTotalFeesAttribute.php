@@ -12,9 +12,9 @@ class CollectTotalFeesAttribute extends CollectAttribute
         $parentTrans = parent::collect($data);
         $symbol = Arr::get($data, 'in_msg.source_details.jetton_master.symbol');
         if ($symbol) {
-            $trans['total_fees'] = (int)Arr::get($data, 'fee') - (int)Arr::get($data, 'in_msg.value');
+            $trans['total_fees_of_ton'] = (int)Arr::get($data, 'fee') - (int)Arr::get($data, 'in_msg.value');
         } else {
-            $trans['total_fees'] = (int)Arr::get($data, 'fee');
+            $trans['total_fees_of_ton'] = (int)Arr::get($data, 'fee');
         }
         return array_merge($parentTrans, $trans);
     }

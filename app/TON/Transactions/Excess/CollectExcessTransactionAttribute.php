@@ -14,7 +14,7 @@ class CollectExcessTransactionAttribute implements CollectAttributeInterface
         return [
             'hash' => null,
             'lt' => null,
-            'total_fees' => null,
+            'total_fees_of_ton' => null,
             'from_address_wallet' => null,
             'to_address_wallet' => null,
             'amount' => null,

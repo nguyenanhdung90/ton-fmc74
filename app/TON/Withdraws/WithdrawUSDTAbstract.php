@@ -86,7 +86,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
                         $walletAddress,
                         $queryId,
                         SnakeString::fromString($toMemo)->cell(true),
-                        Units::toNano("0.0000001")
+                        Units::toNano("0.000000001")
                     )
                 ),
                 SendMode::combine([SendMode::CARRY_ALL_REMAINING_INCOMING_VALUE, SendMode::IGNORE_ERRORS])

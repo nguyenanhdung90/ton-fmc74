@@ -109,6 +109,7 @@ abstract class WithdrawAbstract
                 'decimals' => $decimals,
                 'amount' => $amount,
                 'is_sync_amount' => true,
+                'is_sync_fixed_fee' => true,
                 'query_id' => $queryId,
                 'fixed_fee' => $fixedFee,
                 'created_at' => Carbon::now(),
