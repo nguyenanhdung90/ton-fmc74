@@ -6,7 +6,7 @@ use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class RevokeFixedFeeWithdrawTransaction implements SyncTransactionInterface
+class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 

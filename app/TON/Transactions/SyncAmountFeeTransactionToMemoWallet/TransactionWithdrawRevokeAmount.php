@@ -2,10 +2,10 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-class TransactionRevokeFixedFeeWithdraw extends TransactionToWalletAbstract
+class TransactionWithdrawRevokeAmount extends TransactionToWalletAbstract
 {
     public function getUpdateTransactionToWallet(): SyncTransactionInterface
     {
-        return new RevokeFixedFeeWithdrawTransaction($this->transactionId);
+        return new RevokeWithdrawAmountTransaction($this->transactionId);
     }
 }

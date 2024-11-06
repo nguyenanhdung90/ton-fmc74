@@ -14,7 +14,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionSyncFixedFeeWithdraw;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawSyncFixedFee;
 use App\TON\Transactions\TransactionHelper;
 
 abstract class WithdrawTonAbstract extends WithdrawAbstract
@@ -46,8 +46,8 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
         $transferAmount = (string)Units::fromNano($transaction->amount);
         $transferUnit = Units::toNano($transferAmount);
 
-        $transactionSync = new TransactionSyncFixedFeeWithdraw($transactionId);
-        $transactionSync->syncTransactionWallet();
+        $transactionWithdraw = new TransactionWithdrawSyncFixedFee($transactionId);
+        $transactionWithdraw->syncTransactionWallet();
 
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();

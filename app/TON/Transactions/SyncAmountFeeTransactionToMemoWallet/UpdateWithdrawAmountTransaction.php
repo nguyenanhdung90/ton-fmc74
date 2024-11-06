@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
+class UpdateWithdrawAmountTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 

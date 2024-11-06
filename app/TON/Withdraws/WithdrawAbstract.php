@@ -4,8 +4,8 @@ namespace App\TON\Withdraws;
 
 use App\TON\Exceptions\WithdrawTonException;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionRevokeWithdrawAmount;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionRevokeFixedFeeWithdraw;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeFixedFee;
 use App\TON\Transactions\TransactionHelper;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\Models\TonResponse;
@@ -113,9 +113,9 @@ abstract class WithdrawAbstract
     protected function syncProcessingOrFailedBy(TonResponse $responseMessage, int $transactionId): void
     {
         if (!$responseMessage->ok || empty(Arr::get($responseMessage->result, 'hash'))) {
-            $transactionSync = new TransactionRevokeWithdrawAmount($transactionId);
+            $transactionSync = new TransactionWithdrawRevokeAmount($transactionId);
             $transactionSync->syncTransactionWallet();
-            $transactionRevoke = new TransactionRevokeFixedFeeWithdraw($transactionId);
+            $transactionRevoke = new TransactionWithdrawRevokeFixedFee($transactionId);
             $transactionRevoke->syncTransactionWallet();
         } else {
             DB::table('wallet_ton_transactions')->where('id', $transactionId)
