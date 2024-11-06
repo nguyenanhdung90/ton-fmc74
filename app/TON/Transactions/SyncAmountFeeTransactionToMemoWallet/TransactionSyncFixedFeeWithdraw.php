@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-class TransactionSyncFixedFeeWithdraw extends TransactionUpdateToWalletAbstract
+class TransactionSyncFixedFeeWithdraw extends TransactionToWalletAbstract
 {
     public function getUpdateTransactionToWallet(): SyncTransactionInterface
     {

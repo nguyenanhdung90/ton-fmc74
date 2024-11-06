@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-abstract class TransactionUpdateToWalletAbstract
+abstract class TransactionToWalletAbstract
 {
     protected int $transactionId;
 

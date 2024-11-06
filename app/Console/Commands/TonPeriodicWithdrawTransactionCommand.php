@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionRevokeWithdrawAmount;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionSuccessWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionSyncWithdrawAmount;
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -77,7 +77,7 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                         printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
                         $withdrawAmount = new TransactionRevokeWithdrawAmount($withdrawTransaction->id);
                     } else {
-                        $withdrawAmount = new TransactionSuccessWithdrawAmount($withdrawTransaction->id);
+                        $withdrawAmount = new TransactionSyncWithdrawAmount($withdrawTransaction->id);
                     }
                     $withdrawAmount->syncTransactionWallet($txByMessage);
                 }
