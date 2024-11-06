@@ -16,9 +16,9 @@ class CreateTonWalletsTable extends Migration
         Schema::create('wallet_ton_memos', function (Blueprint $table) {
             $table->id();
             $table->string('memo', 50);
-            $table->string('currency', 20);
+            $table->char('currency', 6);
             $table->unsignedBigInteger('amount')->default(0);
-            $table->unsignedInteger('decimals')->default(0);
+            $table->unsignedTinyInteger('decimals')->default(0);
             $table->unique(['memo', 'currency'], 'memo_currency');
             $table->timestamps();
         });

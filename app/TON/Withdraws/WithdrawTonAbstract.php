@@ -2,6 +2,7 @@
 
 namespace App\TON\Withdraws;
 
+use App\Models\WalletTonTransaction;
 use App\TON\Contracts\Wallets\Exceptions\WalletException;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
@@ -13,6 +14,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionSyncFixedFeeWithdraw;
 use App\TON\Transactions\TransactionHelper;
 
 abstract class WithdrawTonAbstract extends WithdrawAbstract
@@ -26,7 +28,6 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
     public function process(string $fromMemo, string $toAddress,
                             float $transferAmount, string $toMemo = "", bool $isAllRemainBalance = false)
     {
-        $wallet = $this->validGetWalletMemo($fromMemo, TransactionHelper::TON);
         $transactionId = $this->syncToWalletGetIdTransaction(
             $fromMemo,
             $toAddress,
@@ -41,11 +42,12 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
         }
 
-        if ($isAllRemainBalance) {
-            $transferNano = $wallet->amount - TransactionHelper::getFixedFeeByCurrency(TransactionHelper::TON);
-            $transferAmount = (string)Units::fromNano($transferNano);
-        }
+        $transaction = WalletTonTransaction::find($transactionId);
+        $transferAmount = (string)Units::fromNano($transaction->amount);
         $transferUnit = Units::toNano($transferAmount);
+
+        $transactionSync = new TransactionSyncFixedFeeWithdraw($transactionId);
+        $transactionSync->syncTransactionWallet();
 
         $phrases = config('services.ton.ton_mnemonic');
         $transport = $this->getTransport();

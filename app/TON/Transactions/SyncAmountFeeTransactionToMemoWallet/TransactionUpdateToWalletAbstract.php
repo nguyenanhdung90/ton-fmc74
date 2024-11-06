@@ -11,7 +11,7 @@ abstract class TransactionUpdateToWalletAbstract
         $this->transactionId = $transactionId;
     }
 
-    abstract public function getUpdateTransactionToWallet(): UpdateAmountFeeTransactionInterface;
+    abstract public function getUpdateTransactionToWallet(): SyncTransactionInterface;
 
     public function syncTransactionWallet(array $data = [])
     {

@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
+class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 
@@ -24,7 +24,15 @@ class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
-            if (!$transaction || empty($transaction->from_memo) || empty($transaction->currency)) {
+            if (!$transaction) {
+                DB::rollBack();
+                return;
+            }
+            if (empty($transaction->from_memo)) {
+                DB::rollBack();
+                return;
+            }
+            if (empty($transaction->currency)) {
                 DB::rollBack();
                 return;
             }
@@ -38,21 +46,20 @@ class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
                 return;
             }
 
-            if ($transaction->currency === TransactionHelper::TON) {
-                $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.fwd_fee');
-            } else {
-                $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.value') +
-                    Arr::get($data, 'out_msgs.0.fwd_fee');
-            }
             DB::table('wallet_ton_transactions')
-                ->where('id', $wallet->id)
+                ->where('id', $transaction->id)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),
                     'hash' => Arr::get($data, 'hash'),
-                    'occur_ton' => $occurTon,
-                    'status' => TransactionHelper::SUCCESS,
+                    'status' => TransactionHelper::FAILED,
+                    'is_sync_amount' => false,
                     'updated_at' => Carbon::now()
                 ]);
+            $updateAmount = $wallet->amount + $transaction->amount;
+            DB::table('wallet_ton_memos')->where('id', $wallet->id)
+                ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
+            printf("Update amount withdraw tran id: %s, update amount: %s, currency: %s, to memo id: %s \n",
+                $transaction->id, $updateAmount, $transaction->currency, $wallet->id);
             DB::commit();
             return;
         } catch (\Exception $e) {

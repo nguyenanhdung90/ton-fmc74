@@ -2,10 +2,10 @@
 
 namespace App\TON\Withdraws;
 
-use App\Models\WalletTonMemo;
 use App\TON\Exceptions\WithdrawTonException;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionFailedWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionRevokeWithdrawAmount;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionRevokeFixedFeeWithdraw;
 use App\TON\Transactions\TransactionHelper;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\Models\TonResponse;
@@ -54,18 +54,6 @@ abstract class WithdrawAbstract
     /**
      * @throws WithdrawTonException
      */
-    protected function validGetWalletMemo(string $fromMemo, string $currency)
-    {
-        $wallet = WalletTonMemo::where('memo', $fromMemo)->where('currency', $currency)->first();
-        if (!$wallet) {
-            throw new WithdrawTonException("There is not memo account");
-        }
-        return $wallet;
-    }
-
-    /**
-     * @throws WithdrawTonException
-     */
     protected function syncToWalletGetIdTransaction(
         string $fromMemo,
         string $toAddress,
@@ -85,20 +73,18 @@ abstract class WithdrawAbstract
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
-                return null;
+                throw new WithdrawTonException("There is not memo account");
             }
-            $fixedFee = TransactionHelper::getFixedFeeByCurrency($currency);
-            $remainFixedFeeBalance = $wallet->amount - $fixedFee;
-            if ($remainFixedFeeBalance < 0) {
-                DB::rollBack();
-                throw new WithdrawTonException("Minimum amount of wallet is greater than " . $fixedFee);
-            }
-            $remainBalance = $isAllRemainBalance ? 0 : ($remainFixedFeeBalance - $transferUnit);
+            $remainBalance = $isAllRemainBalance ? 0 : ($wallet->amount - $transferUnit);
             if ($remainBalance < 0) {
                 DB::rollBack();
                 throw new WithdrawTonException("Amount of wallet is not enough");
             }
-            $amount = $isAllRemainBalance ? $remainFixedFeeBalance : $transferUnit;
+            $transfer = $isAllRemainBalance ? $wallet->amount : $transferUnit;
+            if ($transfer <= 0) {
+                DB::rollBack();
+                throw new WithdrawTonException("Amount of transfer must be greater than zero");
+            }
             $transaction = [
                 'from_address_wallet' => config('services.ton.root_ton_wallet'),
                 'from_memo' => $fromMemo,
@@ -107,11 +93,9 @@ abstract class WithdrawAbstract
                 'to_address_wallet' => $toAddress,
                 'currency' => $currency,
                 'decimals' => $decimals,
-                'amount' => $amount,
+                'amount' => $transfer,
                 'is_sync_amount' => true,
-                'is_sync_fixed_fee' => true,
                 'query_id' => $queryId,
-                'fixed_fee' => $fixedFee,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
@@ -129,8 +113,10 @@ abstract class WithdrawAbstract
     protected function syncProcessingOrFailedBy(TonResponse $responseMessage, int $transactionId): void
     {
         if (!$responseMessage->ok || empty(Arr::get($responseMessage->result, 'hash'))) {
-            $withdrawAmount = new TransactionFailedWithdrawAmount($transactionId);
-            $withdrawAmount->syncTransactionWallet();
+            $transactionSync = new TransactionRevokeWithdrawAmount($transactionId);
+            $transactionSync->syncTransactionWallet();
+            $transactionRevoke = new TransactionRevokeFixedFeeWithdraw($transactionId);
+            $transactionRevoke->syncTransactionWallet();
         } else {
             DB::table('wallet_ton_transactions')->where('id', $transactionId)
                 ->update([

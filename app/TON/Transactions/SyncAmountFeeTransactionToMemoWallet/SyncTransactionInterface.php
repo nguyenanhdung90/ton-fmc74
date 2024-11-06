@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-interface UpdateAmountFeeTransactionInterface
+interface SyncTransactionInterface
 {
     public function process(array $data);
 }

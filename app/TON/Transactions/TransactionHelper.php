@@ -9,6 +9,7 @@ class TransactionHelper
     const MAX_LIMIT_TRANSACTION = 100;
     const TON = 'TON';
     const USDT = 'USDT';
+    const PAYN = 'PAYN';
     const DEPOSIT = 'DEPOSIT';
     const WITHDRAW = 'WITHDRAW';
     const WITHDRAW_EXCESS = 'WITHDRAW_EXCESS';
@@ -18,14 +19,4 @@ class TransactionHelper
     const PROCESSING = 'PROCESSING';
     const SUCCESS = 'SUCCESS';
     const FAILED = 'FAILED';
-
-    public static function getFixedFeeByCurrency(string $currency)
-    {
-        switch ($currency) {
-            case self::USDT:
-                return config('services.ton.fixed_fee_usdt');
-            default:
-                return config('services.ton.fixed_fee_ton');
-        }
-    }
 }

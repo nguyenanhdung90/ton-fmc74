@@ -5,7 +5,7 @@ namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class UpdateDepositAmountTransaction implements UpdateAmountFeeTransactionInterface
+class UpdateDepositAmountTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 

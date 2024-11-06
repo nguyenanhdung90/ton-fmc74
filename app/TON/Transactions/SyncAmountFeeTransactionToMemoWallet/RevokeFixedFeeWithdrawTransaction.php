@@ -4,10 +4,9 @@ namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
 use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
+class RevokeFixedFeeWithdrawTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 
@@ -24,35 +23,38 @@ class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
-            if (!$transaction || empty($transaction->from_memo) || empty($transaction->currency)) {
+            if (!$transaction) {
+                DB::rollBack();
+                return;
+            }
+            if ($transaction->type !== TransactionHelper::WITHDRAW) {
+                DB::rollBack();
+                return;
+            }
+            if (!$transaction->is_sync_fixed_fee) {
+                DB::rollBack();
+                return;
+            }
+            if (empty($transaction->from_memo)) {
                 DB::rollBack();
                 return;
             }
             $wallet = DB::table('wallet_ton_memos')
-                ->where('currency', $transaction->currency)
                 ->where('memo', $transaction->from_memo)
+                ->where('currency', TransactionHelper::PAYN)
                 ->lockForUpdate()
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
                 return;
             }
-
-            if ($transaction->currency === TransactionHelper::TON) {
-                $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.fwd_fee');
-            } else {
-                $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.value') +
-                    Arr::get($data, 'out_msgs.0.fwd_fee');
-            }
-            DB::table('wallet_ton_transactions')
+            $remainingAmount = $wallet->amount + config("services.ton.fixed_fee");
+            DB::table('wallet_ton_memos')
                 ->where('id', $wallet->id)
-                ->update([
-                    'lt' => Arr::get($data, 'lt'),
-                    'hash' => Arr::get($data, 'hash'),
-                    'occur_ton' => $occurTon,
-                    'status' => TransactionHelper::SUCCESS,
-                    'updated_at' => Carbon::now()
-                ]);
+                ->update(['amount' => $remainingAmount, 'updated_at' => Carbon::now()]);
+            DB::table('wallet_ton_transactions')
+                ->where('id', $transaction->id)
+                ->update(['is_sync_fixed_fee' => false, 'updated_at' => Carbon::now()]);
             DB::commit();
             return;
         } catch (\Exception $e) {
@@ -60,4 +62,5 @@ class UpdateSuccessWithdrawAmountTransaction implements SyncTransactionInterface
             return;
         }
     }
+
 }
