@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions;
 
-use App\Exceptions\ErrorJettonWalletException;
+use App\TON\Exceptions\ErrorJettonWalletException;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Address;
 use Illuminate\Support\Arr;
@@ -26,8 +26,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
         $mapperSource = $this->parseMapperJetWallets($address);
         $jetWalletCollection = $this->getJetWallets($sourceChunks);
         if (!$jetWalletCollection) {
-            throw new ErrorJettonWalletException("Error Jetton wallet: ",
-                ErrorJettonWalletException::ERROR_JET_WALLET);
+            throw new ErrorJettonWalletException("Error Jetton wallet");
         }
         $this->setJetWalletToMapper($jetWalletCollection, $mapperSource);
         return $mapperSource;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\TON\Jobs;
 
 use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
 use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;

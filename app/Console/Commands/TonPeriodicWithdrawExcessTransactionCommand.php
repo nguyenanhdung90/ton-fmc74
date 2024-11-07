@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\TonSyncExcessTransaction;
 use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\Jobs\TonSyncExcessTransaction;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;

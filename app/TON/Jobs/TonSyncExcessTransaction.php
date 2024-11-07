@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace App\TON\Jobs;
 
 use App\TON\Transactions\Excess\CollectAmountAttribute;
 use App\TON\Transactions\Excess\CollectExcessTransactionAttribute;

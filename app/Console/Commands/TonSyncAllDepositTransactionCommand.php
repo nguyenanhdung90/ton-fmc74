@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\TonSyncDepositTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\Jobs\TonSyncDepositTransaction;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Console\Command;
