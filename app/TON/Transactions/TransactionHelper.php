@@ -2,6 +2,8 @@
 
 namespace App\TON\Transactions;
 
+use App\TON\Interop\Units;
+
 class TransactionHelper
 {
     const BATCH_NUMBER_JETTON_WALLET = 20;
@@ -10,6 +12,8 @@ class TransactionHelper
     const TON = 'TON';
     const USDT = 'USDT';
     const PAYN = 'PAYN';
+    const NOT = 'NOT';
+    const AIOTX = 'AIOTX';
     const DEPOSIT = 'DEPOSIT';
     const WITHDRAW = 'WITHDRAW';
     const WITHDRAW_EXCESS = 'WITHDRAW_EXCESS';
@@ -30,12 +34,12 @@ class TransactionHelper
     {
         return [
             config('services.ton.root_usdt') => [
-                'decimals' => 6,
-                'symbol' => 'USDT'
+                'decimals' => Units::USDt,
+                'symbol' => self::USDT
             ],
             config('services.ton.root_not') => [
-                'decimals' => 9,
-                'symbol' => 'NOT'
+                'decimals' => Units::NOT,
+                'symbol' => self::NOT
             ]
         ];
     }

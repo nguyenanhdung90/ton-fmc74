@@ -2,8 +2,6 @@
 
 namespace App\TON\Withdraws;
 
-interface WithdrawUSDTV4R2Interface
+interface WithdrawUSDTV4R2Interface extends WithdrawJettonInterface
 {
-    public function process(string $fromMemo, string $destAddress, string $transferAmount,
-                            string $toMemo = "", bool $isAllRemainBalance = false);
 }

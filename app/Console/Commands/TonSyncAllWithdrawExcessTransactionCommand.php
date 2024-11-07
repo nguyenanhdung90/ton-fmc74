@@ -18,7 +18,7 @@ class TonSyncAllWithdrawExcessTransactionCommand extends Command
     protected $signature = 'ton:sync_all_excess';
 
     /**
-     * The console command description.
+     *  this transaction of TON network is notify for jetton withdraw
      *
      * @var string
      */

@@ -20,10 +20,15 @@ use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawSyncFixedFee;
-use App\TON\Transactions\TransactionHelper;
 
-abstract class WithdrawUSDTAbstract extends WithdrawAbstract
+abstract class WithdrawJettonAbstract extends WithdrawAbstract
 {
+    abstract public function getCurrency(): string;
+
+    abstract public function getDecimals(): int;
+
+    abstract public function getMasterJettonAddress(): string;
+
     /**
      * @throws BitStringException
      * @throws TonMnemonicException
@@ -35,12 +40,15 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
                             bool $isAllRemainBalance = false)
     {
         $queryId = hexdec(uniqid());
+        $currency = $this->getCurrency();
+        $decimals = $this->getDecimals();
+        $jettonMasterAddress = $this->getMasterJettonAddress();
         $transactionId = $this->syncToWalletGetIdTransaction(
             $fromMemo,
             $destAddress,
-            (string)Units::toNano($transferAmount, Units::USDt),
-            TransactionHelper::USDT,
-            Units::USDt,
+            (string)Units::toNano($transferAmount, $decimals),
+            $currency,
+            $decimals,
             $toMemo,
             $queryId,
             $isAllRemainBalance
@@ -50,8 +58,8 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
         }
 
         $transaction = WalletTonTransaction::find($transactionId);
-        $transferAmount = (string)Units::fromNano($transaction->amount, Units::USDt);
-        $transferUnit = Units::toNano($transferAmount, Units::USDt);
+        $transferAmount = (string)Units::fromNano($transaction->amount, $decimals);
+        $transferUnit = Units::toNano($transferAmount, $decimals);
 
         $transactionWithdraw = new TransactionWithdrawSyncFixedFee($transactionId);
         $transactionWithdraw->syncTransactionWallet();
@@ -64,7 +72,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
         $transport = $this->getTransport();
         $usdtRoot = JettonMinter::fromAddress(
             $transport,
-            new Address(config('services.ton.root_usdt'))
+            new Address($jettonMasterAddress)
         );
         $usdtWalletAddress = $usdtRoot->getJettonWalletAddress($transport, $walletAddress);
         $usdtWallet = new JettonWallet(new JettonWalletOptions(

@@ -21,4 +21,6 @@ Route::get('/', function () {
 Route::get('/withdrawInternalVirtualCurrencyExchange', [TonController::class, 'withdrawInternalVirtualCurrencyExchange']);
 Route::get('/withdrawUSDTExample', [TonController::class, 'withdrawUSDTExample']);
 Route::get('/withdrawTONExample', [TonController::class, 'withdrawTONExample']);
+Route::get('/withdrawNOTExample', [TonController::class, 'withdrawNOTExample']);
+Route::get('/withdrawAIOTXExample', [TonController::class, 'withdrawAIOTXExample']);
 

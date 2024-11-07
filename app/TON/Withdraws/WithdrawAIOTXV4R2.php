@@ -7,7 +7,7 @@ use App\TON\Contracts\Wallets\V4\WalletV4R2;
 use App\TON\Interop\Units;
 use App\TON\Transactions\TransactionHelper;
 
-class WithdrawUSDTV4R2 extends WithdrawJettonAbstract implements WithdrawUSDTV4R2Interface
+class WithdrawAIOTXV4R2 extends WithdrawJettonAbstract implements WithdrawAIOTXV4R2Interface
 {
     public function getWallet($pubicKey): WalletV4R2
     {
@@ -16,16 +16,17 @@ class WithdrawUSDTV4R2 extends WithdrawJettonAbstract implements WithdrawUSDTV4R
 
     public function getCurrency(): string
     {
-        return TransactionHelper::USDT;
+        return TransactionHelper::AIOTX;
     }
 
     public function getDecimals(): int
     {
-        return Units::USDt;
+        return Units::AIOTX;
     }
 
     public function getMasterJettonAddress(): string
     {
-        return config('services.ton.root_usdt');
+        // this coin is only test environment
+        return '0:226e80c4bffa91adc11dad87706d52cd397047c128456ed2866d0549d8e2b163';
     }
 }

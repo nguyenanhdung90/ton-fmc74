@@ -13,6 +13,8 @@ class Units
 {
     public const DEFAULT = 9;
     public const USDt = 6;
+    public const NOT = 9;
+    public const AIOTX = 9;
 
     /**
      * Returns $amount in nano.

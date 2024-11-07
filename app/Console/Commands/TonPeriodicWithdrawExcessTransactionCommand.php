@@ -19,7 +19,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
     protected $signature = 'ton:periodic_withdraw_excess';
 
     /**
-     * Sync transaction excess by query id for withdraw
+     * this transaction of TON network is notify for jetton withdraw
      *
      * @var string
      */
