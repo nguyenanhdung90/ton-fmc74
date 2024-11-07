@@ -24,12 +24,6 @@ use App\TON\Transactions\TransactionHelper;
 
 abstract class WithdrawUSDTAbstract extends WithdrawAbstract
 {
-    protected function getRootUSDT()
-    {
-        return config('services.ton.is_main') ? config('services.ton.root_usdt_main') :
-            config('services.ton.root_usdt_test');
-    }
-
     /**
      * @throws BitStringException
      * @throws TonMnemonicException
@@ -70,7 +64,7 @@ abstract class WithdrawUSDTAbstract extends WithdrawAbstract
         $transport = $this->getTransport();
         $usdtRoot = JettonMinter::fromAddress(
             $transport,
-            new Address($this->getRootUSDT())
+            new Address(config('services.ton.root_usdt'))
         );
         $usdtWalletAddress = $usdtRoot->getJettonWalletAddress($transport, $walletAddress);
         $usdtWallet = new JettonWallet(new JettonWalletOptions(

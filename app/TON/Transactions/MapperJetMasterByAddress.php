@@ -2,10 +2,10 @@
 
 namespace App\TON\Transactions;
 
-use App\Exceptions\ErrorJettonMasterException;
 use App\Exceptions\ErrorJettonWalletException;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Address;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
@@ -19,7 +19,6 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
 
     /**
      * @throws ErrorJettonWalletException
-     * @throws ErrorJettonMasterException
      */
     public function request(Collection $address): Collection
     {
@@ -31,15 +30,6 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
                 ErrorJettonWalletException::ERROR_JET_WALLET);
         }
         $this->setJetWalletToMapper($jetWalletCollection, $mapperSource);
-
-        $jetWallets = $jetWalletCollection->pluck('jetton')->unique();
-        $jetWalletChunks = $jetWallets->chunk(TransactionHelper::BATCH_NUMBER_JETTON_MASTER);
-        $jetMasterCollections = $this->getJetMasters($jetWalletChunks);
-        if (!$jetMasterCollections) {
-            throw new ErrorJettonMasterException("Error Jetton master: ",
-                ErrorJettonMasterException::ERROR_JET_MASTER);
-        }
-        $this->setJetMasterToMapper($jetMasterCollections, $mapperSource);
         return $mapperSource;
     }
 
@@ -50,7 +40,6 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
             return [
                 'source' => $item,
                 'hex' => strtoupper($address->toString(false)),
-                'jetton_wallet' => null,
                 'jetton_master' => []
             ];
         });
@@ -77,44 +66,15 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
 
     private function setJetWalletToMapper(Collection $jetWalletCollection, &$mappers)
     {
+        $mappersJettonAttribute = TransactionHelper::validJettonAttribute();
         $keyIndexJetWallets = $jetWalletCollection->keyBy('address');
-        $mappers->transform(function ($item, $key) use ($keyIndexJetWallets) {
+        $mappers->transform(function ($item, $key) use ($keyIndexJetWallets, $mappersJettonAttribute) {
             $hex = $item['hex'];
             if ($keyIndexJetWallets->has($hex)) {
-                $item['jetton_wallet'] = $keyIndexJetWallets->get($hex)['jetton'];
-            }
-            return $item;
-        });
-    }
-
-    private function getJetMasters(Collection $jetWalletChunks): ?Collection
-    {
-        $mergedJetMaster = collect([]);
-        foreach ($jetWalletChunks as $jetWalletChunk) {
-            $params = [
-                "limit" => $jetWalletChunk->count(),
-                "address" => $jetWalletChunk->implode(',')
-            ];
-            sleep(1);
-            $jetMaster = $this->tonCenterClient->getJetMasters($params);
-            if (!$jetMaster) {
-                return null;
-            }
-            $mergedJetMaster = $mergedJetMaster->merge($jetMaster);
-        }
-        return $mergedJetMaster;
-    }
-
-    private function setJetMasterToMapper(Collection $jetMasterCollection, &$mappers)
-    {
-        $keyIndexJetMasters = $jetMasterCollection->keyBy('address');
-        $mappers->transform(function ($item, $key) use ($keyIndexJetMasters) {
-            if (empty($item['jetton_wallet'])) {
-                return $item;
-            }
-            $indexHex = $item['jetton_wallet'];
-            if ($keyIndexJetMasters->has($indexHex)) {
-                $item['jetton_master'] = $keyIndexJetMasters->get($indexHex)['jetton_content'];
+                $jettonMasterAddressHex = strtolower($keyIndexJetWallets->get($hex)['jetton']);
+                $item['jetton_master'] = Arr::has($mappersJettonAttribute, $jettonMasterAddressHex) ?
+                    Arr::get($mappersJettonAttribute, $jettonMasterAddressHex) :
+                    TransactionHelper::NONSUPPORT_JETTON;
             }
             return $item;
         });

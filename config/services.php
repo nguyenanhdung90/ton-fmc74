@@ -34,8 +34,8 @@ return [
         'api_key_test' => env('TON_API_KEY_TEST'),
         'api_key_main' => env('TON_API_KEY_MAIN'),
         'root_ton_wallet' => env('ROOT_TON_WALLET'),
-        'root_usdt_test' => env('ROOT_USDT_TEST'),
-        'root_usdt_main' => env('ROOT_USDT_MAIN'),
+        'root_usdt' => env('IS_MAIN') ? env('ROOT_USDT_MAIN') : env('ROOT_USDT_TEST'),
+        'root_not' => env('IS_MAIN') ? env('ROOT_NOT_MAIN') : env('ROOT_NOT_TEST'),
         'ton_mnemonic' => env('TON_MNEMONIC'),
         'fixed_fee' => env('FIXED_FEE')
     ]

@@ -19,4 +19,24 @@ class TransactionHelper
     const PROCESSING = 'PROCESSING';
     const SUCCESS = 'SUCCESS';
     const FAILED = 'FAILED';
+
+    const NONSUPPORT_JETTON = [
+        'decimals' => 0,
+        'symbol' => self::NONSUPPORT_SYMBOL
+    ];
+    const NONSUPPORT_SYMBOL = 'NONSUPPORT';
+
+    public static function validJettonAttribute(): array
+    {
+        return [
+            config('services.ton.root_usdt') => [
+                'decimals' => 6,
+                'symbol' => 'USDT'
+            ],
+            config('services.ton.root_not') => [
+                'decimals' => 9,
+                'symbol' => 'NOT'
+            ]
+        ];
+    }
 }
