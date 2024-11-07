@@ -61,7 +61,7 @@ class UpdateWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 ->where('id', $wallet->id)
                 ->update(['amount' => $remainingAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')
-                ->where('id', $transaction->id)
+                ->where('id', $this->transactionId)
                 ->update([
                     'is_sync_fixed_fee' => true,
                     'fixed_fee' => config('services.ton.fixed_fee'),

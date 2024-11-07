@@ -2,10 +2,10 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-class TransactionWithdrawSyncAmount extends TransactionToWalletAbstract
+class TransactionWithdrawSuccess extends TransactionToWalletAbstract
 {
     public function getUpdateTransactionToWallet(): SyncTransactionInterface
     {
-        return new UpdateWithdrawAmountTransaction($this->transactionId);
+        return new UpdateWithdrawSuccessTransaction($this->transactionId);
     }
 }

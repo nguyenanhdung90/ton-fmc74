@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class UpdateWithdrawAmountTransaction implements SyncTransactionInterface
+class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 
@@ -45,7 +45,7 @@ class UpdateWithdrawAmountTransaction implements SyncTransactionInterface
                     Arr::get($data, 'out_msgs.0.fwd_fee');
             }
             DB::table('wallet_ton_transactions')
-                ->where('id', $wallet->id)
+                ->where('id', $this->transactionId)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),
                     'hash' => Arr::get($data, 'hash'),
@@ -54,6 +54,7 @@ class UpdateWithdrawAmountTransaction implements SyncTransactionInterface
                     'updated_at' => Carbon::now()
                 ]);
             DB::commit();
+            printf("Update success withdraw tran id: %s, currency: %s \n", $this->transactionId, $transaction->currency);
             return;
         } catch (\Exception $e) {
             DB::rollBack();
