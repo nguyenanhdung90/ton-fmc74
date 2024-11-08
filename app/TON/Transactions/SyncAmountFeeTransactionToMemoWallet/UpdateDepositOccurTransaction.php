@@ -50,7 +50,7 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
                     ->update(['amount' => $updateFeeAmount, 'updated_at' => Carbon::now()]);
                 DB::table('wallet_ton_transactions')->where('id', $this->transactionId)
                     ->update(['is_sync_occur_ton' => true, 'updated_at' => Carbon::now()]);
-                printf("Update fee deposit tran id: %s, updateFeeAmount: %s, to memo id: %s \n",
+                printf("Update occur deposit tran id: %s, updateFeeAmount: %s, to memo id: %s \n",
                     $this->transactionId, $updateFeeAmount, $wallet->id);
             }
             DB::commit();

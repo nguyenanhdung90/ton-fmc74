@@ -54,7 +54,8 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
                     'updated_at' => Carbon::now()
                 ]);
             DB::commit();
-            printf("Update success withdraw tran id: %s, currency: %s \n", $this->transactionId, $transaction->currency);
+            printf("Update success withdraw tran id: %s, currency: %s \n",
+                $this->transactionId, $transaction->currency);
             return;
         } catch (\Exception $e) {
             DB::rollBack();

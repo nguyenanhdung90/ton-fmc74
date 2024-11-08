@@ -2,12 +2,6 @@
 
 namespace App\TON;
 
-//enum Network : int
-//{
-//    case MAIN = -239;
-//    case TEST = -3;
-//}
-
 class Network
 {
     const MAIN = -239;
