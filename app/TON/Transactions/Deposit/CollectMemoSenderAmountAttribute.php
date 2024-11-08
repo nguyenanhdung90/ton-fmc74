@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\Deposit;
 
-use App\Exceptions\InvalidJettonException;
+use App\TON\Exceptions\InvalidJettonException;
 use App\TON\Interop\Address;
 use App\TON\Interop\Boc\Cell;
 use App\TON\Interop\Boc\Exceptions\CellException;
@@ -32,7 +32,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             $amount = (int)Arr::get($data, 'in_msg.value');
             $source = Arr::get($data, 'in_msg.source');
             $address = new Address($source);
-            $fromAddressWallet = $address->asWallet(!config('services.tom.is_main'));
+            $fromAddressWallet = $address->asWallet(!config('services.ton.is_main'));
             $memo = Arr::get($data, 'in_msg.message');
         }
 
@@ -55,13 +55,11 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         $slice = $cell->beginParse();
         $remainBit = count($slice->getRemainingBits());
         if ($remainBit < 32) {
-            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body,
-                InvalidJettonException::INVALID_JETTON);
+            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body);
         }
         $opcode = Bytes::bytesToHexString($slice->loadBits(32));
         if ($opcode !== TransactionHelper::JET_OPCODE) {
-            throw new InvalidJettonException("Invalid Jetton opcode: " . $body,
-                InvalidJettonException::INVALID_JETTON_OPCODE);
+            throw new InvalidJettonException("Invalid Jetton opcode: " . $body);
         }
 
         $slice->skipBits(64);

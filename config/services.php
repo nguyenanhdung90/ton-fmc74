@@ -30,12 +30,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
     'ton' => [
-        'is_main' => env('IS_MAIN'),
+        'is_main' => env('TON_IS_MAIN'),
         'api_key_test' => env('TON_API_KEY_TEST'),
         'api_key_main' => env('TON_API_KEY_MAIN'),
         'root_wallet' => env('TON_ROOT_WALLET'),
-        'master_jetton_usdt' => env('IS_MAIN') ? env('TON_MASTER_USDT_MAIN') : env('TON_MASTER_USDT_TEST'),
-        'master_jetton_not' => env('IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
+        'master_jetton_usdt' => env('TON_IS_MAIN') ? env('TON_MASTER_USDT_MAIN') : env('TON_MASTER_USDT_TEST'),
+        'master_jetton_not' => env('TON_IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
         'mnemonic' => env('TON_MNEMONIC'),
         'fixed_fee' => env('FIXED_FEE')
     ]
