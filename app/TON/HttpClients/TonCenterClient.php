@@ -2,6 +2,7 @@
 
 namespace App\TON\HttpClients;
 
+use App\TON\Exceptions\InvalidJsonRpcException;
 use App\TON\TonHelper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -42,13 +43,16 @@ class TonCenterClient implements TonCenterClientInterface
     public function jsonRPC(array $query): array
     {
         try {
-            $uri = $this->baseUri . 'api/v2/jsonRPC';
-            $rpcQuery = array_merge($query, ['id' => TonHelper::generateRandomString(6), "jsonrpc" => "2.0"]);
+            $idQuery = TonHelper::generateRandomString(6);
+            $rpcQuery = array_merge($query, ['id' => $idQuery, "jsonrpc" => "2.0"]);
             Arr::set($options, 'body', json_encode($rpcQuery));
-            $response = $this->client->request('POST', $uri, $options);
-            $content = $response->getBody()->getContents();
-            return json_decode($content, true);
-        } catch (GuzzleException $e) {
+            $response = $this->client->request('POST', $this->baseUri . 'api/v2/jsonRPC', $options);
+            $contents = json_decode($response->getBody()->getContents(), true);
+            if (Arr::get($contents, 'id') !== $idQuery) {
+                throw new InvalidJsonRpcException('Invalid id query json rpc');
+            }
+            return $contents;
+        } catch (GuzzleException | InvalidJsonRpcException $e) {
             Log::error('Caught exception: ' . $e->getMessage());
             return ['ok' => false, 'error' => $e->getMessage()];
         }
