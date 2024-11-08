@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +55,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                 ->update([
                     'lt' => Arr::get($data, 'lt'),
                     'hash' => Arr::get($data, 'hash'),
-                    'status' => TransactionHelper::FAILED,
+                    'status' => TonHelper::FAILED,
                     'is_sync_amount' => false,
                     'updated_at' => Carbon::now()
                 ]);

@@ -5,6 +5,7 @@ namespace App\TON\Transactions;
 use App\TON\Exceptions\ErrorJettonWalletException;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Address;
+use App\TON\TonHelper;
 use Illuminate\Support\Collection;
 
 class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
@@ -21,7 +22,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
      */
     public function request(Collection $inMsgSources): Collection
     {
-        $inMsgSourceChunks = $inMsgSources->chunk(TransactionHelper::BATCH_NUMBER_JETTON_WALLET);
+        $inMsgSourceChunks = $inMsgSources->chunk(TonHelper::BATCH_NUMBER_JETTON_WALLET);
         $mapperInMsgSource = $this->transformMapperJetWallets($inMsgSources);
         $jetWalletCollection = $this->getJetWallets($inMsgSourceChunks);
         if (!$jetWalletCollection) {
@@ -69,7 +70,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
             $hexSource = $item['hex_source'];
             if ($keyIndexJetWallets->has($hexSource)) {
                 $hexAddressJettonMaster = strtoupper($keyIndexJetWallets->get($hexSource)['jetton']);
-                $item['jetton_master'] = TransactionHelper::getJettonAttribute($hexAddressJettonMaster);
+                $item['jetton_master'] = TonHelper::getJettonAttribute($hexAddressJettonMaster);
             }
             return $item;
         });

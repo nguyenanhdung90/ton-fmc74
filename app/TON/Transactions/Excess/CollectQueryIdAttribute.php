@@ -5,7 +5,7 @@ namespace App\TON\Transactions\Excess;
 use App\TON\Interop\Boc\Cell;
 use App\TON\Interop\Bytes;
 use App\TON\Transactions\CollectAttribute;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +33,7 @@ class CollectQueryIdAttribute extends CollectAttribute
                 return null;
             }
             $opcode = Bytes::bytesToHexString($slice->loadBits(32));
-            if ($opcode !== TransactionHelper::EXCESS_OPCODE) {
+            if ($opcode !== TonHelper::EXCESS_OPCODE) {
                 return null;
             }
             $hexQueryId = Bytes::bytesToHexString($slice->loadBits(64));

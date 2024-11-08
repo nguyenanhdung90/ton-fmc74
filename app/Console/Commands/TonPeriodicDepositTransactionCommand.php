@@ -6,7 +6,7 @@ use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Jobs\TonSyncDepositTransaction;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
@@ -45,7 +45,7 @@ class TonPeriodicDepositTransactionCommand extends Command
         $this->tonCenterClient = $tonCenterClient;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
         $this->params = [
-            "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
+            "limit" => TonHelper::MAX_LIMIT_TRANSACTION,
             "address" => config('services.ton.root_wallet'),
             "to_lt" => null
         ];
@@ -58,7 +58,7 @@ class TonPeriodicDepositTransactionCommand extends Command
      */
     public function handle(): int
     {
-        $lastTransaction = WalletTonTransaction::where('type', 'type', TransactionHelper::DEPOSIT)
+        $lastTransaction = WalletTonTransaction::where('type', 'type', TonHelper::DEPOSIT)
             ->orderBy('lt', 'desc')->first();
         $toLt = $lastTransaction ? $lastTransaction->lt : null;
         Arr::set($this->params, 'to_lt', $toLt);

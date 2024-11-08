@@ -6,7 +6,7 @@ use App\TON\Exceptions\WithdrawTonException;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeAmount;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeFixedFee;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\Models\TonResponse;
 use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
@@ -28,12 +28,6 @@ abstract class WithdrawAbstract
             : TonCenterClientInterface::TEST_BASE_URI;
     }
 
-    protected function getTonApiKey()
-    {
-        return config('services.ton.is_main') ? config('services.ton.api_key_main') :
-            config('services.ton.api_key_test');
-    }
-
     protected function getTransport(): ToncenterTransport
     {
         $httpClient = new HttpMethodsClient(
@@ -45,7 +39,7 @@ abstract class WithdrawAbstract
             $httpClient,
             new ClientOptions(
                 $this->getBaseUri() . "api/v2",
-                $this->getTonApiKey()
+                config('services.ton.api_key')
             )
         );
         return new ToncenterTransport($tonCenter);
@@ -88,7 +82,7 @@ abstract class WithdrawAbstract
             $transaction = [
                 'from_address_wallet' => config('services.ton.root_wallet'),
                 'from_memo' => $fromMemo,
-                'type' => TransactionHelper::WITHDRAW,
+                'type' => TonHelper::WITHDRAW,
                 'to_memo' => $toMemo,
                 'to_address_wallet' => $toAddress,
                 'currency' => $currency,
@@ -120,7 +114,7 @@ abstract class WithdrawAbstract
         } else {
             DB::table('wallet_ton_transactions')->where('id', $transactionId)
                 ->update([
-                    'status' => TransactionHelper::PROCESSING,
+                    'status' => TonHelper::PROCESSING,
                     'in_msg_hash' => Arr::get($responseMessage->result, 'hash'),
                     'updated_at' => Carbon::now()
                 ]);

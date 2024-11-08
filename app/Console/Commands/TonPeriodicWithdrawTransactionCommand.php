@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeAmount;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawSuccess;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -50,11 +50,11 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                 printf("Period transaction withdraw ton query every 20s ...\n");
                 sleep(20);
                 $withDrawTransactions = DB::table('wallet_ton_transactions')
-                    ->where('type', TransactionHelper::WITHDRAW)
+                    ->where('type', TonHelper::WITHDRAW)
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
-                    ->whereNotIn('status', [TransactionHelper::SUCCESS, TransactionHelper::FAILED])
+                    ->whereNotIn('status', [TonHelper::SUCCESS, TonHelper::FAILED])
                     ->whereNotNull('in_msg_hash')
-                    ->limit(TransactionHelper::MAX_LIMIT_TRANSACTION)
+                    ->limit(TonHelper::MAX_LIMIT_TRANSACTION)
                     ->get();
                 if (!$withDrawTransactions->count()) {
                     continue;

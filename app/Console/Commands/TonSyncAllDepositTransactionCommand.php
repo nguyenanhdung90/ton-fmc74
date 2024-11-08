@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Jobs\TonSyncDepositTransaction;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
@@ -44,7 +44,7 @@ class TonSyncAllDepositTransactionCommand extends Command
         $this->tonCenterClient = $tonCenterClient;
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
         $this->params = [
-            "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
+            "limit" => TonHelper::MAX_LIMIT_TRANSACTION,
             "address" => config('services.ton.root_wallet'),
             "lt" => null,
             "hash" => null

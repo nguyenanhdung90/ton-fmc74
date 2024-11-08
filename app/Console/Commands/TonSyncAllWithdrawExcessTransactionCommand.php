@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Jobs\TonSyncExcessTransaction;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
@@ -39,7 +39,7 @@ class TonSyncAllWithdrawExcessTransactionCommand extends Command
         parent::__construct();
         $this->tonCenterClient = $tonCenterClient;
         $this->params = [
-            "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
+            "limit" => TonHelper::MAX_LIMIT_TRANSACTION,
             "address" => config('services.ton.root_wallet'),
             "lt" => null,
             "hash" => null

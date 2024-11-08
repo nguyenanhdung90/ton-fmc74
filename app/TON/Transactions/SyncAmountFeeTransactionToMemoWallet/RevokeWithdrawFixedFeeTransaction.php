@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +27,7 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            if ($transaction->type !== TransactionHelper::WITHDRAW) {
+            if ($transaction->type !== TonHelper::WITHDRAW) {
                 DB::rollBack();
                 return;
             }
@@ -41,7 +41,7 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
             }
             $wallet = DB::table('wallet_ton_memos')
                 ->where('memo', $transaction->from_memo)
-                ->where('currency', TransactionHelper::PAYN)
+                ->where('currency', TonHelper::PAYN)
                 ->lockForUpdate()
                 ->first();
             if (!$wallet) {

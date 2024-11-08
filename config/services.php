@@ -31,8 +31,7 @@ return [
     ],
     'ton' => [
         'is_main' => env('TON_IS_MAIN'),
-        'api_key_test' => env('TON_API_KEY_TEST'),
-        'api_key_main' => env('TON_API_KEY_MAIN'),
+        'api_key' => env('TON_IS_MAIN') ? env('TON_API_KEY_MAIN') : env('TON_API_KEY_TEST'),
         'root_wallet' => env('TON_ROOT_WALLET'),
         'master_jetton_usdt' => env('TON_IS_MAIN') ? env('TON_MASTER_USDT_MAIN') : env('TON_MASTER_USDT_TEST'),
         'master_jetton_not' => env('TON_IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),

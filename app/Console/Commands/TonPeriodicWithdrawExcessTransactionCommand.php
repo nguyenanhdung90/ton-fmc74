@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\WalletTonTransaction;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Jobs\TonSyncExcessTransaction;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 
@@ -37,7 +37,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
     public function __construct(TonCenterClientInterface $tonCenterClient)
     {
         $this->tonCenterClient = $tonCenterClient;
-        $this->params = ["limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
+        $this->params = ["limit" => TonHelper::MAX_LIMIT_TRANSACTION,
             "address" => config('services.ton.root_wallet'),
             "to_lt" => null];
         parent::__construct();
@@ -50,7 +50,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
      */
     public function handle(): int
     {
-        $lastTransaction = WalletTonTransaction::where('type', TransactionHelper::WITHDRAW_EXCESS)
+        $lastTransaction = WalletTonTransaction::where('type', TonHelper::WITHDRAW_EXCESS)
             ->orderBy('lt', 'desc')
             ->first();
         $toLt = $lastTransaction ? $lastTransaction->lt : 0;

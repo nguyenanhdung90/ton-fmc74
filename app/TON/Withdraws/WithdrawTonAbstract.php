@@ -15,7 +15,7 @@ use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawSyncFixedFee;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 
 abstract class WithdrawTonAbstract extends WithdrawAbstract
 {
@@ -32,7 +32,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             $fromMemo,
             $toAddress,
             (string)Units::toNano($transferAmount),
-            TransactionHelper::TON,
+            TonHelper::TON,
             Units::DEFAULT,
             $toMemo,
             null,

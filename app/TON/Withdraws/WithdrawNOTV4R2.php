@@ -5,7 +5,7 @@ namespace App\TON\Withdraws;
 use App\TON\Contracts\Wallets\V4\WalletV4Options;
 use App\TON\Contracts\Wallets\V4\WalletV4R2;
 use App\TON\Interop\Units;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 
 class WithdrawNOTV4R2 extends WithdrawJettonAbstract implements WithdrawNOTV4R2Interface
 {
@@ -16,7 +16,7 @@ class WithdrawNOTV4R2 extends WithdrawJettonAbstract implements WithdrawNOTV4R2I
 
     public function getCurrency(): string
     {
-        return TransactionHelper::NOT;
+        return TonHelper::NOT;
     }
 
     public function getDecimals(): int

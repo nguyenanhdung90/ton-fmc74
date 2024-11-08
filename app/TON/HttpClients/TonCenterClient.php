@@ -17,11 +17,6 @@ class TonCenterClient implements TonCenterClientInterface
     private string $baseUri;
 
     /**
-     * @var string
-     */
-    private string $apiKey;
-
-    /**
      * @var Client
      */
     private Client $client;
@@ -34,14 +29,12 @@ class TonCenterClient implements TonCenterClientInterface
     public function __construct()
     {
         $this->baseUri = config('services.ton.is_main') ? self::MAIN_BASE_URI : self::TEST_BASE_URI;
-        $this->apiKey = config('services.ton.is_main') ? config('services.ton.api_key_main') :
-            config('services.ton.api_key_test');
         $this->client = new Client();
         $this->options = [
             'headers' => [
                 'Content-Type' => 'application/json',
                 'accept' => 'application/json',
-                'X-API-Key' => $this->apiKey,
+                'X-API-Key' => config('services.ton.api_key'),
             ]
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +38,7 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
                 return;
             }
 
-            if ($transaction->currency === TransactionHelper::TON) {
+            if ($transaction->currency === TonHelper::TON) {
                 $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.fwd_fee');
             } else {
                 $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.value') +
@@ -50,7 +50,7 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
                     'lt' => Arr::get($data, 'lt'),
                     'hash' => Arr::get($data, 'hash'),
                     'occur_ton' => $occurTon,
-                    'status' => TransactionHelper::SUCCESS,
+                    'status' => TonHelper::SUCCESS,
                     'updated_at' => Carbon::now()
                 ]);
             DB::commit();

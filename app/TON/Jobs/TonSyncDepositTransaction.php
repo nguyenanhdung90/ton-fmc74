@@ -9,7 +9,7 @@ use App\TON\Transactions\Deposit\CollectOccurTonAttribute;
 use App\TON\Transactions\Deposit\CollectTransactionAttribute;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositAmount;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositOccur;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -58,14 +58,14 @@ class TonSyncDepositTransaction implements ShouldQueue
                 return;
             }
             if (Arr::get($this->data, 'in_msg.source_details.jetton_master.symbol') ===
-                TransactionHelper::NONSUPPORT_SYMBOL) {
+                TonHelper::NONSUPPORT_SYMBOL) {
                 // This is non support jetton
                 return;
             }
             $hash = Arr::get($this->data, 'transaction_id.hash');
             $countTransaction = DB::table('wallet_ton_transactions')
                 ->where('hash', $hash)
-                ->where('type', TransactionHelper::DEPOSIT)
+                ->where('type', TonHelper::DEPOSIT)
                 ->count();
             if ($countTransaction) {
                 return;

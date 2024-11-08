@@ -9,7 +9,7 @@ use App\TON\Transactions\Excess\CollectHashLtAttribute;
 use App\TON\Transactions\Excess\CollectQueryIdAttribute;
 use App\TON\Transactions\Excess\CollectToAddressWalletAttribute;
 use App\TON\Transactions\Excess\CollectOccurTonAttribute;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -61,7 +61,7 @@ class TonSyncExcessTransaction implements ShouldQueue
             }
 
             $existedExcess = DB::table('wallet_ton_transactions')
-                ->where('type', TransactionHelper::WITHDRAW_EXCESS)
+                ->where('type', TonHelper::WITHDRAW_EXCESS)
                 ->where('query_id', $trans['query_id'])
                 ->where('currency', $trans['currency'])
                 ->count();

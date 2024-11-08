@@ -2,7 +2,7 @@
 
 namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
 
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +36,7 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
                 return;
             }
             $wallet = DB::table('wallet_ton_memos')
-                ->where('currency', TransactionHelper::TON)
+                ->where('currency', TonHelper::TON)
                 ->where('memo', $transaction->to_memo)
                 ->lockForUpdate()
                 ->first();

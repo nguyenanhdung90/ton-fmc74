@@ -9,7 +9,7 @@ use App\TON\Interop\Boc\Exceptions\CellException;
 use App\TON\Interop\Boc\Exceptions\SliceException;
 use App\TON\Interop\Bytes;
 use App\TON\Transactions\CollectAttribute;
-use App\TON\Transactions\TransactionHelper;
+use App\TON\TonHelper;
 use Illuminate\Support\Arr;
 
 class CollectMemoSenderAmountAttribute extends CollectAttribute
@@ -58,7 +58,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body);
         }
         $opcode = Bytes::bytesToHexString($slice->loadBits(32));
-        if ($opcode !== TransactionHelper::JET_OPCODE) {
+        if ($opcode !== TonHelper::JET_OPCODE) {
             throw new InvalidJettonException("Invalid Jetton opcode: " . $body);
         }
 
