@@ -8,7 +8,7 @@ use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;
 use App\TON\Transactions\Deposit\CollectOccurTonAttribute;
 use App\TON\Transactions\Deposit\CollectTransactionAttribute;
 use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositAmount;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositFee;
+use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionDepositOccur;
 use App\TON\Transactions\TransactionHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -83,7 +83,7 @@ class TonSyncDepositTransaction implements ShouldQueue
                 , $transaction['amount']);
             $depositAmount = new TransactionDepositAmount($transactionId);
             $depositAmount->syncTransactionWallet();
-            $depositFee = new TransactionDepositFee($transactionId);
+            $depositFee = new TransactionDepositOccur($transactionId);
             $depositFee->syncTransactionWallet();
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());

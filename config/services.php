@@ -33,10 +33,10 @@ return [
         'is_main' => env('IS_MAIN'),
         'api_key_test' => env('TON_API_KEY_TEST'),
         'api_key_main' => env('TON_API_KEY_MAIN'),
-        'root_ton_wallet' => env('ROOT_TON_WALLET'),
-        'root_usdt' => env('IS_MAIN') ? env('ROOT_USDT_MAIN') : env('ROOT_USDT_TEST'),
-        'root_not' => env('IS_MAIN') ? env('ROOT_NOT_MAIN') : env('ROOT_NOT_TEST'),
-        'ton_mnemonic' => env('TON_MNEMONIC'),
+        'root_wallet' => env('TON_ROOT_WALLET'),
+        'master_jetton_usdt' => env('IS_MAIN') ? env('TON_MASTER_USDT_MAIN') : env('TON_MASTER_USDT_TEST'),
+        'master_jetton_not' => env('IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
+        'mnemonic' => env('TON_MNEMONIC'),
         'fixed_fee' => env('FIXED_FEE')
     ]
 ];

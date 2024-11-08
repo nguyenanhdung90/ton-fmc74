@@ -16,7 +16,7 @@ class CollectTransactionAttribute implements CollectAttributeInterface
             'occur_ton' => null,
             'from_address_wallet' => null,
             'to_memo' => null,
-            'to_address_wallet' => config('services.ton.root_ton_wallet'),
+            'to_address_wallet' => config('services.ton.root_wallet'),
             'amount' => null,
             'decimals' => null,
             'type' => TransactionHelper::DEPOSIT,

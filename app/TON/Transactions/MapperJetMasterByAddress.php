@@ -5,7 +5,6 @@ namespace App\TON\Transactions;
 use App\TON\Exceptions\ErrorJettonWalletException;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Interop\Address;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
@@ -20,35 +19,35 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
     /**
      * @throws ErrorJettonWalletException
      */
-    public function request(Collection $address): Collection
+    public function request(Collection $inMsgSources): Collection
     {
-        $sourceChunks = $address->chunk(TransactionHelper::BATCH_NUMBER_JETTON_WALLET);
-        $mapperSource = $this->parseMapperJetWallets($address);
-        $jetWalletCollection = $this->getJetWallets($sourceChunks);
+        $inMsgSourceChunks = $inMsgSources->chunk(TransactionHelper::BATCH_NUMBER_JETTON_WALLET);
+        $mapperInMsgSource = $this->transformMapperJetWallets($inMsgSources);
+        $jetWalletCollection = $this->getJetWallets($inMsgSourceChunks);
         if (!$jetWalletCollection) {
-            throw new ErrorJettonWalletException("Error Jetton wallet");
+            throw new ErrorJettonWalletException("Error when get Jetton wallets");
         }
-        $this->setJetWalletToMapper($jetWalletCollection, $mapperSource);
-        return $mapperSource;
+        $this->setJetWalletToMapper($jetWalletCollection, $mapperInMsgSource);
+        return $mapperInMsgSource;
     }
 
-    private function parseMapperJetWallets(Collection $sources): Collection
+    private function transformMapperJetWallets(Collection $inMsgSources): Collection
     {
-        $sources->transform(function ($item, $key) {
-            $address = new Address($item);
+        $inMsgSources->transform(function ($source, $key) {
+            $address = new Address($source);
             return [
-                'source' => $item,
-                'hex' => strtoupper($address->toString(false)),
+                'in_msg_source' => $source,
+                'hex_source' => strtoupper($address->toString(false)),
                 'jetton_master' => []
             ];
         });
-        return $sources->keyBy('source');
+        return $inMsgSources->keyBy('in_msg_source');
     }
 
-    private function getJetWallets(Collection $sourceChunks): ?Collection
+    private function getJetWallets(Collection $inMsgSourceChunks): ?Collection
     {
         $mergedJetWallet = collect([]);
-        foreach ($sourceChunks as $sourceChunk) {
+        foreach ($inMsgSourceChunks as $sourceChunk) {
             $params = [
                 "limit" => $sourceChunk->count(),
                 "address" => $sourceChunk->implode(','),
@@ -63,17 +62,14 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
         return $mergedJetWallet;
     }
 
-    private function setJetWalletToMapper(Collection $jetWalletCollection, &$mappers)
+    private function setJetWalletToMapper(Collection $jetWalletCollection, &$mapperInMsgSource)
     {
-        $mappersJettonAttribute = TransactionHelper::validJettonAttribute();
         $keyIndexJetWallets = $jetWalletCollection->keyBy('address');
-        $mappers->transform(function ($item, $key) use ($keyIndexJetWallets, $mappersJettonAttribute) {
-            $hex = $item['hex'];
-            if ($keyIndexJetWallets->has($hex)) {
-                $jettonMasterAddressHex = strtolower($keyIndexJetWallets->get($hex)['jetton']);
-                $item['jetton_master'] = Arr::has($mappersJettonAttribute, $jettonMasterAddressHex) ?
-                    Arr::get($mappersJettonAttribute, $jettonMasterAddressHex) :
-                    TransactionHelper::NONSUPPORT_JETTON;
+        $mapperInMsgSource->transform(function ($item, $key) use ($keyIndexJetWallets) {
+            $hexSource = $item['hex_source'];
+            if ($keyIndexJetWallets->has($hexSource)) {
+                $hexAddressJettonMaster = strtoupper($keyIndexJetWallets->get($hexSource)['jetton']);
+                $item['jetton_master'] = TransactionHelper::getJettonAttribute($hexAddressJettonMaster);
             }
             return $item;
         });

@@ -46,7 +46,7 @@ class TonPeriodicDepositTransactionCommand extends Command
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
         $this->params = [
             "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
-            "address" => config('services.ton.root_ton_wallet'),
+            "address" => config('services.ton.root_wallet'),
             "to_lt" => null
         ];
     }
@@ -72,10 +72,10 @@ class TonPeriodicDepositTransactionCommand extends Command
                     continue;
                 }
 
-                $sources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
+                $inMsgSources = $transactions->pluck('in_msg.source')->unique()->filter(function ($value, $key) {
                     return !empty($value);
                 });
-                $mapperSource = $this->mapperJetMasterByAddress->request($sources);
+                $mapperSource = $this->mapperJetMasterByAddress->request($inMsgSources);
 
                 printf("Check over %s transactions \n", $numberTx);
                 foreach ($transactions as $transaction) {

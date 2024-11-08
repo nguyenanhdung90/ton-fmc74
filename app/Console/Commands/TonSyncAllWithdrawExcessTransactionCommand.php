@@ -40,7 +40,7 @@ class TonSyncAllWithdrawExcessTransactionCommand extends Command
         $this->tonCenterClient = $tonCenterClient;
         $this->params = [
             "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
-            "address" => config('services.ton.root_ton_wallet'),
+            "address" => config('services.ton.root_wallet'),
             "lt" => null,
             "hash" => null
         ];

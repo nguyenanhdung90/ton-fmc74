@@ -6,7 +6,7 @@ use App\TON\Transactions\TransactionHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class UpdateDepositFeeTransaction implements SyncTransactionInterface
+class UpdateDepositOccurTransaction implements SyncTransactionInterface
 {
     protected int $transactionId;
 

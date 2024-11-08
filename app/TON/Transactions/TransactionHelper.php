@@ -7,7 +7,6 @@ use App\TON\Interop\Units;
 class TransactionHelper
 {
     const BATCH_NUMBER_JETTON_WALLET = 20;
-    const BATCH_NUMBER_JETTON_MASTER = 15;
     const MAX_LIMIT_TRANSACTION = 100;
     const TON = 'TON';
     const USDT = 'USDT';
@@ -25,22 +24,26 @@ class TransactionHelper
     const FAILED = 'FAILED';
 
     const NONSUPPORT_JETTON = [
-        'decimals' => 0,
+        'decimals' => null,
         'symbol' => self::NONSUPPORT_SYMBOL
     ];
     const NONSUPPORT_SYMBOL = 'NONSUPPORT';
 
-    public static function validJettonAttribute(): array
+    public static function getJettonAttribute(string $hexAddressJettonMaster): array
     {
-        return [
-            config('services.ton.root_usdt') => [
-                'decimals' => Units::USDt,
-                'symbol' => self::USDT
-            ],
-            config('services.ton.root_not') => [
-                'decimals' => Units::NOT,
-                'symbol' => self::NOT
-            ]
-        ];
+        switch ($hexAddressJettonMaster) {
+            case strtoupper(config('services.ton.master_jetton_usdt')):
+                return [
+                    'decimals' => Units::USDt,
+                    'symbol' => self::USDT
+                ];
+            case strtoupper(config('services.ton.master_jetton_not')):
+                return [
+                    'decimals' => Units::NOT,
+                    'symbol' => self::NOT
+                ];
+            default:
+                return self::NONSUPPORT_JETTON;
+        }
     }
 }

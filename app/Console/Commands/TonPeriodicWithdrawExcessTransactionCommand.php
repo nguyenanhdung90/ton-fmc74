@@ -38,7 +38,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
     {
         $this->tonCenterClient = $tonCenterClient;
         $this->params = ["limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
-            "address" => config('services.ton.root_ton_wallet'),
+            "address" => config('services.ton.root_wallet'),
             "to_lt" => null];
         parent::__construct();
     }

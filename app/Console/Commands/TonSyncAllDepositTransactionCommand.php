@@ -45,7 +45,7 @@ class TonSyncAllDepositTransactionCommand extends Command
         $this->mapperJetMasterByAddress = $mapperJetMasterByAddress;
         $this->params = [
             "limit" => TransactionHelper::MAX_LIMIT_TRANSACTION,
-            "address" => config('services.ton.root_ton_wallet'),
+            "address" => config('services.ton.root_wallet'),
             "lt" => null,
             "hash" => null
         ];

@@ -86,7 +86,7 @@ abstract class WithdrawAbstract
                 throw new WithdrawTonException("Amount of transfer must be greater than zero");
             }
             $transaction = [
-                'from_address_wallet' => config('services.ton.root_ton_wallet'),
+                'from_address_wallet' => config('services.ton.root_wallet'),
                 'from_memo' => $fromMemo,
                 'type' => TransactionHelper::WITHDRAW,
                 'to_memo' => $toMemo,

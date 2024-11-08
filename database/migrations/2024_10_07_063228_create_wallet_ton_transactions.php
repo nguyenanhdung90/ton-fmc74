@@ -33,7 +33,7 @@ class CreateWalletTonTransactions extends Migration
             $table->boolean('is_sync_occur_ton')->default(0);
             $table->boolean('is_sync_fixed_fee')->default(0);
             $table->enum('status', ['INITIATED', 'PROCESSING', 'SUCCESS', 'FAILED'])->default("INITIATED");
-            $table->unique(['query_id', 'currency', 'type'], 'query id');
+            $table->unique(['query_id', 'type'], 'query id');
             $table->timestamps();
         });
     }

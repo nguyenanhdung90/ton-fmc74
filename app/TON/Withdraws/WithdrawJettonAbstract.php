@@ -54,7 +54,7 @@ abstract class WithdrawJettonAbstract extends WithdrawAbstract
             $isAllRemainBalance
         );
         if (!$transactionId) {
-            throw new WithdrawTonException("There is error when sync transaction Ton to wallet");
+            throw new WithdrawTonException("There is error when sync transaction jetton to wallet");
         }
 
         $transaction = WalletTonTransaction::find($transactionId);
@@ -64,26 +64,26 @@ abstract class WithdrawJettonAbstract extends WithdrawAbstract
         $transactionWithdraw = new TransactionWithdrawSyncFixedFee($transactionId);
         $transactionWithdraw->syncTransactionWallet();
 
-        $phrases = config('services.ton.ton_mnemonic');
+        $phrases = config('services.ton.mnemonic');
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
         $wallet = $this->getWallet($kp->publicKey);
         /** @var Address $walletAddress */
         $walletAddress = $wallet->getAddress();
         $transport = $this->getTransport();
-        $usdtRoot = JettonMinter::fromAddress(
+        $jettonRoot = JettonMinter::fromAddress(
             $transport,
             new Address($jettonMasterAddress)
         );
-        $usdtWalletAddress = $usdtRoot->getJettonWalletAddress($transport, $walletAddress);
-        $usdtWallet = new JettonWallet(new JettonWalletOptions(
-            null, 0, $usdtWalletAddress
+        $jettonWalletAddress = $jettonRoot->getJettonWalletAddress($transport, $walletAddress);
+        $jettonWallet = new JettonWallet(new JettonWalletOptions(
+            null, 0, $jettonWalletAddress
         ));
         $transfer = new TransferOptions((int)$wallet->seqno($transport));
         $extMessage = $wallet->createTransferMessage([
             new Transfer(
-                $usdtWalletAddress,
+                $jettonWalletAddress,
                 Units::toNano("0.1"),
-                $usdtWallet->createTransferBody(
+                $jettonWallet->createTransferBody(
                     new TransferJettonOptions(
                         $transferUnit,
                         new Address($destAddress),
