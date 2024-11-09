@@ -1,6 +1,6 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
+namespace App\TON\Transactions\SyncTransactionToWallet;
 
 class TransactionDepositAmount extends TransactionToWalletAbstract
 {

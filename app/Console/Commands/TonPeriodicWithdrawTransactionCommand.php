@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeAmount;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawSuccess;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeAmount;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSuccess;
 use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;

@@ -19,7 +19,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawSyncFixedFee;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSyncFixedFee;
 
 abstract class WithdrawJettonAbstract extends WithdrawAbstract
 {

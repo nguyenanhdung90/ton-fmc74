@@ -1,6 +1,6 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
+namespace App\TON\Transactions\SyncTransactionToWallet;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,7 @@ class UpdateDepositAmountTransaction implements SyncTransactionInterface
         $this->transactionId = $transactionId;
     }
 
-    public function process(array $data)
+    public function process(?array $data)
     {
         DB::beginTransaction();
         try {

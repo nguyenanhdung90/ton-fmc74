@@ -1,6 +1,6 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
+namespace App\TON\Transactions\SyncTransactionToWallet;
 
 use App\TON\TonHelper;
 use Carbon\Carbon;
@@ -16,7 +16,7 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
         $this->transactionId = $transactionId;
     }
 
-    public function process(array $data)
+    public function process(?array $data)
     {
         DB::beginTransaction();
         try {

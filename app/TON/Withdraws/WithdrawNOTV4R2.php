@@ -26,6 +26,6 @@ class WithdrawNOTV4R2 extends WithdrawJettonAbstract implements WithdrawNOTV4R2I
 
     public function getMasterJettonAddress(): string
     {
-        return config('services.ton.root_not');
+        return config('services.ton.master_jetton_not');
     }
 }

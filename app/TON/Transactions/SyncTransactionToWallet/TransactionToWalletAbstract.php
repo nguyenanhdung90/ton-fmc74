@@ -1,6 +1,6 @@
 <?php
 
-namespace App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet;
+namespace App\TON\Transactions\SyncTransactionToWallet;
 
 abstract class TransactionToWalletAbstract
 {
@@ -13,7 +13,7 @@ abstract class TransactionToWalletAbstract
 
     abstract public function getUpdateTransactionToWallet(): SyncTransactionInterface;
 
-    public function syncTransactionWallet(array $data = [])
+    public function syncTransactionWallet(?array $data = [])
     {
         $updateTransactionToWallet = $this->getUpdateTransactionToWallet();
         $updateTransactionToWallet->process($data);

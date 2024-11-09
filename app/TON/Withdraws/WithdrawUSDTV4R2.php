@@ -26,6 +26,6 @@ class WithdrawUSDTV4R2 extends WithdrawJettonAbstract implements WithdrawUSDTV4R
 
     public function getMasterJettonAddress(): string
     {
-        return config('services.ton.root_usdt');
+        return config('services.ton.master_jetton_usdt');
     }
 }

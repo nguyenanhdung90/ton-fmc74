@@ -4,8 +4,8 @@ namespace App\TON\Withdraws;
 
 use App\TON\Exceptions\WithdrawTonException;
 use App\TON\HttpClients\TonCenterClientInterface;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeAmount;
-use App\TON\Transactions\SyncAmountFeeTransactionToMemoWallet\TransactionWithdrawRevokeFixedFee;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeAmount;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeFixedFee;
 use App\TON\TonHelper;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\Models\TonResponse;
