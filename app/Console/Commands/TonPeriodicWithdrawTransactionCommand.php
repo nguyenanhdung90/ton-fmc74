@@ -62,17 +62,20 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                 printf("Check over %s transactions \n", $withDrawTransactions->count());
                 foreach ($withDrawTransactions as $withdrawTransaction) {
                     sleep(1);
-                    $txByMessages = $tonCenterClient->getTransactionsByMessage(['msg_hash' => $withdrawTransaction->in_msg_hash]);
+                    $txByMessages = $tonCenterClient->getTransactionsByMessage([
+                        'msg_hash' => $withdrawTransaction->in_msg_hash,
+                        'direction' => 'in'
+                    ]);
                     if (!$txByMessages) {
                         continue;
                     }
-                    $txByMessage = $txByMessages->first();
-                    if (!$txByMessage) {
+                    if ($txByMessages->count() !== 1) {
                         printf("Failed with empty transaction, id: %s \n", $withdrawTransaction->id);
                         $withdrawAmount = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
                         $withdrawAmount->syncTransactionWallet();
                         continue;
                     }
+                    $txByMessage = $txByMessages->first();
                     if (empty(Arr::get($txByMessage, 'out_msgs'))) {
                         printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
                         $withdrawAmount = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
