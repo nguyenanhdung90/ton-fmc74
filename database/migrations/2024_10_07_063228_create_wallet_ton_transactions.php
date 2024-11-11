@@ -13,7 +13,7 @@ class CreateWalletTonTransactions extends Migration
      */
     public function up()
     {
-        Schema::create('wallet_ton_transactions', function (Blueprint $table) {
+        Schema::create('wallets_ton_transactions', function (Blueprint $table) {
             $table->id();
             $table->char('from_address_wallet', 66)->nullable();
             $table->string('from_memo', 50)->nullable();
@@ -45,6 +45,6 @@ class CreateWalletTonTransactions extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('wallet_ton_transactions');
+        Schema::dropIfExists('wallets_ton_transactions');
     }
 };

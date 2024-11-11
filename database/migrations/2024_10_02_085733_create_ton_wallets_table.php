@@ -13,7 +13,7 @@ class CreateTonWalletsTable extends Migration
      */
     public function up()
     {
-        Schema::create('wallet_ton_memos', function (Blueprint $table) {
+        Schema::create('wallets_ton_address', function (Blueprint $table) {
             $table->id();
             $table->string('memo', 50);
             $table->char('currency', 6);

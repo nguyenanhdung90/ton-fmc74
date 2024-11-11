@@ -30,7 +30,7 @@ class TonController extends Controller
     public function withdrawTONExample(Request $request): string
     {
         try {
-            $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
+            $destinationAddress = '0QDt8nJuiKhM6kz99QjuB6XXVHZQZA350balZBMZoJiEDsVA';
             $this->withdrawTon->process('memo', $destinationAddress, 0.0639, 'memo2', false);
             return 'success';
         } catch (\Exception $e) {
@@ -41,8 +41,8 @@ class TonController extends Controller
     public function withdrawUSDTExample(Request $request): string
     {
         try {
-            $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawUSDT->process('memo', $destinationAddress, 0.0187, 'memo2', true);
+            $destinationAddress = '0QDt8nJuiKhM6kz99QjuB6XXVHZQZA350balZBMZoJiEDsVA';
+            $this->withdrawUSDT->process('memo', $destinationAddress, 0.0849, 'memo2', false);
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();

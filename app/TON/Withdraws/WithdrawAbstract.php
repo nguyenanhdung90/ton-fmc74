@@ -30,7 +30,7 @@ abstract class WithdrawAbstract
     {
         DB::beginTransaction();
         try {
-            $wallet = DB::table('wallet_ton_memos')
+            $wallet = DB::table('wallets_ton_address')
                 ->where('currency', $currency)
                 ->where('memo', $fromMemo)
                 ->lockForUpdate()
@@ -63,8 +63,8 @@ abstract class WithdrawAbstract
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
-            $transactionId = DB::table('wallet_ton_transactions')->insertGetId($transaction);
-            DB::table('wallet_ton_memos')->where('id', $wallet->id)
+            $transactionId = DB::table('wallets_ton_transactions')->insertGetId($transaction);
+            DB::table('wallets_ton_address')->where('id', $wallet->id)
                 ->update(['amount' => $remainBalance, 'updated_at' => Carbon::now()]);
             DB::commit();
             return $transactionId;
@@ -82,7 +82,7 @@ abstract class WithdrawAbstract
             $transactionRevoke = new TransactionWithdrawRevokeFixedFee($transactionId);
             $transactionRevoke->syncTransactionWallet();
         } else {
-            DB::table('wallet_ton_transactions')->where('id', $transactionId)
+            DB::table('wallets_ton_transactions')->where('id', $transactionId)
                 ->update([
                     'status' => TonHelper::PROCESSING,
                     'in_msg_hash' => Arr::get($responseMessage->result, 'hash'),

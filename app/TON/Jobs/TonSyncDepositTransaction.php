@@ -63,7 +63,7 @@ class TonSyncDepositTransaction implements ShouldQueue
                 return;
             }
             $hash = Arr::get($this->data, 'transaction_id.hash');
-            $countTransaction = DB::table('wallet_ton_transactions')
+            $countTransaction = DB::table('wallets_ton_transactions')
                 ->where('hash', $hash)
                 ->where('type', TonHelper::DEPOSIT)
                 ->count();
@@ -78,7 +78,7 @@ class TonSyncDepositTransaction implements ShouldQueue
             $decimals = new CollectDecimalsAttribute($memoSenderAmount);
             $transaction = $decimals->collect($this->data);
 
-            $transactionId = DB::table('wallet_ton_transactions')->insertGetId($transaction);
+            $transactionId = DB::table('wallets_ton_transactions')->insertGetId($transaction);
             printf("Insert tran id: %s currency: %s amount: %s \n", $transactionId, $transaction['currency']
                 , $transaction['amount']);
             $depositAmount = new TransactionDepositAmount($transactionId);

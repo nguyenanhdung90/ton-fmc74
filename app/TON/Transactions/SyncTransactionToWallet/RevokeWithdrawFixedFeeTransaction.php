@@ -19,7 +19,7 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
     {
         DB::beginTransaction();
         try {
-            $transaction = DB::table('wallet_ton_transactions')
+            $transaction = DB::table('wallets_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
@@ -39,7 +39,7 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $wallet = DB::table('wallet_ton_memos')
+            $wallet = DB::table('wallets_ton_address')
                 ->where('memo', $transaction->from_memo)
                 ->where('currency', TonHelper::PAYN)
                 ->lockForUpdate()
@@ -49,10 +49,10 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 return;
             }
             $remainingAmount = $wallet->amount + config("services.ton.fixed_fee");
-            DB::table('wallet_ton_memos')
+            DB::table('wallets_ton_address')
                 ->where('id', $wallet->id)
                 ->update(['amount' => $remainingAmount, 'updated_at' => Carbon::now()]);
-            DB::table('wallet_ton_transactions')
+            DB::table('wallets_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update(['is_sync_fixed_fee' => false, 'updated_at' => Carbon::now()]);
             DB::commit();

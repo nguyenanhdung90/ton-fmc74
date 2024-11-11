@@ -20,7 +20,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
     {
         DB::beginTransaction();
         try {
-            $transaction = DB::table('wallet_ton_transactions')
+            $transaction = DB::table('wallets_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
@@ -40,7 +40,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $wallet = DB::table('wallet_ton_memos')
+            $wallet = DB::table('wallets_ton_address')
                 ->where('currency', $transaction->currency)
                 ->where('memo', $transaction->from_memo)
                 ->lockForUpdate()
@@ -50,7 +50,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                 return;
             }
 
-            DB::table('wallet_ton_transactions')
+            DB::table('wallets_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),
@@ -60,7 +60,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                     'updated_at' => Carbon::now()
                 ]);
             $updateAmount = $wallet->amount + $transaction->amount;
-            DB::table('wallet_ton_memos')->where('id', $wallet->id)
+            DB::table('wallets_ton_address')->where('id', $wallet->id)
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
             printf("Revoke amount withdraw tran id: %s, update amount: %s, currency: %s, to memo id: %s \n",
                 $this->transactionId, $updateAmount, $transaction->currency, $wallet->id);

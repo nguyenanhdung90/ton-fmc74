@@ -49,7 +49,7 @@ class TonPeriodicWithdrawTransactionCommand extends Command
             try {
                 printf("Period transaction withdraw ton query every 20s ...\n");
                 sleep(20);
-                $withDrawTransactions = DB::table('wallet_ton_transactions')
+                $withDrawTransactions = DB::table('wallets_ton_transactions')
                     ->where('type', TonHelper::WITHDRAW)
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
                     ->whereNotIn('status', [TonHelper::SUCCESS, TonHelper::FAILED])
