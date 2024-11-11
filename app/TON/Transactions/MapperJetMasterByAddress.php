@@ -26,7 +26,7 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
         $mapperInMsgSource = $this->transformMapperJetWallets($inMsgSources);
         $jetWalletCollection = $this->getJetWallets($inMsgSourceChunks);
         if (!$jetWalletCollection) {
-            throw new ErrorJettonWalletException("Error when get Jetton wallets");
+            throw new ErrorJettonWalletException("Error when get Jetton wallets \n");
         }
         $this->setJetWalletToMapper($jetWalletCollection, $mapperInMsgSource);
         return $mapperInMsgSource;
