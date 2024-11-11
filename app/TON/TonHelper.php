@@ -3,6 +3,12 @@
 namespace App\TON;
 
 use App\TON\Interop\Units;
+use App\TON\Transports\Toncenter\ClientOptions;
+use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
+use App\TON\Transports\Toncenter\ToncenterTransport;
+use Http\Client\Common\HttpMethodsClient;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
 
 class TonHelper
 {
@@ -33,23 +39,49 @@ class TonHelper
     {
         switch ($hexAddressJettonMaster) {
             case strtoupper(config('services.ton.master_jetton_usdt')):
-                return [
+                $attribute = [
                     'decimals' => Units::USDt,
                     'symbol' => self::USDT
                 ];
+                break;
             case strtoupper(config('services.ton.master_jetton_not')):
-                return [
+                $attribute = [
                     'decimals' => Units::NOT,
                     'symbol' => self::NOT
                 ];
+                break;
             default:
-                return self::NONSUPPORT_JETTON;
+                $attribute = self::NONSUPPORT_JETTON;
+                break;
         }
+        return array_merge($attribute, ['hex_address' => $hexAddressJettonMaster]);
     }
 
     public static function generateRandomString($length = 10)
     {
         return substr(str_shuffle(str_repeat($x = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
             ceil($length / strlen($x)))), 1, $length);
+    }
+
+    public static function getBaseUri(): string
+    {
+        return config('services.ton.is_main') ? ClientOptions::MAIN_BASE_URL : ClientOptions::TEST_BASE_URL;
+    }
+
+    public static function getTransport(): ToncenterTransport
+    {
+        $httpClient = new HttpMethodsClient(
+            Psr18ClientDiscovery::find(),
+            Psr17FactoryDiscovery::findRequestFactory(),
+            Psr17FactoryDiscovery::findStreamFactory(),
+        );
+        $tonCenter = new ToncenterHttpV2Client(
+            $httpClient,
+            new ClientOptions(
+                self::getBaseUri(),
+                config('services.ton.api_key')
+            )
+        );
+        return new ToncenterTransport($tonCenter);
     }
 }

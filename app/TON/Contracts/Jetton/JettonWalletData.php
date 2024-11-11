@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Olifanton\Ton\Contracts\Jetton;
+namespace App\TON\Contracts\Jetton;
 
 use Brick\Math\BigInteger;
 use App\TON\Interop\Address;

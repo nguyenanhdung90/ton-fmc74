@@ -50,7 +50,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
         $transactionWithdraw->syncTransactionWallet();
 
         $phrases = config('services.ton.mnemonic');
-        $transport = $this->getTransport();
+        $transport = TonHelper::getTransport();
         $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
         /** @var WalletV4R2 $wallet */
         $wallet = $this->getWallet($kp->publicKey);

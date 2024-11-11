@@ -18,7 +18,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/withdrawInternalVirtualCurrencyExchange', [TonController::class, 'withdrawInternalVirtualCurrencyExchange']);
+Route::get('/valid', [TonController::class, 'valid']);
 Route::get('/withdrawUSDTExample', [TonController::class, 'withdrawUSDTExample']);
 Route::get('/withdrawTONExample', [TonController::class, 'withdrawTONExample']);
 Route::get('/withdrawNOTExample', [TonController::class, 'withdrawNOTExample']);

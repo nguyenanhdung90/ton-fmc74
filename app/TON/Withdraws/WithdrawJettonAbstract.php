@@ -19,6 +19,7 @@ use App\TON\Interop\Units;
 use App\TON\Mnemonic\Exceptions\TonMnemonicException;
 use App\TON\Mnemonic\TonMnemonic;
 use App\TON\SendMode;
+use App\TON\TonHelper;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSyncFixedFee;
 
 abstract class WithdrawJettonAbstract extends WithdrawAbstract
@@ -69,7 +70,7 @@ abstract class WithdrawJettonAbstract extends WithdrawAbstract
         $wallet = $this->getWallet($kp->publicKey);
         /** @var Address $walletAddress */
         $walletAddress = $wallet->getAddress();
-        $transport = $this->getTransport();
+        $transport = TonHelper::getTransport();
         $jettonRoot = JettonMinter::fromAddress(
             $transport,
             new Address($jettonMasterAddress)

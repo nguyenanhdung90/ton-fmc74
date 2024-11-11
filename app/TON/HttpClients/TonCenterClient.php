@@ -90,25 +90,6 @@ class TonCenterClient implements TonCenterClientInterface
         }
     }
 
-    public function getJetMasters(array $params): ?Collection
-    {
-        try {
-            $uri = $this->baseUri . 'api/v3/jetton/masters?' . http_build_query(array_filter($params));
-            $response = $this->client->request('GET', $uri);
-            if ($response->getStatusCode() !== 200) {
-                return null;
-            }
-            $content = $response->getBody()->getContents();
-            $result = json_decode($content, true);
-            $jetMasters = Arr::get($result, 'jetton_masters', []);
-            return collect($jetMasters);
-        } catch (GuzzleException $e) {
-            Log::error('Caught exception getJettonMasters: ' . $e->getMessage());
-            printf("Caught exception getJettonMasters: %s \n", $e->getMessage());
-            return null;
-        }
-    }
-
     public function getTransactionsByMessage(array $params): ?Collection
     {
         try {
@@ -124,25 +105,6 @@ class TonCenterClient implements TonCenterClientInterface
         } catch (GuzzleException $e) {
             Log::error('Caught exception getTransactionsByMessage: ' . $e->getMessage());
             printf("Caught exception getTransactionsByMessage: %s \n", $e->getMessage());
-            return null;
-        }
-    }
-
-    public function getTransactionsBy(array $params): ?Collection
-    {
-        try {
-            $uri = $this->baseUri . 'api/v3/transactions?' . http_build_query(array_filter($params));
-            $response = $this->client->request('GET', $uri);
-            if ($response->getStatusCode() !== 200) {
-                return null;
-            }
-            $content = $response->getBody()->getContents();
-            $result = json_decode($content, true);
-            $transactions = Arr::get($result, 'transactions', []);
-            return collect($transactions);
-        } catch (GuzzleException $e) {
-            Log::error('Caught exception getTransactionsBy: ' . $e->getMessage());
-            printf("Caught exception getTransactionsBy: %s \n", $e->getMessage());
             return null;
         }
     }

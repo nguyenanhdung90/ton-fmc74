@@ -3,47 +3,17 @@
 namespace App\TON\Withdraws;
 
 use App\TON\Exceptions\WithdrawTonException;
-use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\TonHelper;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeAmount;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeFixedFee;
-use App\TON\TonHelper;
-use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\Models\TonResponse;
-use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
-use App\TON\Transports\Toncenter\ToncenterTransport;
 use Carbon\Carbon;
-use Http\Client\Common\HttpMethodsClient;
-use Http\Discovery\Psr17FactoryDiscovery;
-use Http\Discovery\Psr18ClientDiscovery;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 abstract class WithdrawAbstract
 {
     abstract public function getWallet($pubicKey);
-
-    protected function getBaseUri(): string
-    {
-        return config('services.ton.is_main') ? TonCenterClientInterface::MAIN_BASE_URI
-            : TonCenterClientInterface::TEST_BASE_URI;
-    }
-
-    protected function getTransport(): ToncenterTransport
-    {
-        $httpClient = new HttpMethodsClient(
-            Psr18ClientDiscovery::find(),
-            Psr17FactoryDiscovery::findRequestFactory(),
-            Psr17FactoryDiscovery::findStreamFactory(),
-        );
-        $tonCenter = new ToncenterHttpV2Client(
-            $httpClient,
-            new ClientOptions(
-                $this->getBaseUri() . "api/v2",
-                config('services.ton.api_key')
-            )
-        );
-        return new ToncenterTransport($tonCenter);
-    }
 
     /**
      * @throws WithdrawTonException

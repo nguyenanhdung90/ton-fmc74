@@ -2,7 +2,10 @@
 
 namespace App\TON\Transactions\Deposit;
 
+use App\TON\Contracts\Exceptions\ContractException;
+use App\TON\Contracts\Jetton\JettonMinter;
 use App\TON\Exceptions\InvalidJettonException;
+use App\TON\Exceptions\TransportException;
 use App\TON\Interop\Address;
 use App\TON\Interop\Boc\Cell;
 use App\TON\Interop\Boc\Exceptions\CellException;
@@ -18,16 +21,22 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
      * @throws SliceException
      * @throws InvalidJettonException
      * @throws CellException
+     * @throws TransportException
+     * @throws ContractException
+     * @throws InvalidJettonException
      */
     public function collect(array $data): array
     {
         $parentTrans = parent::collect($data);
-        $symbol = Arr::get($data, 'in_msg.source_details.jetton_master.symbol');
-        if ($symbol) {
+        if (!empty(Arr::get($data, 'in_msg.source_details.jetton_master'))) {
             $body = $this->parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
             $amount = Arr::get($body, 'amount', 0);
-            $fromAddressWallet = Arr::get($body, 'from_address_wallet');
             $memo = Arr::get($body, 'comment');
+            /** @var Address $sender */
+            $sender = Arr::get($body, 'sender');
+            $hexJettonMaster = Arr::get($data, 'in_msg.source_details.jetton_master.hex_address');
+            $this->validJettonSender($sender, new Address($hexJettonMaster));
+            $fromAddressWallet = $sender->asWallet(!config('services.ton.is_main'));
         } else {
             $amount = (int)Arr::get($data, 'in_msg.value');
             $source = Arr::get($data, 'in_msg.source');
@@ -64,7 +73,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
 
         $slice->skipBits(64);
         $amount = (string)$slice->loadCoins();
-        $sender = $slice->loadAddress()->toString(true, true, null, true);
+        $sender = $slice->loadAddress();
 
         $comment = null;
         if ($cellForward = $slice->loadMaybeRef()) {
@@ -81,8 +90,26 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         }
         return [
             'amount' => (int)$amount,
-            'from_address_wallet' => $sender,
+            'sender' => $sender,
             'comment' => $comment,
         ];
+    }
+
+    /**
+     * @throws TransportException
+     * @throws ContractException
+     * @throws InvalidJettonException
+     */
+    private function validJettonSender(Address $sender, Address $masterJetton)
+    {
+        $transport = TonHelper::getTransport();
+        $minRoot = JettonMinter::fromAddress($transport, $masterJetton);
+        $rootWallet = new Address(config("services.ton.root_wallet"));
+        sleep(1);
+        $validSender = $minRoot->getJettonWalletAddress($transport, $rootWallet);
+        if (!$validSender->isEqual($sender)) {
+            throw new InvalidJettonException("Jetton sender is fake" .
+                $sender->toString(false));
+        }
     }
 }
