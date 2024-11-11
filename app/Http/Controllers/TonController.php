@@ -65,7 +65,7 @@ class TonController extends Controller
         // Only test environment for this coin
         try {
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
-            $this->withdrawAIOTX->process('memo', $destinationAddress, 0.0022, 'memo2', false);
+            $this->withdrawAIOTX->process('memo', $destinationAddress, 0.0011, 'memo2', false);
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();
