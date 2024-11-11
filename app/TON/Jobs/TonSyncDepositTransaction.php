@@ -87,7 +87,7 @@ class TonSyncDepositTransaction implements ShouldQueue
             $depositFee->syncTransactionWallet();
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());
-            //printf("Exception: %s \n", $e->getMessage());
+            printf("Exception: %s \n", $e->getMessage());
         }
     }
 }

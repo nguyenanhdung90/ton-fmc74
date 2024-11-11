@@ -32,11 +32,12 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             $body = $this->parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
             $amount = Arr::get($body, 'amount', 0);
             $memo = Arr::get($body, 'comment');
-            /** @var Address $sender */
-            $sender = Arr::get($body, 'sender');
+            /** @var Address $fromAddress */
+            $fromAddress = Arr::get($body, 'from_address');//source
             $hexJettonMaster = Arr::get($data, 'in_msg.source_details.jetton_master.hex_address');
+            $sender = new Address(Arr::get($data, 'in_msg.source'));
             $this->validJettonSender($sender, new Address($hexJettonMaster));
-            $fromAddressWallet = $sender->asWallet(!config('services.ton.is_main'));
+            $fromAddressWallet = $fromAddress->asWallet(!config('services.ton.is_main'));
         } else {
             $amount = (int)Arr::get($data, 'in_msg.value');
             $source = Arr::get($data, 'in_msg.source');
@@ -73,7 +74,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
 
         $slice->skipBits(64);
         $amount = (string)$slice->loadCoins();
-        $sender = $slice->loadAddress();
+        $fromAddress = $slice->loadAddress();
 
         $comment = null;
         if ($cellForward = $slice->loadMaybeRef()) {
@@ -90,7 +91,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         }
         return [
             'amount' => (int)$amount,
-            'sender' => $sender,
+            'from_address' => $fromAddress,
             'comment' => $comment,
         ];
     }
@@ -108,8 +109,9 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         sleep(1);
         $validSender = $minRoot->getJettonWalletAddress($transport, $rootWallet);
         if (!$validSender->isEqual($sender)) {
-            throw new InvalidJettonException("Jetton sender is fake" .
-                $sender->toString(false));
+            $msg = printf("Jetton sender is fake: %s, validSender: %s \n",
+                $sender->asWallet(!config("services.ton.is_main")), $validSender->asWallet(!config("services.ton.is_main")));
+            throw new InvalidJettonException($msg);
         }
     }
 }

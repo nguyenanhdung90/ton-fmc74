@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\TON\Contracts\Jetton\JettonMinter;
+use App\TON\Contracts\Jetton\JettonWallet;
+use App\TON\Contracts\Jetton\JettonWalletOptions;
+use App\TON\Interop\Address;
+use App\TON\TonHelper;
 use App\TON\Withdraws\WithdrawAIOTXV4R2Interface;
 use App\TON\Withdraws\WithdrawNOTV4R2Interface;
 use App\TON\Withdraws\WithdrawTonV4R2Interface;
 use App\TON\Withdraws\WithdrawUSDTV4R2Interface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TonController extends Controller
 {
@@ -42,7 +48,7 @@ class TonController extends Controller
     {
         try {
             $destinationAddress = '0QDt8nJuiKhM6kz99QjuB6XXVHZQZA350balZBMZoJiEDsVA';
-            $this->withdrawUSDT->process('memo', $destinationAddress, 0.0849, 'memo2', false);
+            $this->withdrawUSDT->process('memo', $destinationAddress, 0.0194, 'memo2', false);
             return 'success';
         } catch (\Exception $e) {
             return $e->getMessage();
@@ -67,6 +73,36 @@ class TonController extends Controller
             $destinationAddress = '0QB2qumdPNrPUzgAAuTvG43NNBg45Cl4Bi_Gt81vE-EwF70k';
             $this->withdrawAIOTX->process('memo', $destinationAddress, 0.0022, 'memo2', false);
             return 'success';
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+
+    public function valid()
+    {
+        try {
+            $sender = new Address("0QBoTi1kR6AvQmrUxJYIzs0dbGuYlHt2PzIjKMv47ULBOsD6");
+            $transport =  TonHelper::getTransport();
+//            $mintWallet = new JettonWallet(new JettonWalletOptions(
+//                null, 0,
+//                $sender
+//            ));
+//            $masterJetton = $mintWallet->getWalletData($transport)->minterAddress;
+            $masterJetton = new Address("0:F997BE6D6E162809C60C00FCE50F51914C021D259F72F9F808FB9C539C479522");
+
+            $address = new Address("0QDt8nJuiKhM6kz99QjuB6XXVHZQZA350balZBMZoJiEDsVA");
+            $minRoot = JettonMinter::fromAddress(
+                $transport,
+                $masterJetton,
+            );
+            $validSender = $minRoot->getJettonWalletAddress($transport, $address);
+            if ($validSender->isEqual($sender)) {
+                echo "valid";
+            } else {
+                echo "wrong ";
+            }
+            return 0;
         } catch (\Exception $e) {
             return $e->getMessage();
         }
