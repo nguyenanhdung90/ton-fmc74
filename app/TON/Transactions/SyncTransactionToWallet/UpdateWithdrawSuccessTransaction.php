@@ -20,7 +20,7 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
     {
         DB::beginTransaction();
         try {
-            $transaction = DB::table('wallets_ton_transactions')
+            $transaction = DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
@@ -44,7 +44,7 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
                 $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.value') +
                     Arr::get($data, 'out_msgs.0.fwd_fee');
             }
-            DB::table('wallets_ton_transactions')
+            DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),

@@ -18,7 +18,7 @@ class UpdateDepositAmountTransaction implements SyncTransactionInterface
     {
         DB::beginTransaction();
         try {
-            $transaction = DB::table('wallets_ton_transactions')
+            $transaction = DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
@@ -50,7 +50,7 @@ class UpdateDepositAmountTransaction implements SyncTransactionInterface
             $updateAmount = $wallet->amount + $transaction->amount;
             DB::table('wallets_ton_address')->where('id', $wallet->id)
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
-            DB::table('wallets_ton_transactions')->where('id', $this->transactionId)
+            DB::table('wallet_ton_transactions')->where('id', $this->transactionId)
                 ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);
             printf("Update amount deposit tran id: %s, update amount: %s, currency: %s, to memo id: %s \n",
                 $this->transactionId, $updateAmount, $transaction->currency, $wallet->id);

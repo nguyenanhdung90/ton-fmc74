@@ -20,7 +20,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
     {
         DB::beginTransaction();
         try {
-            $transaction = DB::table('wallets_ton_transactions')
+            $transaction = DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
@@ -50,7 +50,7 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                 return;
             }
 
-            DB::table('wallets_ton_transactions')
+            DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update([
                     'lt' => Arr::get($data, 'lt'),

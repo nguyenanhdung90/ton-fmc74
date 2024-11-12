@@ -63,7 +63,7 @@ abstract class WithdrawAbstract
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
-            $transactionId = DB::table('wallets_ton_transactions')->insertGetId($transaction);
+            $transactionId = DB::table('wallet_ton_transactions')->insertGetId($transaction);
             DB::table('wallets_ton_address')->where('id', $wallet->id)
                 ->update(['amount' => $remainBalance, 'updated_at' => Carbon::now()]);
             DB::commit();
@@ -82,7 +82,7 @@ abstract class WithdrawAbstract
             $transactionRevoke = new TransactionWithdrawRevokeFixedFee($transactionId);
             $transactionRevoke->syncTransactionWallet();
         } else {
-            DB::table('wallets_ton_transactions')->where('id', $transactionId)
+            DB::table('wallet_ton_transactions')->where('id', $transactionId)
                 ->update([
                     'status' => TonHelper::PROCESSING,
                     'in_msg_hash' => Arr::get($responseMessage->result, 'hash'),

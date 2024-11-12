@@ -19,7 +19,7 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
     {
         DB::beginTransaction();
         try {
-            $transaction = DB::table('wallets_ton_transactions')
+            $transaction = DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->lockForUpdate()
                 ->first();
@@ -48,7 +48,7 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
             if ($updateFeeAmount >= 0) {
                 DB::table('wallets_ton_address')->where('id', $wallet->id)
                     ->update(['amount' => $updateFeeAmount, 'updated_at' => Carbon::now()]);
-                DB::table('wallets_ton_transactions')->where('id', $this->transactionId)
+                DB::table('wallet_ton_transactions')->where('id', $this->transactionId)
                     ->update(['is_sync_occur_ton' => true, 'updated_at' => Carbon::now()]);
                 printf("Update occur deposit tran id: %s, updateFeeAmount: %s, to memo id: %s \n",
                     $this->transactionId, $updateFeeAmount, $wallet->id);

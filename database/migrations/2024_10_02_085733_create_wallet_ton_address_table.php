@@ -13,13 +13,13 @@ class CreateTonWalletsTable extends Migration
      */
     public function up()
     {
-        Schema::create('wallets_ton_address', function (Blueprint $table) {
+        Schema::create('wallet_ton_address', function (Blueprint $table) {
             $table->id();
             $table->string('memo', 50);
-            $table->char('currency', 6);
-            $table->unsignedBigInteger('amount')->default(0);
-            $table->unsignedTinyInteger('decimals')->default(0);
-            $table->unique(['memo', 'currency'], 'memo_currency');
+            $table->string('user_name');
+            $table->foreign('user_name')
+                ->references('user_name')
+                ->on('wallets');
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateTonWalletsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ton_wallets');
+        Schema::dropIfExists('wallet_ton_address');
     }
 };

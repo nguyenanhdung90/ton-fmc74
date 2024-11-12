@@ -33,7 +33,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             $amount = Arr::get($body, 'amount', 0);
             $memo = Arr::get($body, 'comment');
             /** @var Address $fromAddress */
-            $fromAddress = Arr::get($body, 'from_address');//source
+            $fromAddress = Arr::get($body, 'from_address');
             $hexJettonMaster = Arr::get($data, 'in_msg.source_details.jetton_master.hex_address');
             $sender = new Address(Arr::get($data, 'in_msg.source'));
             $this->validJettonSender($sender, new Address($hexJettonMaster));
