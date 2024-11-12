@@ -21,7 +21,7 @@ class CreateWalletsTable extends Migration
             $table->unsignedTinyInteger('decimals')->default(0);
             $table->boolean("is_active")->default(true);
 
-
+            $table->unique(['user_name', 'currency'], 'user_name_currency');
             $table->timestamps();
         });
     }

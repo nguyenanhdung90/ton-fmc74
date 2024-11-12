@@ -1,2 +1,5 @@
-php 7.4
-laravel 7.3
+- php 7.4
+- laravel 7.3 
+- php artisan db:seed
+- php artisan ton:periodic_deposit
+- php artisan ton:periodic_withdraw_ton

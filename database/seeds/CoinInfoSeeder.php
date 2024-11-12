@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CoinInfo;
 use Illuminate\Database\Seeder;
 
 class CoinInfoSeeder extends Seeder
@@ -11,6 +12,14 @@ class CoinInfoSeeder extends Seeder
      */
     public function run()
     {
-        echo 2132131;
+        foreach (config("services.coin_infos") as $coinInfo) {
+            if (empty($coinInfo['currency']) || empty($coinInfo['decimals'])) {
+                continue;
+            }
+            if (CoinInfo::where('currency', $coinInfo['currency'])->count()) {
+                continue;
+            }
+            CoinInfo::create($coinInfo);
+        }
     }
 }

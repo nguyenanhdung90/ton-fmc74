@@ -9,6 +9,6 @@ class CoinInfo extends Model
     protected $table = 'coin_infos';
 
     protected $fillable = [
-        'name', 'description', 'image', 'currency', 'decimals', 'is_active', 'hex_master_address'
+        'name', 'description', 'image', 'currency', 'decimals', 'hex_master_address', 'is_active'
     ];
 }

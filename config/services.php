@@ -37,5 +37,26 @@ return [
         'master_jetton_not' => env('TON_IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
         'mnemonic' => env('TON_MNEMONIC'),
         'fixed_fee' => env('FIXED_FEE')
+    ],
+    'coin_infos' => [
+        [
+            "currency" => "TON",
+            "decimals" => 9,
+        ],
+        [
+            "name" => "Tether USD",
+            "description" => "Tether Token for Tether USD",
+            "image" => "https://tether.to/images/logoCircle.png",
+            "currency" => "USDT",
+            "decimals" => 6,
+            "hex_master_address" => env('TON_IS_MAIN') ? env('TON_MASTER_USDT_MAIN') : env('TON_MASTER_USDT_TEST'),
+        ],
+        [
+            "name" => "Notcoin",
+            "image" => "https://cdn.joincommunity.xyz/clicker/not_logo.png",
+            "currency" => "NOT",
+            "decimals" => 9,
+            "hex_master_address" => env('TON_IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
+        ]
     ]
 ];

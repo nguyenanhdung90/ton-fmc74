@@ -15,11 +15,11 @@ class CreateCoinInfosTable extends Migration
     {
         Schema::create('coin_infos', function (Blueprint $table) {
             $table->id();
+            $table->char('currency', 20)->unique();
+            $table->unsignedTinyInteger('decimals')->default(0);
             $table->string('name')->nullable();
             $table->string('description')->nullable();
             $table->string('image')->nullable();
-            $table->char('currency', 20)->unique();
-            $table->unsignedTinyInteger('decimals')->default(0);
             $table->char('hex_master_address', 66)->nullable();
             $table->boolean("is_active")->default(true);
             $table->timestamps();
