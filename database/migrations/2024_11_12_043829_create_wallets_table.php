@@ -18,10 +18,12 @@ class CreateWalletsTable extends Migration
             $table->string('user_name', 191);
             $table->unsignedBigInteger('amount')->default(0);
             $table->char('currency', 20);
-            $table->unsignedTinyInteger('decimals')->default(0);
             $table->boolean("is_active")->default(true);
 
             $table->unique(['user_name', 'currency'], 'user_name_currency');
+            $table->foreign('currency')
+                ->references('currency')
+                ->on('coin_infos');
             $table->timestamps();
         });
     }

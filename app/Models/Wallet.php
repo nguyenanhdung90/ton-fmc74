@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Wallet extends Model
 {
@@ -13,8 +13,13 @@ class Wallet extends Model
         'user_name', 'amount', 'currency', 'decimals', 'is_active'
     ];
 
-    public function walletMemo(): BelongsTo
+    public function walletMemo(): HasOne
     {
-        return $this->belongsTo(WalletMemo::class, 'user_name', 'user_name');
+        return $this->hasOne(WalletMemo::class, 'user_name', 'user_name');
+    }
+
+    public function coinInfo(): HasOne
+    {
+        return $this->hasOne(CoinInfo::class, 'currency', 'currency');
     }
 }

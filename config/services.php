@@ -57,6 +57,10 @@ return [
             "currency" => "NOT",
             "decimals" => 9,
             "hex_master_address" => env('TON_IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
+        ],
+        [
+            "currency" => "PAYN",
+            "decimals" => 9,
         ]
     ]
 ];

@@ -18,37 +18,31 @@ class WalletSeeder extends Seeder
             "user_name" => "user_1",
             "amount" => 30000000000,
             "currency" => TonHelper::TON,
-            "decimals" => Units::DEFAULT,
         ]);
         Wallet::firstOrCreate([
             "user_name" => "user_1",
             "amount" => 30000000,
             "currency" => TonHelper::USDT,
-            "decimals" => Units::USDt,
         ]);
         Wallet::firstOrCreate([
             "user_name" => "user_2",
             "amount" => 30000000000,
             "currency" => TonHelper::TON,
-            "decimals" => Units::DEFAULT,
         ]);
         Wallet::firstOrCreate([
             "user_name" => "user_2",
             "amount" => 30000000,
             "currency" => TonHelper::USDT,
-            "decimals" => Units::USDt,
         ]);
         Wallet::firstOrCreate([
             "user_name" => "user_1",
             "amount" => 50000000000,
             "currency" => TonHelper::PAYN,
-            "decimals" => Units::DEFAULT,
         ]);
         Wallet::firstOrCreate([
             "user_name" => "user_2",
             "amount" => 50000000000,
             "currency" => TonHelper::PAYN,
-            "decimals" => Units::DEFAULT,
         ]);
     }
 }

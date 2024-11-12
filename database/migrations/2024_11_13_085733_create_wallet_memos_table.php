@@ -32,6 +32,6 @@ class CreateWalletMemosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('wallet_ton_address');
+        Schema::dropIfExists('wallet_memos');
     }
 };
