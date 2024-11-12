@@ -15,11 +15,13 @@ class CreateWalletsTable extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
-            $table->string('user_name');
+            $table->string('user_name', 191)->unique();
             $table->unsignedBigInteger('amount')->default(0);
             $table->char('currency', 20)->unique();
             $table->unsignedTinyInteger('decimals')->default(0);
             $table->boolean("is_active")->default(true);
+
+
             $table->timestamps();
         });
     }

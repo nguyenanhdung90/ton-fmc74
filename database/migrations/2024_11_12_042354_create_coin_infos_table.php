@@ -20,7 +20,7 @@ class CreateCoinInfosTable extends Migration
             $table->string('image')->nullable();
             $table->char('currency', 20)->unique();
             $table->unsignedTinyInteger('decimals')->default(0);
-            $table->char('hex_master_address', 66);
+            $table->char('hex_master_address', 66)->nullable();
             $table->boolean("is_active")->default(true);
             $table->timestamps();
         });
