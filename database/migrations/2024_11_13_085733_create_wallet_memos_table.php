@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateWalletTonAddressTable extends Migration
+class CreateWalletMemosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateWalletTonAddressTable extends Migration
      */
     public function up()
     {
-        Schema::create('wallet_ton_address', function (Blueprint $table) {
+        Schema::create('wallet_memos', function (Blueprint $table) {
             $table->id();
             $table->string('memo', 50)->unique();
             $table->string('user_name', 191)->unique();

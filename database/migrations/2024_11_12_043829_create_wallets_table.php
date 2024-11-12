@@ -15,9 +15,9 @@ class CreateWalletsTable extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
-            $table->string('user_name', 191)->unique();
+            $table->string('user_name', 191);
             $table->unsignedBigInteger('amount')->default(0);
-            $table->char('currency', 20)->unique();
+            $table->char('currency', 20);
             $table->unsignedTinyInteger('decimals')->default(0);
             $table->boolean("is_active")->default(true);
 
