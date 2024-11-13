@@ -5,14 +5,15 @@ namespace App\TON\Transactions\Deposit;
 use App\TON\Contracts\Exceptions\ContractException;
 use App\TON\Contracts\Jetton\JettonMinter;
 use App\TON\Exceptions\InvalidJettonException;
+use App\TON\Exceptions\InvalidTonException;
 use App\TON\Exceptions\TransportException;
 use App\TON\Interop\Address;
 use App\TON\Interop\Boc\Cell;
 use App\TON\Interop\Boc\Exceptions\CellException;
 use App\TON\Interop\Boc\Exceptions\SliceException;
 use App\TON\Interop\Bytes;
-use App\TON\Transactions\CollectAttribute;
 use App\TON\TonHelper;
+use App\TON\Transactions\CollectAttribute;
 use Illuminate\Support\Arr;
 
 class CollectMemoSenderAmountAttribute extends CollectAttribute
@@ -24,6 +25,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
      * @throws TransportException
      * @throws ContractException
      * @throws InvalidJettonException
+     * @throws InvalidTonException
      */
     public function collect(array $data): array
     {
@@ -43,13 +45,40 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             $source = Arr::get($data, 'in_msg.source');
             $address = new Address($source);
             $fromAddressWallet = $address->asWallet(!config('services.ton.is_main'));
-            $memo = Arr::get($data, 'in_msg.message');
+            $memo = $this->validTonDepositGetComment(Arr::get($data, 'in_msg'));
         }
 
         Arr::set($trans, 'to_memo', $memo);
         Arr::set($trans, 'from_address_wallet', $fromAddressWallet);
         Arr::set($trans, 'amount', $amount);
         return array_merge($parentTrans, $trans);
+    }
+
+    /**
+     * @throws InvalidTonException
+     * @throws CellException
+     * @throws SliceException
+     */
+    private function validTonDepositGetComment(array $inMsg)
+    {
+        if (Arr::get($inMsg, 'msg_data.@type') === 'msg.dataText') {
+            return Arr::get($inMsg, 'message');
+        }
+        if (Arr::get($inMsg, 'msg_data.@type') !== 'msg.dataRaw') {
+            throw new InvalidTonException("Invalid deposit ton msg");
+        }
+        if (empty(Arr::get($inMsg, 'msg_data.body'))) {
+            throw new InvalidTonException("Invalid, body is empty");
+        }
+        $body = Arr::get($inMsg, 'msg_data.body');
+        $bytes = Bytes::base64ToBytes($body);
+        $cell = Cell::oneFromBoc($bytes, true);
+        $slice = $cell->beginParse();
+        $remainBit = count($slice->getRemainingBits());
+        if ($remainBit >= 32) {
+            throw new InvalidTonException("Invalid getting opcode");
+        }
+        return "";
     }
 
 

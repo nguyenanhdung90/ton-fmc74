@@ -30,6 +30,10 @@ class TonHelper
     const PROCESSING = 'PROCESSING';
     const SUCCESS = 'SUCCESS';
     const FAILED = 'FAILED';
+    const ENVIRONMENT_MAIN = 'MAIN';
+    const ENVIRONMENT_TEST = 'TEST';
+    const ACTIVE = 1;
+    const IN_ACTIVE = 0;
 
     const NONSUPPORT_JETTON = [
         'decimals' => null,
@@ -82,7 +86,8 @@ class TonHelper
      */
     public static function validGetJettonInfo(string $currency)
     {
-        $jettonInfo = CoinInfo::where('currency', $currency)->with('coin_info_address')->first();
+        $jettonInfo = CoinInfo::where('currency', $currency)->where('is_active', TonHelper::ACTIVE)
+            ->with('coin_info_address')->first();
         if (!$jettonInfo) {
             throw new WithdrawTonException("This coin doest not support.");
         }

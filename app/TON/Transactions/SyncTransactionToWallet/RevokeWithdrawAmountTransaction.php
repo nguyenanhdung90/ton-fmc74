@@ -41,12 +41,15 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                 return;
             }
 
+            $walletMemo = DB::table('wallet_memos')->where('memo', $transaction->from_memo)->first();
+            if (!$walletMemo) {
+                DB::rollBack();
+                return;
+            }
             $wallet = DB::table('wallets')
-                ->leftJoin('wallet_memos', 'wallets.user_name', '=', 'wallet_memos.user_name')
-                ->where('wallets.currency', $transaction->currency)
-                ->where('wallet_memos.memo', $transaction->from_memo)
+                ->where('user_name', $walletMemo->user_name)
+                ->where('currency', $transaction->currency)
                 ->lockForUpdate()
-                ->select('wallet.*')
                 ->first();
             if (!$wallet) {
                 DB::rollBack();

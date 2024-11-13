@@ -3,5 +3,5 @@
 - php artisan db:seed
 - php artisan ton:periodic_deposit
 - php artisan ton:periodic_withdraw_ton
-- php artisan db:seed --class=WalletMemoSeeder
 - php artisan db:seed --class=WalletSeeder
+- php artisan db:seed --class=WalletMemoSeeder

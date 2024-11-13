@@ -35,12 +35,15 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
+            $walletMemo = DB::table('wallet_memos')->where('memo', $transaction->to_memo)->first();
+            if (!$walletMemo) {
+                DB::rollBack();
+                return;
+            }
             $wallet = DB::table('wallets')
-                ->leftJoin('wallet_memos', 'wallets.user_name', '=', 'wallet_memos.user_name')
-                ->where('wallets.currency', TonHelper::TON)
-                ->where('wallet_memos.memo', $transaction->to_memo)
+                ->where('user_name', $walletMemo->user_name)
+                ->where('currency', TonHelper::TON)
                 ->lockForUpdate()
-                ->select('wallet.*')
                 ->first();
             if (!$wallet) {
                 DB::rollBack();

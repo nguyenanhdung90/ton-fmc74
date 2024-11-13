@@ -47,21 +47,26 @@ class TonSyncDepositTransaction implements ShouldQueue
     public function handle()
     {
         try {
-            $source = Arr::get($this->data, 'in_msg.source');
-            if (!empty($source) && $this->mapperSource->has($source)) {
-                Arr::set($this->data, 'in_msg.source_details', $this->mapperSource->get($source));
-            } else {
-                Arr::set($this->data, 'in_msg.source_details', null);
-            }
             if (count(Arr::get($this->data, 'out_msgs'))) {
                 // This is not received transaction
                 return;
             }
-            if (Arr::get($this->data, 'in_msg.source_details.jetton_master.currency') ===
-                TonHelper::NONSUPPORT_CURRENCY) {
-                // This is non support jetton
+            $source = Arr::get($this->data, 'in_msg.source');
+            if (empty($source)) {
+                // This is failed message
                 return;
             }
+            if ($this->mapperSource->has($source)) {
+                $sourceDetails = $this->mapperSource->get($source);
+                Arr::set($this->data, 'in_msg.source_details', $sourceDetails);
+                if (Arr::get($sourceDetails, 'jetton_master.currency') === TonHelper::NONSUPPORT_CURRENCY) {
+                    // This is non support jetton
+                    return;
+                }
+            } else {
+                Arr::set($this->data, 'in_msg.source_details', null);
+            }
+
             $hash = Arr::get($this->data, 'transaction_id.hash');
             $existedTransaction = DB::table('wallet_ton_transactions')
                 ->where('hash', $hash)->where('type', TonHelper::DEPOSIT)->count();
@@ -85,7 +90,7 @@ class TonSyncDepositTransaction implements ShouldQueue
             $depositFee->syncTransactionWallet();
         } catch (\Exception $e) {
             Log::error("Exception message: " . ' | ' . $e->getMessage());
-            //printf("Exception: %s \n", $e->getMessage());
+            printf("Exception: %s \n", $e->getMessage());
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\TON\TonHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -15,8 +16,7 @@ class CoinInfo extends Model
 
     public function coin_info_address(): HasOne
     {
-        $environment = config("services.ton.is_main") ? CoinInfoAddress::ENVIRONMENT_MAIN :
-            CoinInfoAddress::ENVIRONMENT_TEST;
+        $environment = config("services.ton.is_main") ? TonHelper::ENVIRONMENT_MAIN : TonHelper::ENVIRONMENT_TEST;
         return $this->hasOne(CoinInfoAddress::class, 'currency', 'currency')
             ->where("environment", $environment);
     }
