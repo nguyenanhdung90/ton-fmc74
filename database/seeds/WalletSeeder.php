@@ -14,35 +14,59 @@ class WalletSeeder extends Seeder
      */
     public function run()
     {
-        Wallet::firstOrCreate([
-            "user_name" => "user_1",
-            "amount" => 30000000000,
-            "currency" => TonHelper::TON,
-        ]);
-        Wallet::firstOrCreate([
-            "user_name" => "user_1",
-            "amount" => 30000000,
-            "currency" => TonHelper::USDT,
-        ]);
-        Wallet::firstOrCreate([
-            "user_name" => "user_2",
-            "amount" => 30000000000,
-            "currency" => TonHelper::TON,
-        ]);
-        Wallet::firstOrCreate([
-            "user_name" => "user_2",
-            "amount" => 30000000,
-            "currency" => TonHelper::USDT,
-        ]);
-        Wallet::firstOrCreate([
-            "user_name" => "user_1",
-            "amount" => 50000000000,
-            "currency" => TonHelper::PAYN,
-        ]);
-        Wallet::firstOrCreate([
-            "user_name" => "user_2",
-            "amount" => 50000000000,
-            "currency" => TonHelper::PAYN,
-        ]);
+        Wallet::firstOrCreate(
+            [
+                "user_name" => "user_1",
+                "currency" => TonHelper::TON,
+            ],
+            [
+                "amount" => 30000000000,
+            ]
+        );
+        Wallet::firstOrCreate(
+            [
+                "user_name" => "user_1",
+                "currency" => TonHelper::USDT,
+            ],
+            [
+                "amount" => 30000000
+            ]
+        );
+        Wallet::firstOrCreate(
+            [
+                "user_name" => "user_2",
+                "currency" => TonHelper::TON,
+            ],
+            [
+                "amount" => 30000000000
+            ]
+        );
+        Wallet::firstOrCreate(
+            [
+                "user_name" => "user_2",
+                "currency" => TonHelper::USDT,
+            ],
+            [
+                "amount" => 30000000
+            ]
+        );
+        Wallet::firstOrCreate(
+            [
+                "user_name" => "user_1",
+                "currency" => TonHelper::PAYN,
+            ],
+            [
+                "amount" => 50000000000
+            ]
+        );
+        Wallet::firstOrCreate(
+            [
+                "user_name" => "user_2",
+                "currency" => TonHelper::PAYN,
+            ],
+            [
+                "amount" => 50000000000
+            ]
+        );
     }
 }
