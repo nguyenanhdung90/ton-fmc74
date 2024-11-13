@@ -35,10 +35,12 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $wallet = DB::table('wallets_ton_address')
-                ->where('currency', TonHelper::TON)
-                ->where('memo', $transaction->to_memo)
+            $wallet = DB::table('wallets')
+                ->leftJoin('wallet_memos', 'wallets.user_name', '=', 'wallet_memos.user_name')
+                ->where('wallets.currency', TonHelper::TON)
+                ->where('wallet_memos.memo', $transaction->to_memo)
                 ->lockForUpdate()
+                ->select('wallet.*')
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
@@ -46,7 +48,7 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
             }
             $updateFeeAmount = $wallet->amount - $transaction->occur_ton;
             if ($updateFeeAmount >= 0) {
-                DB::table('wallets_ton_address')->where('id', $wallet->id)
+                DB::table('wallets')->where('id', $wallet->id)
                     ->update(['amount' => $updateFeeAmount, 'updated_at' => Carbon::now()]);
                 DB::table('wallet_ton_transactions')->where('id', $this->transactionId)
                     ->update(['is_sync_occur_ton' => true, 'updated_at' => Carbon::now()]);

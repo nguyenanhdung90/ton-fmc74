@@ -2,7 +2,9 @@
 
 namespace App\TON;
 
-use App\TON\Interop\Units;
+use App\Models\CoinInfo;
+use App\Models\CoinInfoAddress;
+use App\TON\Exceptions\WithdrawTonException;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
 use App\TON\Transports\Toncenter\ToncenterTransport;
@@ -31,28 +33,18 @@ class TonHelper
 
     const NONSUPPORT_JETTON = [
         'decimals' => null,
-        'symbol' => self::NONSUPPORT_SYMBOL
+        'currency' => self::NONSUPPORT_CURRENCY
     ];
-    const NONSUPPORT_SYMBOL = 'NONSUPPORT';
+    const NONSUPPORT_CURRENCY = 'NONSUPPORT';
 
     public static function getJettonAttribute(string $hexAddressJettonMaster): array
     {
-        switch ($hexAddressJettonMaster) {
-            case strtoupper(config('services.ton.master_jetton_usdt')):
-                $attribute = [
-                    'decimals' => Units::USDt,
-                    'symbol' => self::USDT
-                ];
-                break;
-            case strtoupper(config('services.ton.master_jetton_not')):
-                $attribute = [
-                    'decimals' => Units::NOT,
-                    'symbol' => self::NOT
-                ];
-                break;
-            default:
-                $attribute = self::NONSUPPORT_JETTON;
-                break;
+        $coin = CoinInfoAddress::where('hex_master_address', strtolower($hexAddressJettonMaster))
+            ->with('coin_info')->first();
+        if (!$coin || !$coin->coin_info) {
+            $attribute = self::NONSUPPORT_JETTON;
+        } else {
+            $attribute = $coin->coin_info->only(['currency', 'decimals']);
         }
         return array_merge($attribute, ['hex_address' => $hexAddressJettonMaster]);
     }
@@ -83,5 +75,27 @@ class TonHelper
             )
         );
         return new ToncenterTransport($tonCenter);
+    }
+
+    /**
+     * @throws WithdrawTonException
+     */
+    public static function validGetJettonInfo(string $currency)
+    {
+        $jettonInfo = CoinInfo::where('currency', $currency)->with('coin_info_address')->first();
+        if (!$jettonInfo) {
+            throw new WithdrawTonException("This coin doest not support.");
+        }
+        if (empty($jettonInfo->coin_info_address)) {
+            throw new WithdrawTonException("Master jetton config is empty.");
+        }
+
+        if (empty($jettonInfo->decimals)) {
+            throw new WithdrawTonException("Decimals coin is empty");
+        }
+        if (empty($jettonInfo->coin_info_address->hex_master_address)) {
+            throw new WithdrawTonException("Master jetton config is empty.");
+        }
+        return $jettonInfo;
     }
 }

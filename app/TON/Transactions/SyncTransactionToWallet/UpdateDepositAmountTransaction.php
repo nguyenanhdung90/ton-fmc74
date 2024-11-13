@@ -38,17 +38,20 @@ class UpdateDepositAmountTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $wallet = DB::table('wallets_ton_address')
-                ->where('currency', $transaction->currency)
-                ->where('memo', $transaction->to_memo)
+
+            $wallet = DB::table('wallets')
+                ->leftJoin('wallet_memos', 'wallets.user_name', '=', 'wallet_memos.user_name')
+                ->where('wallets.currency', $transaction->currency)
+                ->where('wallet_memos.memo', $transaction->to_memo)
                 ->lockForUpdate()
+                ->select('wallet.*')
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
                 return;
             }
             $updateAmount = $wallet->amount + $transaction->amount;
-            DB::table('wallets_ton_address')->where('id', $wallet->id)
+            DB::table('wallets')->where('id', $wallet->id)
                 ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')->where('id', $this->transactionId)
                 ->update(['is_sync_amount' => true, 'updated_at' => Carbon::now()]);

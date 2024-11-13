@@ -20,7 +20,6 @@ class CreateCoinInfosTable extends Migration
             $table->string('name')->nullable();
             $table->string('description')->nullable();
             $table->string('image')->nullable();
-            $table->char('hex_master_address', 66)->nullable();
             $table->boolean("is_active")->default(true);
             $table->timestamps();
         });

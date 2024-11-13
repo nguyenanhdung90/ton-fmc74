@@ -57,17 +57,15 @@ class TonSyncDepositTransaction implements ShouldQueue
                 // This is not received transaction
                 return;
             }
-            if (Arr::get($this->data, 'in_msg.source_details.jetton_master.symbol') ===
-                TonHelper::NONSUPPORT_SYMBOL) {
+            if (Arr::get($this->data, 'in_msg.source_details.jetton_master.currency') ===
+                TonHelper::NONSUPPORT_CURRENCY) {
                 // This is non support jetton
                 return;
             }
             $hash = Arr::get($this->data, 'transaction_id.hash');
-            $countTransaction = DB::table('wallet_ton_transactions')
-                ->where('hash', $hash)
-                ->where('type', TonHelper::DEPOSIT)
-                ->count();
-            if ($countTransaction) {
+            $existedTransaction = DB::table('wallet_ton_transactions')
+                ->where('hash', $hash)->where('type', TonHelper::DEPOSIT)->count();
+            if ($existedTransaction) {
                 return;
             }
 

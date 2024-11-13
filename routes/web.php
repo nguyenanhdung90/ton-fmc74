@@ -19,8 +19,6 @@ Route::get('/', function () {
 });
 
 Route::get('/valid', [TonController::class, 'valid']);
-Route::get('/withdrawUSDTExample', [TonController::class, 'withdrawUSDTExample']);
+Route::get('/withdrawJettonExample', [TonController::class, 'withdrawJettonExample']);
 Route::get('/withdrawTONExample', [TonController::class, 'withdrawTONExample']);
-Route::get('/withdrawNOTExample', [TonController::class, 'withdrawNOTExample']);
-Route::get('/withdrawAIOTXExample', [TonController::class, 'withdrawAIOTXExample']);
 

@@ -49,18 +49,38 @@ return [
             "image" => "https://tether.to/images/logoCircle.png",
             "currency" => "USDT",
             "decimals" => 6,
-            "hex_master_address" => env('TON_IS_MAIN') ? env('TON_MASTER_USDT_MAIN') : env('TON_MASTER_USDT_TEST'),
         ],
         [
             "name" => "Notcoin",
             "image" => "https://cdn.joincommunity.xyz/clicker/not_logo.png",
             "currency" => "NOT",
             "decimals" => 9,
-            "hex_master_address" => env('TON_IS_MAIN') ? env('TON_MASTER_NOT_MAIN') : env('TON_MASTER_NOT_TEST'),
         ],
         [
             "currency" => "PAYN",
             "decimals" => 9,
         ]
+    ],
+    'coin_info_address' => [
+        [
+            "currency" => "USDT",
+            "hex_master_address" => "0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+            "environment" => "MAIN",
+        ],
+        [
+            "currency" => "USDT",
+            "hex_master_address" => "0:f997be6d6e162809c60c00fce50f51914c021d259f72f9f808fb9c539c479522",
+            "environment" => "TEST",
+        ],
+        [
+            "currency" => "NOT",
+            "hex_master_address" => "0:2f956143c461769579baef2e32cc2d7bc18283f40d20bb03e432cd603ac33ffc",
+            "environment" => "MAIN",
+        ],
+        [
+            "currency" => "NOT",
+            "hex_master_address" => "0:119ae171343ec283e1495593ead040616ff60bcf399c42a7afa6ef3ce7b56181",
+            "environment" => "TEST",
+        ],
     ]
 ];

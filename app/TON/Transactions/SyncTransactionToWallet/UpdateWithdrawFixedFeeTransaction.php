@@ -43,10 +43,13 @@ class UpdateWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $wallet = DB::table('wallets_ton_address')
-                ->where('memo', $transaction->from_memo)
-                ->where('currency', TonHelper::PAYN)
+
+            $wallet = DB::table('wallets')
+                ->leftJoin('wallet_memos', 'wallets.user_name', '=', 'wallet_memos.user_name')
+                ->where('wallets.currency', TonHelper::PAYN)
+                ->where('wallet_memos.memo', $transaction->from_memo)
                 ->lockForUpdate()
+                ->select('wallet.*')
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
@@ -57,7 +60,7 @@ class UpdateWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            DB::table('wallets_ton_address')
+            DB::table('wallets')
                 ->where('id', $wallet->id)
                 ->update(['amount' => $remainingAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')

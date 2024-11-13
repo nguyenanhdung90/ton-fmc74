@@ -22,8 +22,8 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
      */
     public function request(Collection $inMsgSources): Collection
     {
-        $inMsgSourceChunks = $inMsgSources->chunk(TonHelper::BATCH_NUMBER_JETTON_WALLET);
         $mapperInMsgSource = $this->transformMapperJetWallets($inMsgSources);
+        $inMsgSourceChunks = $inMsgSources->chunk(TonHelper::BATCH_NUMBER_JETTON_WALLET);
         $jetWalletCollection = $this->getJetWallets($inMsgSourceChunks);
         if (!$jetWalletCollection) {
             throw new ErrorJettonWalletException("Error when get Jetton wallets \n");

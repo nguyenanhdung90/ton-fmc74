@@ -13,13 +13,7 @@ class CoinInfoSeeder extends Seeder
     public function run()
     {
         foreach (config("services.coin_infos") as $coinInfo) {
-            if (empty($coinInfo['currency']) || empty($coinInfo['decimals'])) {
-                continue;
-            }
-            if (CoinInfo::where('currency', $coinInfo['currency'])->count()) {
-                continue;
-            }
-            CoinInfo::create($coinInfo);
+            CoinInfo::firstOrCreate($coinInfo);
         }
     }
 }

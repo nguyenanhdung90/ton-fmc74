@@ -10,6 +10,8 @@ use App\TON\Contracts\Jetton\JettonWalletOptions;
 use App\TON\Contracts\Jetton\TransferJettonOptions;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
+use App\TON\Contracts\Wallets\V4\WalletV4Options;
+use App\TON\Contracts\Wallets\V4\WalletV4R2;
 use App\TON\Exceptions\TransportException;
 use App\TON\Exceptions\WithdrawTonException;
 use App\TON\Interop\Address;
@@ -22,13 +24,12 @@ use App\TON\SendMode;
 use App\TON\TonHelper;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSyncFixedFee;
 
-abstract class WithdrawJettonAbstract extends WithdrawAbstract
+class WithdrawJetton extends WithdrawAbstract implements WithdrawJettonInterface
 {
-    abstract public function getCurrency(): string;
-
-    abstract public function getDecimals(): int;
-
-    abstract public function getMasterJettonAddress(): string;
+    public function getWallet($pubicKey): WalletV4R2
+    {
+        return new WalletV4R2(new WalletV4Options($pubicKey));
+    }
 
     /**
      * @throws BitStringException
@@ -37,13 +38,13 @@ abstract class WithdrawJettonAbstract extends WithdrawAbstract
      * @throws TransportException
      * @throws WithdrawTonException
      */
-    public function process(string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "",
+    public function process(string $currency, string $fromMemo, string $destAddress, string $transferAmount, string $toMemo = "",
                             bool $isAllRemainBalance = false)
     {
+        $jettonInfo = TonHelper::validGetJettonInfo($currency);
+        $decimals = $jettonInfo->decimals;
+        $jettonMasterAddress = $jettonInfo->coin_info_address->hex_master_address;
         $queryId = hexdec(uniqid());
-        $currency = $this->getCurrency();
-        $decimals = $this->getDecimals();
-        $jettonMasterAddress = $this->getMasterJettonAddress();
         $transactionId = $this->syncToWalletGetIdTransaction(
             $fromMemo,
             $destAddress,
@@ -65,8 +66,7 @@ abstract class WithdrawJettonAbstract extends WithdrawAbstract
         $transactionWithdraw = new TransactionWithdrawSyncFixedFee($transactionId);
         $transactionWithdraw->syncTransactionWallet();
 
-        $phrases = config('services.ton.mnemonic');
-        $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", $phrases));
+        $kp = TonMnemonic::mnemonicToKeyPair(explode(" ", config('services.ton.mnemonic')));
         $wallet = $this->getWallet($kp->publicKey);
         /** @var Address $walletAddress */
         $walletAddress = $wallet->getAddress();

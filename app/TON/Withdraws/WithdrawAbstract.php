@@ -30,14 +30,20 @@ abstract class WithdrawAbstract
     {
         DB::beginTransaction();
         try {
-            $wallet = DB::table('wallets_ton_address')
+            $walletMemo = DB::table('wallet_memos')->where('memo', $fromMemo)->first();
+            if (!$walletMemo) {
+                DB::rollBack();
+                throw new WithdrawTonException("Memo account does not exist");
+            }
+            $wallet = DB::table('wallets')
+                ->where('user_name', $walletMemo->user_name)
                 ->where('currency', $currency)
-                ->where('memo', $fromMemo)
+                ->where('is_active', true)
                 ->lockForUpdate()
                 ->first();
             if (!$wallet) {
                 DB::rollBack();
-                throw new WithdrawTonException("There is not memo account");
+                throw new WithdrawTonException("Wallet account is disable");
             }
             $remainBalance = $isAllRemainBalance ? 0 : ($wallet->amount - $transferUnit);
             if ($remainBalance < 0) {
@@ -64,7 +70,7 @@ abstract class WithdrawAbstract
                 'updated_at' => Carbon::now(),
             ];
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($transaction);
-            DB::table('wallets_ton_address')->where('id', $wallet->id)
+            DB::table('wallets')->where('id', $wallet->id)
                 ->update(['amount' => $remainBalance, 'updated_at' => Carbon::now()]);
             DB::commit();
             return $transactionId;

@@ -6,14 +6,10 @@ use App\TON\HttpClients\TonCenterClient;
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\MapperJetMasterByAddress;
 use App\TON\Transactions\MapperJetMasterByAddressInterface;
-use App\TON\Withdraws\WithdrawAIOTXV4R2;
-use App\TON\Withdraws\WithdrawAIOTXV4R2Interface;
-use App\TON\Withdraws\WithdrawNOTV4R2;
-use App\TON\Withdraws\WithdrawNOTV4R2Interface;
+use App\TON\Withdraws\WithdrawJetton;
+use App\TON\Withdraws\WithdrawJettonInterface;
 use App\TON\Withdraws\WithdrawTonV4R2;
 use App\TON\Withdraws\WithdrawTonV4R2Interface;
-use App\TON\Withdraws\WithdrawUSDTV4R2;
-use App\TON\Withdraws\WithdrawUSDTV4R2Interface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,9 +25,7 @@ class AppServiceProvider extends ServiceProvider
             TonCenterClientInterface::class => TonCenterClient::class,
             MapperJetMasterByAddressInterface::class => MapperJetMasterByAddress::class,
             WithdrawTonV4R2Interface::class => WithdrawTonV4R2::class,
-            WithdrawUSDTV4R2Interface::class => WithdrawUSDTV4R2::class,
-            WithdrawAIOTXV4R2Interface::class => WithdrawAIOTXV4R2::class,
-            WithdrawNOTV4R2Interface::class => WithdrawNOTV4R2::class,
+            WithdrawJettonInterface::class => WithdrawJetton::class,
         ];
         foreach ($appServices as $key => $value) {
             $this->app->bind($key, $value);
