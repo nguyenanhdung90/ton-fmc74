@@ -76,10 +76,14 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                         continue;
                     }
                     $txByMessage = $txByMessages->first();
+
+
+
                     if (empty(Arr::get($txByMessage, 'out_msgs'))) {
                         printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
                         $withdrawAmount = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
                     } else {
+                        // valid jetton failed with opcode
                         $withdrawAmount = new TransactionWithdrawSuccess($withdrawTransaction->id);
                     }
                     $withdrawAmount->syncTransactionWallet($txByMessage);

@@ -15,6 +15,7 @@ use App\TON\Interop\Bytes;
 use App\TON\TonHelper;
 use App\TON\Transactions\CollectAttribute;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class CollectMemoSenderAmountAttribute extends CollectAttribute
 {
@@ -30,20 +31,19 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
     public function collect(array $data): array
     {
         $parentTrans = parent::collect($data);
+        $sender = new Address(Arr::get($data, 'in_msg.source'));
         if (!empty(Arr::get($data, 'in_msg.source_details.jetton_master'))) {
             $body = $this->parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
-            $amount = Arr::get($body, 'amount', 0);
-            $memo = Arr::get($body, 'comment');
+            $amount = $body->get('amount', 0);
+            $memo = $body->get('comment');
             /** @var Address $fromAddress */
-            $fromAddress = Arr::get($body, 'from_address');
+            $fromAddress = $body->get('from_address');
             $hexJettonMaster = Arr::get($data, 'in_msg.source_details.jetton_master.hex_address');
-            $sender = new Address(Arr::get($data, 'in_msg.source'));
             $this->validJettonSender($sender, new Address($hexJettonMaster));
             $fromAddressWallet = $fromAddress->asWallet(!config('services.ton.is_main'));
         } else {
             $amount = (int)Arr::get($data, 'in_msg.value');
-            $source = Arr::get($data, 'in_msg.source');
-            $address = new Address($source);
+            $address = new Address($sender);
             $fromAddressWallet = $address->asWallet(!config('services.ton.is_main'));
             $memo = $this->validTonDepositGetComment(Arr::get($data, 'in_msg'));
         }
@@ -59,7 +59,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
      * @throws CellException
      * @throws SliceException
      */
-    private function validTonDepositGetComment(array $inMsg)
+    private function validTonDepositGetComment(array $inMsg): string
     {
         if (Arr::get($inMsg, 'msg_data.@type') === 'msg.dataText') {
             return Arr::get($inMsg, 'message');
@@ -76,18 +76,17 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         $slice = $cell->beginParse();
         $remainBit = count($slice->getRemainingBits());
         if ($remainBit >= 32) {
-            throw new InvalidTonException("Invalid getting opcode");
+            throw new InvalidTonException("simple message without comment need opcode is zero");
         }
         return "";
     }
-
 
     /**
      * @throws SliceException
      * @throws InvalidJettonException
      * @throws CellException
      */
-    private function parseJetBody(string $body): array
+    private function parseJetBody(string $body): Collection
     {
         $bytes = Bytes::base64ToBytes($body);
         $cell = Cell::oneFromBoc($bytes, true);
@@ -118,11 +117,11 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
                 }
             }
         }
-        return [
+        return collect([
             'amount' => (int)$amount,
             'from_address' => $fromAddress,
             'comment' => $comment,
-        ];
+        ]);
     }
 
     /**

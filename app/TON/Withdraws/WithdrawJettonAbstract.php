@@ -10,8 +10,6 @@ use App\TON\Contracts\Jetton\JettonWalletOptions;
 use App\TON\Contracts\Jetton\TransferJettonOptions;
 use App\TON\Contracts\Wallets\Transfer;
 use App\TON\Contracts\Wallets\TransferOptions;
-use App\TON\Contracts\Wallets\V4\WalletV4Options;
-use App\TON\Contracts\Wallets\V4\WalletV4R2;
 use App\TON\Exceptions\TransportException;
 use App\TON\Exceptions\WithdrawTonException;
 use App\TON\Interop\Address;
@@ -24,13 +22,8 @@ use App\TON\SendMode;
 use App\TON\TonHelper;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSyncFixedFee;
 
-class WithdrawJetton extends WithdrawAbstract implements WithdrawJettonInterface
+abstract class WithdrawJettonAbstract extends WithdrawAbstract implements WithdrawJettonInterface
 {
-    public function getWallet($pubicKey): WalletV4R2
-    {
-        return new WalletV4R2(new WalletV4Options($pubicKey));
-    }
-
     /**
      * @throws BitStringException
      * @throws TonMnemonicException

@@ -60,7 +60,7 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
                     new Address($toAddress),
                     $transferUnit,
                     $toMemo,
-                    SendMode::PAY_GAS_SEPARATELY
+                    SendMode::combine([SendMode::PAY_GAS_SEPARATELY, SendMode::IGNORE_ERRORS])
                 )
             ],
             new TransferOptions((int)$wallet->seqno($transport))

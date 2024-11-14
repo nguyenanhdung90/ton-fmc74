@@ -86,6 +86,9 @@ class TonHelper
      */
     public static function validGetJettonInfo(string $currency)
     {
+        if ($currency === TonHelper::TON) {
+            throw new WithdrawTonException("Jetton transfer without TON currency");
+        }
         $jettonInfo = CoinInfo::where('currency', $currency)->where('is_active', TonHelper::ACTIVE)
             ->with('coin_info_address')->first();
         if (!$jettonInfo) {

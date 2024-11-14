@@ -22,12 +22,12 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
      */
     public function request(Collection $inMsgSources): Collection
     {
-        $mapperInMsgSource = $this->transformMapperJetWallets($inMsgSources);
         $inMsgSourceChunks = $inMsgSources->chunk(TonHelper::BATCH_NUMBER_JETTON_WALLET);
         $jetWalletCollection = $this->getJetWallets($inMsgSourceChunks);
         if (!$jetWalletCollection) {
             throw new ErrorJettonWalletException("Error when get Jetton wallets \n");
         }
+        $mapperInMsgSource = $this->transformMapperJetWallets($inMsgSources);
         $this->setJetWalletToMapper($jetWalletCollection, $mapperInMsgSource);
         return $mapperInMsgSource;
     }
@@ -67,9 +67,9 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
     {
         $keyIndexJetWallets = $jetWalletCollection->keyBy('address');
         $mapperInMsgSource->transform(function ($item, $key) use ($keyIndexJetWallets) {
-            $hexSource = $item['hex_source'];
+            $hexSource = strtoupper($item['hex_source']);
             if ($keyIndexJetWallets->has($hexSource)) {
-                $hexAddressJettonMaster = strtoupper($keyIndexJetWallets->get($hexSource)['jetton']);
+                $hexAddressJettonMaster = strtolower($keyIndexJetWallets->get($hexSource)['jetton']);
                 $item['jetton_master'] = TonHelper::getJettonAttribute($hexAddressJettonMaster);
             }
             return $item;
