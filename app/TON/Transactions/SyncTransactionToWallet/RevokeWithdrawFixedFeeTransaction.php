@@ -54,13 +54,15 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
-            $remainingAmount = $wallet->amount + config("services.ton.fixed_fee");
+            $updateAmount = $wallet->amount + config("services.ton.fixed_fee");
             DB::table('wallets')
                 ->where('id', $wallet->id)
-                ->update(['amount' => $remainingAmount, 'updated_at' => Carbon::now()]);
+                ->update(['amount' => $updateAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update(['is_sync_fixed_fee' => false, 'status' => TonHelper::FAILED, 'updated_at' => Carbon::now()]);
+            printf("Revoke fixed fee withdraw tran id: %s, update amount: %s, currency: %s, to memo id: %s \n",
+                $this->transactionId, $updateAmount, $transaction->currency, $wallet->id);
             DB::commit();
             return;
         } catch (\Exception $e) {
