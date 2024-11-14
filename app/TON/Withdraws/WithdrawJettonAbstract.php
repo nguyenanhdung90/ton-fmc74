@@ -22,7 +22,7 @@ use App\TON\SendMode;
 use App\TON\TonHelper;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSyncFixedFee;
 
-abstract class WithdrawJettonAbstract extends WithdrawAbstract implements WithdrawJettonInterface
+abstract class WithdrawJettonAbstract extends WithdrawAbstract
 {
     /**
      * @throws BitStringException
@@ -43,7 +43,6 @@ abstract class WithdrawJettonAbstract extends WithdrawAbstract implements Withdr
             $destAddress,
             (string)Units::toNano($transferAmount, $decimals),
             $currency,
-            $decimals,
             $toMemo,
             $queryId,
             $isAllRemainBalance

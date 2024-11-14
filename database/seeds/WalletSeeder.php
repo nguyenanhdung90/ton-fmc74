@@ -14,7 +14,7 @@ class WalletSeeder extends Seeder
      */
     public function run()
     {
-        Wallet::firstOrCreate(
+        Wallet::updateOrCreate(
             [
                 "user_name" => "user_1",
                 "currency" => TonHelper::TON,
@@ -23,7 +23,7 @@ class WalletSeeder extends Seeder
                 "amount" => 30000000000,
             ]
         );
-        Wallet::firstOrCreate(
+        Wallet::updateOrCreate(
             [
                 "user_name" => "user_1",
                 "currency" => TonHelper::USDT,
@@ -32,7 +32,7 @@ class WalletSeeder extends Seeder
                 "amount" => 30000000
             ]
         );
-        Wallet::firstOrCreate(
+        Wallet::updateOrCreate(
             [
                 "user_name" => "user_2",
                 "currency" => TonHelper::TON,
@@ -41,7 +41,7 @@ class WalletSeeder extends Seeder
                 "amount" => 30000000000
             ]
         );
-        Wallet::firstOrCreate(
+        Wallet::updateOrCreate(
             [
                 "user_name" => "user_2",
                 "currency" => TonHelper::USDT,
@@ -50,7 +50,7 @@ class WalletSeeder extends Seeder
                 "amount" => 30000000
             ]
         );
-        Wallet::firstOrCreate(
+        Wallet::updateOrCreate(
             [
                 "user_name" => "user_1",
                 "currency" => TonHelper::PAYN,
@@ -59,7 +59,7 @@ class WalletSeeder extends Seeder
                 "amount" => 50000000000
             ]
         );
-        Wallet::firstOrCreate(
+        Wallet::updateOrCreate(
             [
                 "user_name" => "user_2",
                 "currency" => TonHelper::PAYN,

@@ -23,7 +23,6 @@ abstract class WithdrawAbstract
         string $toAddress,
         int $transferUnit,
         string $currency,
-        int $decimals,
         string $toMemo,
         ?int $queryId = null,
         bool $isAllRemainBalance = false): ?int
@@ -62,7 +61,6 @@ abstract class WithdrawAbstract
                 'to_memo' => $toMemo,
                 'to_address_wallet' => $toAddress,
                 'currency' => $currency,
-                'decimals' => $decimals,
                 'amount' => $transfer,
                 'is_sync_amount' => true,
                 'query_id' => $queryId,

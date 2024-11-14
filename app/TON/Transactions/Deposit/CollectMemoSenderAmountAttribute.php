@@ -15,7 +15,6 @@ use App\TON\Interop\Bytes;
 use App\TON\TonHelper;
 use App\TON\Transactions\CollectAttribute;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 
 class CollectMemoSenderAmountAttribute extends CollectAttribute
 {
@@ -33,7 +32,7 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
         $parentTrans = parent::collect($data);
         $sender = new Address(Arr::get($data, 'in_msg.source'));
         if (!empty(Arr::get($data, 'in_msg.source_details.jetton_master'))) {
-            $body = $this->parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
+            $body = TonHelper::parseJetBody(Arr::get($data, 'in_msg.msg_data.body'));
             $amount = $body->get('amount', 0);
             $memo = $body->get('comment');
             /** @var Address $fromAddress */
@@ -79,49 +78,6 @@ class CollectMemoSenderAmountAttribute extends CollectAttribute
             throw new InvalidTonException("simple message without comment need opcode is zero");
         }
         return "";
-    }
-
-    /**
-     * @throws SliceException
-     * @throws InvalidJettonException
-     * @throws CellException
-     */
-    private function parseJetBody(string $body): Collection
-    {
-        $bytes = Bytes::base64ToBytes($body);
-        $cell = Cell::oneFromBoc($bytes, true);
-        $slice = $cell->beginParse();
-        $remainBit = count($slice->getRemainingBits());
-        if ($remainBit < 32) {
-            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body);
-        }
-        $opcode = Bytes::bytesToHexString($slice->loadBits(32));
-        if ($opcode !== TonHelper::JET_OPCODE) {
-            throw new InvalidJettonException("Invalid Jetton opcode: " . $body);
-        }
-
-        $slice->skipBits(64);
-        $amount = (string)$slice->loadCoins();
-        $fromAddress = $slice->loadAddress();
-
-        $comment = null;
-        if ($cellForward = $slice->loadMaybeRef()) {
-            $forwardPayload = $cellForward->beginParse();
-            $comment = $forwardPayload->loadString();
-        } else {
-            $remainBitJet = count($slice->getRemainingBits());
-            if ($remainBitJet >= 32) {
-                $forwardOp = Bytes::bytesToHexString($slice->loadBits(32));
-                if ($forwardOp == 0) {
-                    $comment = $slice->loadString(32);
-                }
-            }
-        }
-        return collect([
-            'amount' => (int)$amount,
-            'from_address' => $fromAddress,
-            'comment' => $comment,
-        ]);
     }
 
     /**

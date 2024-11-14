@@ -33,7 +33,6 @@ abstract class WithdrawTonAbstract extends WithdrawAbstract
             $toAddress,
             (string)Units::toNano($transferAmount),
             TonHelper::TON,
-            Units::DEFAULT,
             $toMemo,
             null,
             $isAllRemainBalance

@@ -4,13 +4,19 @@ namespace App\TON;
 
 use App\Models\CoinInfo;
 use App\Models\CoinInfoAddress;
+use App\TON\Exceptions\InvalidJettonException;
 use App\TON\Exceptions\WithdrawTonException;
+use App\TON\Interop\Boc\Cell;
+use App\TON\Interop\Boc\Exceptions\CellException;
+use App\TON\Interop\Boc\Exceptions\SliceException;
+use App\TON\Interop\Bytes;
 use App\TON\Transports\Toncenter\ClientOptions;
 use App\TON\Transports\Toncenter\ToncenterHttpV2Client;
 use App\TON\Transports\Toncenter\ToncenterTransport;
 use Http\Client\Common\HttpMethodsClient;
 use Http\Discovery\Psr17FactoryDiscovery;
 use Http\Discovery\Psr18ClientDiscovery;
+use Illuminate\Support\Collection;
 
 class TonHelper
 {
@@ -25,6 +31,7 @@ class TonHelper
     const WITHDRAW = 'WITHDRAW';
     const WITHDRAW_EXCESS = 'WITHDRAW_EXCESS';
     const JET_OPCODE = '7362d09c';
+    const JET_OPCODE_FAILED_WITHDRAW = '0f8a7ea5';
     const EXCESS_OPCODE = 'd53276db';
     const INITIATED = 'INITIATED';
     const PROCESSING = 'PROCESSING';
@@ -105,5 +112,49 @@ class TonHelper
             throw new WithdrawTonException("Master jetton config is empty.");
         }
         return $jettonInfo;
+    }
+
+    /**
+     * @throws SliceException
+     * @throws InvalidJettonException
+     * @throws CellException
+     */
+    public static function parseJetBody(string $body): Collection
+    {
+        $bytes = Bytes::base64ToBytes($body);
+        $cell = Cell::oneFromBoc($bytes, true);
+        $slice = $cell->beginParse();
+        $remainBit = count($slice->getRemainingBits());
+        if ($remainBit < 32) {
+            throw new InvalidJettonException("Invalid Jetton, this is simple transfer TON: " . $body);
+        }
+        $opcode = Bytes::bytesToHexString($slice->loadBits(32));
+        if ($opcode !== TonHelper::JET_OPCODE) {
+            throw new InvalidJettonException("Invalid Jetton opcode: " . $body);
+        }
+
+        $slice->skipBits(64);
+        $amount = (string)$slice->loadCoins();
+        $fromAddress = $slice->loadAddress();
+
+        $comment = null;
+        if ($cellForward = $slice->loadMaybeRef()) {
+            $forwardPayload = $cellForward->beginParse();
+            $comment = $forwardPayload->loadString();
+        } else {
+            $remainBitJet = count($slice->getRemainingBits());
+            if ($remainBitJet >= 32) {
+                $forwardOp = Bytes::bytesToHexString($slice->loadBits(32));
+                if ($forwardOp == 0) {
+                    $comment = $slice->loadString(32);
+                }
+            }
+        }
+        return collect([
+            'amount' => (int)$amount,
+            'from_address' => $fromAddress,
+            'comment' => $comment,
+            'opcode' => $opcode,
+        ]);
     }
 }

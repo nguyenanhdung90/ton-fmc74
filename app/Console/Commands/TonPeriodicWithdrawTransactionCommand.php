@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeAmount;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeFixedFee;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSuccess;
 use App\TON\TonHelper;
 use Carbon\Carbon;
@@ -77,16 +78,16 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                     }
                     $txByMessage = $txByMessages->first();
 
-
-
-                    if (empty(Arr::get($txByMessage, 'out_msgs'))) {
-                        printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
-                        $withdrawAmount = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
+                    if ($this->isSuccessWithdrawTransaction($txByMessage)) {
+                        $withdrawSuccess = new TransactionWithdrawSuccess($withdrawTransaction->id);
+                        $withdrawSuccess->syncTransactionWallet($txByMessage);
                     } else {
-                        // valid jetton failed with opcode
-                        $withdrawAmount = new TransactionWithdrawSuccess($withdrawTransaction->id);
+                        printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
+                        $withdrawRevoke = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
+                        $withdrawRevoke->syncTransactionWallet($txByMessage);
+                        $withdrawRevokeFixedFee = new TransactionWithdrawRevokeFixedFee($withdrawTransaction->id);
+                        $withdrawRevokeFixedFee->syncTransactionWallet($txByMessage);
                     }
-                    $withdrawAmount->syncTransactionWallet($txByMessage);
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw ton: " . $e->getMessage());
@@ -94,5 +95,23 @@ class TonPeriodicWithdrawTransactionCommand extends Command
             }
         }
         return Command::SUCCESS;
+    }
+
+    public function isSuccessWithdrawTransaction(array $txByMessage): bool
+    {
+        try {
+            $outMsgs = Arr::get($txByMessage, 'out_msgs');
+            if (empty($outMsgs)) {
+                return false;
+            }
+            $body = Arr::get($txByMessage, 'out_msgs.0.message_content.body');
+            if (empty($body)) {
+                return false;
+            }
+            TonHelper::parseJetBody($body);
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

@@ -60,7 +60,7 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 ->update(['amount' => $remainingAmount, 'updated_at' => Carbon::now()]);
             DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
-                ->update(['is_sync_fixed_fee' => false, 'updated_at' => Carbon::now()]);
+                ->update(['is_sync_fixed_fee' => false, 'status' => TonHelper::FAILED, 'updated_at' => Carbon::now()]);
             DB::commit();
             return;
         } catch (\Exception $e) {
