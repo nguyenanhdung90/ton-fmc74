@@ -2,7 +2,6 @@
 
 namespace App\TON\Jobs;
 
-use App\TON\Transactions\Deposit\CollectDecimalsAttribute;
 use App\TON\Transactions\Deposit\CollectHashLtCurrencyAttribute;
 use App\TON\Transactions\Deposit\CollectMemoSenderAmountAttribute;
 use App\TON\Transactions\Deposit\CollectOccurTonAttribute;
@@ -78,8 +77,7 @@ class TonSyncDepositTransaction implements ShouldQueue
             $hashLtCurrency = new CollectHashLtCurrencyAttribute($collectTransaction);
             $occurTon = new CollectOccurTonAttribute($hashLtCurrency);
             $memoSenderAmount = new CollectMemoSenderAmountAttribute($occurTon);
-            $decimals = new CollectDecimalsAttribute($memoSenderAmount);
-            $transaction = $decimals->collect($this->data);
+            $transaction = $memoSenderAmount->collect($this->data);
 
             $transactionId = DB::table('wallet_ton_transactions')->insertGetId($transaction);
             printf("Insert tran id: %s currency: %s amount: %s \n", $transactionId, $transaction['currency']

@@ -24,7 +24,6 @@ class CreateWalletTonTransactionsTable extends Migration
             $table->unsignedBigInteger('lt')->nullable();
             $table->char('in_msg_hash', '44')->nullable();
             $table->unsignedBigInteger('amount')->nullable();
-            $table->unsignedTinyInteger('decimals')->default(0);
             $table->char('currency', 6);
             $table->bigInteger('occur_ton')->nullable();
             $table->unsignedInteger('fixed_fee')->nullable();

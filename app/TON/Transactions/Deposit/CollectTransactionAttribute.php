@@ -18,7 +18,6 @@ class CollectTransactionAttribute implements CollectAttributeInterface
             'to_memo' => null,
             'to_address_wallet' => config('services.ton.root_wallet'),
             'amount' => null,
-            'decimals' => null,
             'type' => TonHelper::DEPOSIT,
             'status' => TonHelper::SUCCESS,
             'currency' => null,

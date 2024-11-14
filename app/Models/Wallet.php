@@ -10,7 +10,7 @@ class Wallet extends Model
     protected $table = 'wallets';
 
     protected $fillable = [
-        'user_name', 'amount', 'currency', 'decimals', 'is_active'
+        'user_name', 'amount', 'currency', 'is_active'
     ];
 
     public function walletMemo(): HasOne

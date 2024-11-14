@@ -48,7 +48,7 @@ class TonHelper
         if (!$coin || !$coin->coin_info) {
             $attribute = self::NONSUPPORT_JETTON;
         } else {
-            $attribute = $coin->coin_info->only(['currency', 'decimals']);
+            $attribute = $coin->coin_info->only(['currency']);
         }
         return array_merge($attribute, ['hex_address' => $hexAddressJettonMaster]);
     }

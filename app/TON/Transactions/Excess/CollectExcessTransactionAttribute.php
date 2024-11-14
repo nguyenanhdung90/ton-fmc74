@@ -19,7 +19,6 @@ class CollectExcessTransactionAttribute implements CollectAttributeInterface
             'to_address_wallet' => null,
             'amount' => null,
             'query_id' => null,
-            'decimals' => Units::DEFAULT,
             'type' => TonHelper::WITHDRAW_EXCESS,
             'status' => TonHelper::SUCCESS,
             'currency' => TonHelper::TON,

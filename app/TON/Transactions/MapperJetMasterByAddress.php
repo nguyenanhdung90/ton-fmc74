@@ -67,9 +67,9 @@ class MapperJetMasterByAddress implements MapperJetMasterByAddressInterface
     {
         $keyIndexJetWallets = $jetWalletCollection->keyBy('address');
         $mapperInMsgSource->transform(function ($item, $key) use ($keyIndexJetWallets) {
-            $hexSource = strtoupper($item['hex_source']);
-            if ($keyIndexJetWallets->has($hexSource)) {
-                $hexAddressJettonMaster = strtolower($keyIndexJetWallets->get($hexSource)['jetton']);
+            $jettonWallet = $keyIndexJetWallets->get($item['hex_source']);
+            if (!empty($jettonWallet)) {
+                $hexAddressJettonMaster = strtolower($jettonWallet['jetton']);
                 $item['jetton_master'] = TonHelper::getJettonAttribute($hexAddressJettonMaster);
             }
             return $item;
