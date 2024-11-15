@@ -22,6 +22,7 @@ class TonHelper
 {
     const BATCH_NUMBER_JETTON_WALLET = 20;
     const MAX_LIMIT_TRANSACTION = 100;
+    const MAX_LIMIT_QUERY = 5000;
     const TON = 'TON';
     const USDT = 'USDT';
     const PAYN = 'PAYN';

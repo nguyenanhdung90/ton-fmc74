@@ -17,4 +17,6 @@ interface TonCenterClientInterface
     public function getJetWallets(array $params): ?Collection;
 
     public function getTransactionsByMessage(array $params): ?Collection;
+
+    public function getJettonTransfers(array $params): ?Collection;
 }

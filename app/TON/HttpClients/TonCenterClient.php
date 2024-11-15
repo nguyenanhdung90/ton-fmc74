@@ -108,4 +108,23 @@ class TonCenterClient implements TonCenterClientInterface
             return null;
         }
     }
+
+    public function getJettonTransfers(array $params): ?Collection
+    {
+        try {
+            $uri = $this->baseUri . 'api/v3/jetton/transfers?' . http_build_query(array_filter($params));
+            $response = $this->client->request('GET', $uri);
+            if ($response->getStatusCode() !== 200) {
+                return null;
+            }
+            $content = $response->getBody()->getContents();
+            $result = json_decode($content, true);
+            $jettonTransfers = Arr::get($result, 'jetton_transfers', []);
+            return collect($jettonTransfers);
+        } catch (GuzzleException $e) {
+            Log::error('Caught exception getTransactionsByMessage: ' . $e->getMessage());
+            printf("Caught exception getTransactionsByMessage: %s \n", $e->getMessage());
+            return null;
+        }
+    }
 }

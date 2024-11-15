@@ -28,15 +28,23 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
                 DB::rollBack();
                 return;
             }
+
+            if (!$transaction->is_sync_amount) {
+                DB::table('wallet_ton_transactions')
+                    ->where('id', $this->transactionId)
+                    ->update([
+                        'status' => TonHelper::FAILED,
+                        'updated_at' => Carbon::now()
+                    ]);
+                DB::commit();
+                return;
+            }
+
             if (empty($transaction->from_memo)) {
                 DB::rollBack();
                 return;
             }
             if (empty($transaction->currency)) {
-                DB::rollBack();
-                return;
-            }
-            if (!$transaction->is_sync_amount) {
                 DB::rollBack();
                 return;
             }
@@ -60,8 +68,6 @@ class RevokeWithdrawAmountTransaction implements SyncTransactionInterface
             DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update([
-                    'lt' => Arr::get($data, 'lt'),
-                    'hash' => Arr::get($data, 'hash'),
                     'status' => TonHelper::FAILED,
                     'is_sync_amount' => false,
                     'updated_at' => Carbon::now()

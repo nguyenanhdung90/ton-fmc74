@@ -4,6 +4,7 @@ namespace App\TON\Transactions\SyncTransactionToWallet;
 
 use App\TON\TonHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
@@ -32,7 +33,13 @@ class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
                 return;
             }
             if (!$transaction->is_sync_fixed_fee) {
-                DB::rollBack();
+                DB::table('wallet_ton_transactions')
+                    ->where('id', $this->transactionId)
+                    ->update([
+                        'status' => TonHelper::FAILED,
+                        'updated_at' => Carbon::now()
+                    ]);
+                DB::commit();
                 return;
             }
             if (empty($transaction->from_memo)) {

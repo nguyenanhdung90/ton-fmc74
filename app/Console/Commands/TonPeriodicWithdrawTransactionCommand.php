@@ -3,10 +3,11 @@
 namespace App\Console\Commands;
 
 use App\TON\HttpClients\TonCenterClientInterface;
+use App\TON\TonHelper;
+use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawFetchInMsgHash;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeAmount;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawRevokeFixedFee;
 use App\TON\Transactions\SyncTransactionToWallet\TransactionWithdrawSuccess;
-use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -55,7 +56,7 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                     ->where('created_at', '<=', Carbon::now()->subSeconds(30)->format('Y-m-d H:i:s'))
                     ->whereNotIn('status', [TonHelper::SUCCESS, TonHelper::FAILED])
                     ->whereNotNull('in_msg_hash')
-                    ->limit(TonHelper::MAX_LIMIT_TRANSACTION)
+                    ->limit(TonHelper::MAX_LIMIT_QUERY)
                     ->get();
                 if (!$withDrawTransactions->count()) {
                     continue;
@@ -70,26 +71,25 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                     if (!$txByMessages) {
                         continue;
                     }
-                    if ($txByMessages->count() !== 1) {
-                        printf("Failed with empty transaction, id: %s \n", $withdrawTransaction->id);
-                        $withdrawAmount = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
-                        $withdrawAmount->syncTransactionWallet();
-                        $withdrawRevokeFixedFee = new TransactionWithdrawRevokeFixedFee($withdrawTransaction->id);
-                        $withdrawRevokeFixedFee->syncTransactionWallet();
+                    $txByMessage = $txByMessages->first();
+                    if (!$txByMessage) {
+                        printf("Get empty transaction by message hash.\n");
                         continue;
                     }
-                    $txByMessage = $txByMessages->first();
-
-                    if ($this->isSuccessWithdrawTransaction($txByMessage)) {
-                        $withdrawSuccess = new TransactionWithdrawSuccess($withdrawTransaction->id);
-                        $withdrawSuccess->syncTransactionWallet($txByMessage);
-                    } else {
-                        printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
-                        $withdrawRevoke = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
-                        $withdrawRevoke->syncTransactionWallet($txByMessage);
-                        $withdrawRevokeFixedFee = new TransactionWithdrawRevokeFixedFee($withdrawTransaction->id);
-                        $withdrawRevokeFixedFee->syncTransactionWallet();
+                    if ($withdrawTransaction->currency === TonHelper::TON) {
+                        if ($this->isSuccessTonWithdraw($txByMessage)) {
+                            $withdrawSuccess = new TransactionWithdrawSuccess($withdrawTransaction->id);
+                            $withdrawSuccess->syncTransactionWallet($txByMessage);
+                        } else {
+                            printf("Failed with empty out_msgs, id: %s \n", $withdrawTransaction->id);
+                            $withdrawRevoke = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
+                            $withdrawRevoke->syncTransactionWallet($txByMessage);
+                            $withdrawRevokeFixedFee = new TransactionWithdrawRevokeFixedFee($withdrawTransaction->id);
+                            $withdrawRevokeFixedFee->syncTransactionWallet();
+                        }
                     }
+                    $withdrawFetchInMsgHash = new TransactionWithdrawFetchInMsgHash($withdrawTransaction->id);
+                    $withdrawFetchInMsgHash->syncTransactionWallet($txByMessage);
                 }
             } catch (\Exception $e) {
                 printf("Exception periodic withdraw ton: " . $e->getMessage());
@@ -99,20 +99,8 @@ class TonPeriodicWithdrawTransactionCommand extends Command
         return Command::SUCCESS;
     }
 
-    public function isSuccessWithdrawTransaction(array $txByMessage): bool
+    public function isSuccessTonWithdraw(array $txByMessage): bool
     {
-        try {
-            $outMsgs = Arr::get($txByMessage, 'out_msgs');
-            if (empty($outMsgs)) {
-                return false;
-            }
-            $body = Arr::get($txByMessage, 'out_msgs.0.message_content.body');
-            if (empty($body)) {
-                return false;
-            }
-            return TonHelper::validWithDrawOpcode($body);
-        } catch (\Exception $e) {
-            return false;
-        }
+        return !empty(Arr::get($txByMessage, 'out_msgs'));
     }
 }

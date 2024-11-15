@@ -4,7 +4,6 @@ namespace App\TON\Transactions\SyncTransactionToWallet;
 
 use App\TON\TonHelper;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
@@ -38,7 +37,6 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
                 ->where('user_name', $walletMemo->user_name)
                 ->where('currency', $transaction->currency)
                 ->where('is_active', TonHelper::ACTIVE)
-                ->lockForUpdate()
                 ->first();
 
             if (!$wallet) {
@@ -46,18 +44,9 @@ class UpdateWithdrawSuccessTransaction implements SyncTransactionInterface
                 return;
             }
 
-            if ($transaction->currency === TonHelper::TON) {
-                $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.fwd_fee');
-            } else {
-                $occurTon = Arr::get($data, 'total_fees', 0) + Arr::get($data, 'out_msgs.0.value') +
-                    Arr::get($data, 'out_msgs.0.fwd_fee');
-            }
             DB::table('wallet_ton_transactions')
                 ->where('id', $this->transactionId)
                 ->update([
-                    'lt' => Arr::get($data, 'lt'),
-                    'hash' => Arr::get($data, 'hash'),
-                    'occur_ton' => $occurTon,
                     'status' => TonHelper::SUCCESS,
                     'updated_at' => Carbon::now()
                 ]);
