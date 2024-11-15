@@ -157,4 +157,21 @@ class TonHelper
             'opcode' => $opcode,
         ]);
     }
+
+    /**
+     * @throws CellException
+     * @throws SliceException
+     */
+    public static function validWithDrawOpcode(string $body): bool
+    {
+        $bytes = Bytes::base64ToBytes($body);
+        $cell = Cell::oneFromBoc($bytes, true);
+        $slice = $cell->beginParse();
+        $remainBit = count($slice->getRemainingBits());
+        if ($remainBit < 32) {
+            return true;
+        }
+        $opcode = Bytes::bytesToHexString($slice->loadBits(32));
+        return $opcode === TonHelper::JET_OPCODE || $opcode === "00000000";
+    }
 }

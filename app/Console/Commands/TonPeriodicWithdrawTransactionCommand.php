@@ -74,6 +74,8 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                         printf("Failed with empty transaction, id: %s \n", $withdrawTransaction->id);
                         $withdrawAmount = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
                         $withdrawAmount->syncTransactionWallet();
+                        $withdrawRevokeFixedFee = new TransactionWithdrawRevokeFixedFee($withdrawTransaction->id);
+                        $withdrawRevokeFixedFee->syncTransactionWallet();
                         continue;
                     }
                     $txByMessage = $txByMessages->first();
@@ -86,7 +88,7 @@ class TonPeriodicWithdrawTransactionCommand extends Command
                         $withdrawRevoke = new TransactionWithdrawRevokeAmount($withdrawTransaction->id);
                         $withdrawRevoke->syncTransactionWallet($txByMessage);
                         $withdrawRevokeFixedFee = new TransactionWithdrawRevokeFixedFee($withdrawTransaction->id);
-                        $withdrawRevokeFixedFee->syncTransactionWallet($txByMessage);
+                        $withdrawRevokeFixedFee->syncTransactionWallet();
                     }
                 }
             } catch (\Exception $e) {
@@ -108,8 +110,7 @@ class TonPeriodicWithdrawTransactionCommand extends Command
             if (empty($body)) {
                 return false;
             }
-            TonHelper::parseJetBody($body);
-            return false;
+            return TonHelper::validWithDrawOpcode($body);
         } catch (\Exception $e) {
             return false;
         }

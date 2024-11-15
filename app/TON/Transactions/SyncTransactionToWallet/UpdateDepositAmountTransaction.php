@@ -2,6 +2,7 @@
 
 namespace App\TON\Transactions\SyncTransactionToWallet;
 
+use App\TON\TonHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -47,6 +48,7 @@ class UpdateDepositAmountTransaction implements SyncTransactionInterface
             $wallet = DB::table('wallets')
                 ->where('user_name', $walletMemo->user_name)
                 ->where('currency', $transaction->currency)
+                ->where('is_active', TonHelper::ACTIVE)
                 ->lockForUpdate()
                 ->first();
             if (!$wallet) {

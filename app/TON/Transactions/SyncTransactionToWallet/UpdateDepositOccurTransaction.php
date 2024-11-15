@@ -43,6 +43,7 @@ class UpdateDepositOccurTransaction implements SyncTransactionInterface
             $wallet = DB::table('wallets')
                 ->where('user_name', $walletMemo->user_name)
                 ->where('currency', TonHelper::TON)
+                ->where('is_active', TonHelper::ACTIVE)
                 ->lockForUpdate()
                 ->first();
             if (!$wallet) {

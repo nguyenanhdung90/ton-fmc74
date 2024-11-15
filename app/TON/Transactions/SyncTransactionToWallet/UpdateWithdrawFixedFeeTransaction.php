@@ -52,6 +52,7 @@ class UpdateWithdrawFixedFeeTransaction implements SyncTransactionInterface
             $wallet = DB::table('wallets')
                 ->where('user_name', $walletMemo->user_name)
                 ->where('currency', TonHelper::PAYN)
+                ->where('is_active', TonHelper::ACTIVE)
                 ->lockForUpdate()
                 ->first();
 
