@@ -52,6 +52,7 @@ class TonPeriodicWithdrawJettonTransferTransactionCommand extends Command
             "direction" => "out",
             "sort" => "asc",
         ];
+        $counterEmptyJetton = 0;
         while (true) {
             try {
                 printf("Period transaction withdraw ton query every 20s ...\n");
@@ -59,22 +60,20 @@ class TonPeriodicWithdrawJettonTransferTransactionCommand extends Command
                 $jettonTransfer = DB::table('jetton_transfers')->orderBy("lt", "DESC")->first();
                 if ($jettonTransfer) {
                     $params["start_lt"] = $jettonTransfer->lt;
-                    $this->syncStatusWithdrawTransaction($jettonTransfer->lt);
                 }
-
                 $jettons = $tonCenterClient->getJettonTransfers($params);
                 if (!$jettons) {
                     printf("Get error jetton transfer. \n");
                     continue;
                 }
-                if (!empty($jettonTransfer) && $jettons->count() == 1) {
-                    printf("Get empty jetton transfer. \n");
+
+                $this->syncStatusWithdrawTransaction($jettonTransfer, $counterEmptyJetton);
+                if ($this->isGetEmptyJettonTransfer($jettonTransfer, $jettons)) {
+                    $counterEmptyJetton++;
                     continue;
                 }
-                if (empty($jettonTransfer) && $jettons->count() == 0) {
-                    printf("Get empty jetton transfer  in the fist loop. \n");
-                    continue;
-                }
+                $counterEmptyJetton = 0;
+
                 $jettons->transform(function ($item, $key) {
                     return [
                         'query_id' => Arr::get($item, 'query_id'),
@@ -95,18 +94,36 @@ class TonPeriodicWithdrawJettonTransferTransactionCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function syncStatusWithdrawTransaction(int $transferLt)
+    private function isGetEmptyJettonTransfer($jettonTransfer, $jettons): bool
     {
-        $transactions = DB::table('wallet_ton_transactions')
+        if (empty($jettonTransfer)) {
+            printf("Get empty jetton transfer  in the fist loop. \n");
+            return $jettons->count() == 0;
+        } else {
+            printf("Get empty jetton transfer. \n");
+            return $jettons->count() == 1;
+        }
+    }
+
+    private function syncStatusWithdrawTransaction($jettonTransfer, int $counterEmptyJetton)
+    {
+        $transactionQuery = DB::table('wallet_ton_transactions')
             ->whereNotNull('lt')
             ->whereNotNull('hash')
             ->whereNotNull('query_id')
-            ->where("lt", "<=", $transferLt)
             ->where("type", "=", TonHelper::WITHDRAW)
             ->where("currency", "!=", TonHelper::TON)
             ->whereNotIn("status", [TonHelper::FAILED, TonHelper::SUCCESS])
-            ->limit(5000)
-            ->get();
+            ->limit(TonHelper::MAX_LIMIT_QUERY);
+        if ($counterEmptyJetton < TonHelper::MAX_COUNTER_EMPTY_JETTON_SET_STATUS) {
+            if (!$jettonTransfer || empty($jettonTransfer->lt)) {
+                return;
+            }
+            $transactionQuery->where("lt", "<=", $jettonTransfer->lt);
+        } else {
+            printf("Three times get new empty jetton transfer. Sync all transaction withdraw status \n");
+        }
+        $transactions = $transactionQuery->get();
         foreach ($transactions as $item) {
             $existedTransfer = DB::table('jetton_transfers')
                 ->where("trace_id", $item->hash)

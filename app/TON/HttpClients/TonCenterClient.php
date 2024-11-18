@@ -66,7 +66,7 @@ class TonCenterClient implements TonCenterClientInterface
         ];
         $data = $this->jsonRPC($query);
         if (!$data['ok']) {
-            printf("Error from TonCenter: %s \n", json_encode($query));
+            printf("Error from TonCenter: %s \n", json_encode($data));
         }
         return $data['ok'] ? collect($data['result']) : collect([]);
     }
