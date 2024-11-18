@@ -27,7 +27,7 @@ class TonPeriodicWithdrawTransactionCommand extends Command
      *
      * @var string
      */
-    protected $description = 'periodic sync withdraw transaction and wallet memo only for Ton';
+    protected $description = 'periodic fetch withdraw transaction and sync wallet memo only for Ton currency';
 
     /**
      * Create a new command instance.

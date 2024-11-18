@@ -18,11 +18,11 @@ class TonSyncAllWithdrawExcessTransactionCommand extends Command
     protected $signature = 'ton:sync_all_excess';
 
     /**
-     *  this transaction of TON network is notify for jetton withdraw
+     *  Run one time to fetch all excess withdraw of jetton with query_id
      *
      * @var string
      */
-    protected $description = 'sync all transaction excess withdraw';
+    protected $description = 'Run one time to fetch all excess withdraw of jetton with query_id';
 
     protected TonCenterClientInterface $tonCenterClient;
 

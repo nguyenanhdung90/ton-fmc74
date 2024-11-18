@@ -20,11 +20,11 @@ class TonPeriodicDepositTransactionCommand extends Command
     protected $signature = 'ton:periodic_deposit';
 
     /**
-     * The console command description.
+     *  Periodic sync transaction.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Periodic sync transaction';
 
     protected TonCenterClientInterface $tonCenterClient;
 

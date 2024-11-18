@@ -23,7 +23,7 @@ class TonPeriodicWithdrawExcessTransactionCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Sync transaction excess by query id for withdraw';
+    protected $description = 'Fetch transaction excess by query id for withdraw';
 
     protected TonCenterClientInterface $tonCenterClient;
 

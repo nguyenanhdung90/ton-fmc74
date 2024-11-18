@@ -22,11 +22,11 @@ class TonPeriodicWithdrawJettonTransferTransactionCommand extends Command
     protected $signature = 'ton:periodic_withdraw_jetton';
 
     /**
-     * The console command description.
+     * Fetch success withdraw jetton transfer with query id.
      *
      * @var string
      */
-    protected $description = '';
+    protected $description = 'Fetch success withdraw jetton transfer with query id.';
 
     /**
      * Create a new command instance.

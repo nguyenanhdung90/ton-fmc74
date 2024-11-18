@@ -19,11 +19,11 @@ class TonSyncAllDepositTransactionCommand extends Command
     protected $signature = 'ton:sync_all_deposit';
 
     /**
-     * The console command description.
+     * Run one time to get all deposit transactions and sync to wallet memo.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Run one time to get all deposit transactions and sync to wallet memo.';
 
     protected TonCenterClientInterface $tonCenterClient;
 
