@@ -32,7 +32,6 @@ class TonHelper
     const WITHDRAW = 'WITHDRAW';
     const WITHDRAW_EXCESS = 'WITHDRAW_EXCESS';
     const JET_OPCODE = '7362d09c';
-    const JET_OPCODE_FAILED_WITHDRAW = '0f8a7ea5';
     const EXCESS_OPCODE = 'd53276db';
     const INITIATED = 'INITIATED';
     const PROCESSING = 'PROCESSING';

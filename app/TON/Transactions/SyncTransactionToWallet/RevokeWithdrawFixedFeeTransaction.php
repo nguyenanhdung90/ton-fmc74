@@ -4,7 +4,6 @@ namespace App\TON\Transactions\SyncTransactionToWallet;
 
 use App\TON\TonHelper;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class RevokeWithdrawFixedFeeTransaction implements SyncTransactionInterface
